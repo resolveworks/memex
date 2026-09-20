@@ -3,7 +3,6 @@
 	"sidebar.open": "Open sidebar",
 	"sidebar.close": "Close sidebar",
 	"sidebar.memexes": "Memexes",
-	"sidebar.newMemex": "New memex",
 	"nav.settings": "Settings",
 	"sidebar.requests": "Requests",
 	"sidebar.noRequests": "No requests yet.",
@@ -13,9 +12,9 @@
 	"settings.heading": "Memex settings",
 	"settings.save": "Save",
 	"settings.languageLocked": "Everything I remember is stored in this language, so it can't be changed after the memex is created.",
-	"chat.intro": "I'm Memex — a memory for you, and for anyone you choose to share it with. Tell me what's worth keeping and ask for it back later, in your own words and your own language. Keep it to yourself, or share the link and let a group build it with you.\n\nSay things the way you'd say them out loud: \"the gate code is 4711\", \"the trip is the first weekend of June\", \"the spare keys are with Sam\". Ask for them any time — today or months from now — and I'll tell you exactly what was stored.\n\nIf something isn't there yet, I turn the question into a request. Answer it yourself when you can, or leave it for anyone with the link to fill in — once it's answered, it's remembered for good.",
 	"chat.placeholder": "Message Memex…",
 	"chat.send": "Send",
+	"chat.thinking": "Thinking",
 	"error.notFound": "This page doesn't exist.",
 	"error.newMemex": "Start a new memex"
 }

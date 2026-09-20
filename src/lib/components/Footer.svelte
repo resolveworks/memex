@@ -15,7 +15,5 @@
 		flex-shrink: 0;
 		min-height: 3.5rem;
 		padding: 0.5rem 0.75rem;
-		border-top: 1px solid var(--line);
-		background: var(--surface);
 	}
 </style>

@@ -3,12 +3,15 @@
 	import { contentText } from "@earendil-works/pi-ai";
 	import { marked } from "marked";
 	import { chat, open, send } from "$lib/chat.svelte";
-	import Button from "$lib/components/Button.svelte";
 	import Footer from "$lib/components/Footer.svelte";
 	import { t } from "$lib/i18n.svelte";
 
 	function md(text: string): string {
 		return marked(text, { async: false });
+	}
+
+	function streamed(text: string, active: boolean): string {
+		return md(active ? `${text}<span class="cursor"></span>` : text);
 	}
 
 	let { id, language }: { id: string; language: string } = $props();
@@ -53,7 +56,15 @@
 		toItems(chat.streaming ? [...chat.messages, chat.streaming] : chat.messages)
 	);
 
+	const streamText = $derived.by(() => {
+		const message = chat.streaming;
+		if (!message || message.role !== "assistant") return "";
+		return contentText(message.content);
+	});
+	const thinking = $derived(chat.busy && !streamText);
+
 	let viewport = $state<HTMLDivElement>();
+	let composerEl = $state<HTMLTextAreaElement>();
 	// Whether the view was at the bottom before the latest content arrived, so
 	// streaming keeps following the answer without yanking a reader back down.
 	let pinned = $state(true);
@@ -65,11 +76,16 @@
 
 	$effect(() => {
 		void items;
+		void thinking;
 		if (pinned && viewport) viewport.scrollTop = viewport.scrollHeight;
 	});
 
-	// Static welcome shown only on an empty chat; never sent to the model or saved.
-	const intro = $derived(t("chat.intro"));
+	$effect(() => {
+		void input;
+		if (!composerEl) return;
+		composerEl.style.height = "auto";
+		composerEl.style.height = `${composerEl.scrollHeight}px`;
+	});
 
 	function submit() {
 		const text = input.trim();
@@ -90,25 +106,29 @@
 <div class="chat">
 	<div class="messages" bind:this={viewport} onscroll={onScroll}>
 		<div class="thread">
-			{#if items.length === 0}
-				<div class="assistant">{@html md(intro)}</div>
-			{/if}
-		{#each items as item}
+		{#each items as item, i}
 			{#if item.kind === "tool"}
 				<div class="tool">
 					<span class="tool-name">{item.name}</span>
 					{#if item.args.length}
 						<span class="tool-args">
-							{#each item.args as arg, i}{#if i}<span class="sep"> · </span>{/if}<span class:clamp={arg.key === "id"}>{arg.value}</span>{/each}
+							{#each item.args as arg, j}{#if j}<span class="sep"> · </span>{/if}<span class:clamp={arg.key === "id"}>{arg.value}</span>{/each}
 						</span>
 					{/if}
 				</div>
 			{:else if item.kind === "assistant"}
-				<div class="assistant">{@html md(item.text)}</div>
+				<div class="assistant">{@html streamed(item.text, chat.streaming !== undefined && i === items.length - 1)}</div>
 			{:else}
 				<div class="bubble user">{item.text}</div>
 			{/if}
 		{/each}
+		{#if thinking}
+			<div class="assistant thinking" role="status" aria-label={t("chat.thinking")}>
+				<span class="dot"></span>
+				<span class="dot"></span>
+				<span class="dot"></span>
+			</div>
+		{/if}
 		</div>
 	</div>
 
@@ -121,12 +141,18 @@
 			}}
 		>
 			<textarea
+				bind:this={composerEl}
 				bind:value={input}
 				onkeydown={onKeydown}
 				placeholder={t("chat.placeholder")}
 				rows="1"
 			></textarea>
-			<Button type="submit" disabled={chat.busy}>{t("chat.send")}</Button>
+			<button class="send" type="submit" disabled={chat.busy} aria-label={t("chat.send")}>
+				<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+					<line x1="12" y1="19" x2="12" y2="5" />
+					<polyline points="6 11 12 5 18 11" />
+				</svg>
+			</button>
 		</form>
 	</Footer>
 </div>
@@ -282,21 +308,111 @@
 
 	.composer {
 		display: flex;
+		align-items: flex-end;
 		flex: 1;
 		gap: 0.5rem;
+		padding: 0.375rem 0.375rem 0.375rem 0.875rem;
+		border: 1px solid var(--line-strong);
+		border-radius: 1.25rem;
+		background: var(--surface);
+	}
+
+	.composer:focus-within {
+		border-color: var(--accent);
 	}
 
 	textarea {
 		flex: 1;
-		resize: none;
-		font: inherit;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid var(--line-strong);
-		border-radius: 0.5rem;
+		min-height: 1.5rem;
+		max-height: 12rem;
+		padding: 0.4rem 0;
+		border: none;
 		outline: none;
+		background: none;
+		color: inherit;
+		font: inherit;
+		resize: none;
+		overflow-y: auto;
 	}
 
-	textarea:focus {
-		border-color: var(--accent);
+	.send {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex: none;
+		width: 2rem;
+		height: 2rem;
+		padding: 0;
+		border: none;
+		border-radius: 50%;
+		background: var(--accent);
+		color: var(--accent-ink);
+		cursor: pointer;
+	}
+
+	.send:hover:not(:disabled) {
+		background: var(--accent-hover);
+	}
+
+	.send:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+
+	.send svg {
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+
+	:global(.cursor) {
+		display: inline-block;
+		width: 0.5ch;
+		height: 1em;
+		margin-left: 0.1ch;
+		vertical-align: text-bottom;
+		background: currentColor;
+		animation: blink 1s steps(1) infinite;
+	}
+
+	@keyframes blink {
+		50% {
+			opacity: 0;
+		}
+	}
+
+	.thinking {
+		display: inline-flex;
+		gap: 0.25rem;
+		padding: 0.5rem 0;
+	}
+
+	.dot {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 50%;
+		background: var(--muted);
+		animation: pulse 1.2s ease-in-out infinite;
+	}
+
+	.dot:nth-child(2) {
+		animation-delay: 0.2s;
+	}
+
+	.dot:nth-child(3) {
+		animation-delay: 0.4s;
+	}
+
+	@keyframes pulse {
+		0%,
+		80%,
+		100% {
+			opacity: 0.3;
+		}
+		40% {
+			opacity: 1;
+		}
 	}
 </style>

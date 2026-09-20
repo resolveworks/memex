@@ -27,11 +27,6 @@
 		return known;
 	});
 
-	function newMemex() {
-		onclose();
-		goto("/");
-	}
-
 	function switchMemex(event: Event) {
 		const id = (event.currentTarget as HTMLSelectElement).value;
 		if (id === page.params.id) return;
@@ -70,8 +65,6 @@
 			{/each}
 		</Select>
 
-		<button class="new" onclick={newMemex} disabled={chat.busy}>{t("sidebar.newMemex")}</button>
-
 		{#if page.data.requests}
 			<div class="requests">
 				<span class="section">{t("sidebar.requests")}</span>
@@ -97,7 +90,7 @@
 					/>
 					<circle cx="12" cy="12" r="3" />
 				</svg>
-				{t("nav.settings")}
+				{t("settings.heading")}
 			</a>
 		{/if}
 	</Footer>
@@ -163,26 +156,6 @@
 		color: var(--ink);
 	}
 
-	.new {
-		font: inherit;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid var(--line-strong);
-		border-radius: 0.5rem;
-		background: var(--surface);
-		color: var(--ink);
-		cursor: pointer;
-		text-align: left;
-	}
-
-	.new:hover:not(:disabled) {
-		border-color: var(--accent);
-	}
-
-	.new:disabled {
-		opacity: 0.5;
-		cursor: default;
-	}
-
 	.settings {
 		display: flex;
 		align-items: center;
@@ -205,6 +178,7 @@
 	}
 
 	.requests {
+		margin-top: 1rem;
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;

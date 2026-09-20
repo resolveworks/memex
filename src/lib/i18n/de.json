@@ -3,7 +3,6 @@
 	"sidebar.open": "Seitenleiste öffnen",
 	"sidebar.close": "Seitenleiste schließen",
 	"sidebar.memexes": "Memexe",
-	"sidebar.newMemex": "Neuer Memex",
 	"nav.settings": "Einstellungen",
 	"sidebar.requests": "Anfragen",
 	"sidebar.noRequests": "Noch keine Anfragen.",
@@ -13,9 +12,9 @@
 	"settings.heading": "Memex-Einstellungen",
 	"settings.save": "Speichern",
 	"settings.languageLocked": "Alles, woran ich mich erinnere, ist in dieser Sprache gespeichert und kann nach dem Erstellen des Memex nicht mehr geändert werden.",
-	"chat.intro": "Ich bin Memex — ein Gedächtnis für Sie, und für alle, mit denen Sie es teilen möchten. Sagen Sie mir, was es sich zu behalten lohnt, und fragen Sie später danach — in Ihren eigenen Worten und Ihrer Sprache. Behalten Sie es für sich, oder teilen Sie den Link und lassen Sie eine Gruppe mit aufbauen.\n\nSagen Sie es so, wie Sie es laut sagen würden: „der Torcode ist 4711“, „die Reise ist am ersten Juni-Wochenende“, „die Ersatzschlüssel sind bei Sam“. Fragen Sie jederzeit danach — heute oder in Monaten — und ich sage Ihnen genau, was gespeichert wurde.\n\nWenn etwas noch fehlt, mache ich die Frage daraus zu einer Anfrage. Beantworten Sie sie selbst, wenn Sie können, oder überlassen Sie sie allen mit dem Link — und sobald sie beantwortet ist, ist sie für immer gemerkt.",
 	"chat.placeholder": "Nachricht an Memex…",
 	"chat.send": "Senden",
+	"chat.thinking": "Denkt nach",
 	"error.notFound": "Diese Seite existiert nicht.",
 	"error.newMemex": "Neuen Memex starten"
 }
