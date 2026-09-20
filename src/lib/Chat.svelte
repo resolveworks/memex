@@ -285,7 +285,6 @@
 		gap: 0.5rem;
 		padding: 0.75rem;
 		border-top: 1px solid var(--line);
-		background: var(--surface);
 	}
 
 	textarea {
