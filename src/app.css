@@ -57,18 +57,18 @@
 		--font-sans: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 		--font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-		--bg: #f5f2ec;
+		--bg: #e6f4f2;
 		--surface: #ffffff;
-		--ink: #23211d;
-		--ink-soft: #4d473e;
-		--muted: #6f675c;
-		--line: #e6e0d5;
-		--line-strong: #d6cec0;
-		--fill: #ede8df;
-		--accent: #2f5d50;
-		--accent-hover: #264c41;
+		--ink: #2e2623;
+		--ink-soft: #51443f;
+		--muted: #6f625b;
+		--line: #cfe4e0;
+		--line-strong: #b4d3cd;
+		--fill: #dcefeb;
+		--accent: #b5461a;
+		--accent-hover: #8f3712;
 		--accent-ink: #ffffff;
-		--danger: #b4442f;
+		--danger: #b91c1c;
 
 		/* Every step is a multiple of one fluid unit, so the whole scale
 		   grows with the viewport instead of hand-picked rems. */
