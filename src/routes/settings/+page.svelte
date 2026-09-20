@@ -27,7 +27,7 @@
 						</div>
 						<form method="POST" action="?/delete">
 							<input type="hidden" name="key" value={memory.key} />
-							<button aria-label={`${t("settings.delete")} ${memory.key}`}>{t("settings.delete")}</button>
+							<button class="delete" aria-label={`${t("settings.delete")} ${memory.key}`}>×</button>
 						</form>
 					</li>
 				{/each}
@@ -45,7 +45,7 @@
 						</div>
 						<form method="POST" action="?/deleteRequest">
 							<input type="hidden" name="id" value={item.id} />
-							<button aria-label={t("settings.deleteRequest")}>{t("settings.delete")}</button>
+							<button class="delete" aria-label={t("settings.deleteRequest")}>×</button>
 						</form>
 					</li>
 				{/each}
@@ -131,18 +131,16 @@
 		overflow-wrap: anywhere;
 	}
 
-	button {
+	.delete {
 		font: inherit;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid var(--line-strong);
-		border-radius: 0.5rem;
-		background: var(--surface);
-		color: var(--ink);
+		padding: 0.25rem 0.5rem;
+		border: none;
+		background: none;
+		color: var(--muted);
 		cursor: pointer;
 	}
 
-	button:hover {
-		border-color: var(--danger);
-		color: var(--danger);
+	.delete:hover {
+		color: var(--ink);
 	}
 </style>
