@@ -70,11 +70,11 @@
 	});
 
 	// Static welcome shown only on an empty chat; never sent to the model or saved.
-	const intro = `I'm Memex, a memory that outlives the conversation.
+	const intro = `I'm Memex, the memory of your house — the knowledge that usually walks out the door with your staff.
 
-Tell me something worth keeping — "remember my sister's birthday is June 3rd" — and I'll store it. Ask for it later, in this chat or a brand-new one — "when is my sister's birthday?" — and I'll look it up. If it isn't in memory, I'll note the question so you can fill it in.
+Tell me something worth keeping — "the boiler key is in the office, code 4711" — and I'll store it. Ask for it later, in this chat or a brand-new one — "where's the boiler key?" — and I'll look it up. If it isn't in memory, I'll note the question so you can fill it in.
 
-That's the whole idea: say it once, and I remember.`;
+That's the whole idea: say it once, and it stays in the house.`;
 
 	async function submit() {
 		const text = input.trim();
