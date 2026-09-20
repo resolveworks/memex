@@ -31,34 +31,41 @@
 </svelte:head>
 
 <div class="app">
-	<Sidebar open={drawerOpen} onclose={() => (drawerOpen = false)} />
-	<div class="content">
-		<Header>
-			<button
-				class="menu"
-				aria-label={t('sidebar.open')}
-				aria-expanded={drawerOpen}
-				onclick={() => (drawerOpen = true)}
-			>
+	<Header>
+		<button
+			class="menu"
+			aria-label={drawerOpen ? t('sidebar.close') : t('sidebar.open')}
+			aria-expanded={drawerOpen}
+			onclick={() => (drawerOpen = !drawerOpen)}
+		>
+			{#if drawerOpen}
+				<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+					<line x1="5" y1="5" x2="19" y2="19" />
+					<line x1="19" y1="5" x2="5" y2="19" />
+				</svg>
+			{:else}
 				<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
 					<line x1="3" y1="6" x2="21" y2="6" />
 					<line x1="3" y1="12" x2="21" y2="12" />
 					<line x1="3" y1="18" x2="21" y2="18" />
 				</svg>
-			</button>
-			<a class="title" href={home} onclick={follow}>{page.data.memex?.title ?? "Memex"}</a>
-			<div class="language">
-				<Select
-					aria-label={t('nav.language')}
-					value={i18n.locale}
-					onchange={(event) => setLocale(event.currentTarget.value)}
-				>
-					{#each languages as code (code)}
-						<option value={code}>{languageName(code)}</option>
-					{/each}
-				</Select>
-			</div>
-		</Header>
+			{/if}
+		</button>
+		<a class="title" href={home} onclick={follow}>{page.data.memex?.title ?? "Memex"}</a>
+		<div class="language">
+			<Select
+				aria-label={t('nav.language')}
+				value={i18n.locale}
+				onchange={(event) => setLocale(event.currentTarget.value)}
+			>
+				{#each languages as code (code)}
+					<option value={code}>{languageName(code)}</option>
+				{/each}
+			</Select>
+		</div>
+	</Header>
+	<div class="body">
+		<Sidebar open={drawerOpen} onclose={() => (drawerOpen = false)} />
 		<main>
 			{@render children()}
 		</main>
@@ -94,17 +101,17 @@
 
 	.app {
 		display: flex;
+		flex-direction: column;
 		height: 100dvh;
 		color: var(--ink);
 		background: var(--bg);
 		font-family: var(--font-sans);
 	}
 
-	.content {
+	.body {
 		display: flex;
-		flex-direction: column;
 		flex: 1;
-		min-width: 0;
+		min-height: 0;
 	}
 
 	.title {

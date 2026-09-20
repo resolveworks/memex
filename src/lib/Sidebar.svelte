@@ -3,7 +3,6 @@
 	import { page } from "$app/state";
 	import { chat } from "$lib/chat.svelte";
 	import Footer from "$lib/components/Footer.svelte";
-	import Header from "$lib/components/Header.svelte";
 	import Select from "$lib/components/Select.svelte";
 	import { t } from "$lib/i18n.svelte";
 	import { forget, getMemexes, remember } from "$lib/memexes.svelte";
@@ -48,23 +47,7 @@
 {/if}
 
 <aside class:open>
-	<Header>
-		<span class="head-title">{t("sidebar.memexes")}</span>
-		<button class="close" aria-label={t("sidebar.close")} onclick={onclose}>×</button>
-	</Header>
-
 	<div class="body">
-		<Select
-			aria-label={t("sidebar.memexes")}
-			value={page.params.id}
-			onchange={switchMemex}
-			disabled={chat.busy}
-		>
-			{#each memexes as memex (memex.id)}
-				<option value={memex.id}>{memex.title}</option>
-			{/each}
-		</Select>
-
 		{#if page.data.requests}
 			<div class="requests">
 				<span class="section">{t("sidebar.requests")}</span>
@@ -82,24 +65,37 @@
 	</div>
 
 	<Footer>
-		{#if page.params.id}
-			<a class="settings" href={`/${page.params.id}/settings`} onclick={follow}>
-				<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-					<path
-						d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
-					/>
-					<circle cx="12" cy="12" r="3" />
-				</svg>
-				{t("settings.heading")}
-			</a>
-		{/if}
+		<div class="footer-stack">
+			{#if page.params.id}
+				<a class="settings" href={`/${page.params.id}/settings`} onclick={follow}>
+					<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+						<path
+							d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+						/>
+						<circle cx="12" cy="12" r="3" />
+					</svg>
+					{t("settings.heading")}
+				</a>
+			{/if}
+
+			<Select
+				aria-label={t("sidebar.memexes")}
+				value={page.params.id}
+				onchange={switchMemex}
+				disabled={chat.busy}
+			>
+				{#each memexes as memex (memex.id)}
+					<option value={memex.id}>{memex.title}</option>
+				{/each}
+			</Select>
+		</div>
 	</Footer>
 </aside>
 
 <style>
 	.scrim {
 		position: fixed;
-		inset: 0;
+		inset: 3rem 0 0 0;
 		z-index: 1;
 		padding: 0;
 		border: none;
@@ -108,7 +104,7 @@
 
 	aside {
 		position: fixed;
-		top: 0;
+		top: 3rem;
 		bottom: 0;
 		left: 0;
 		z-index: 2;
@@ -138,35 +134,20 @@
 		padding: 0.75rem;
 	}
 
-	.head-title {
-		font-weight: 600;
-	}
-
-	.close {
-		margin-left: auto;
-		font: inherit;
-		padding: 0.25rem 0.5rem;
-		border: none;
-		background: none;
-		color: var(--muted);
-		cursor: pointer;
-	}
-
-	.close:hover {
-		color: var(--ink);
-	}
-
 	.settings {
 		display: flex;
 		align-items: center;
 		gap: 0.375rem;
 		align-self: stretch;
-		color: var(--ink);
+		padding: 0.375rem 0.75rem;
+		border-radius: 0.5rem;
+		color: var(--muted);
 		text-decoration: none;
 	}
 
 	.settings:hover {
-		color: var(--accent);
+		color: var(--ink);
+		background: var(--fill);
 	}
 
 	.settings svg {
@@ -177,8 +158,14 @@
 		stroke-linejoin: round;
 	}
 
+	.footer-stack {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		flex: 1;
+	}
+
 	.requests {
-		margin-top: 1rem;
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
@@ -228,10 +215,6 @@
 			visibility: visible;
 			transform: none;
 			transition: none;
-		}
-
-		.close {
-			display: none;
 		}
 	}
 </style>
