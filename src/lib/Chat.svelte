@@ -45,6 +45,13 @@
 		toItems(chat.streaming ? [...chat.messages, chat.streaming] : chat.messages)
 	);
 
+	// Static welcome shown only on an empty chat; never sent to the model or saved.
+	const intro = `I'm Memex, a memory that outlives the conversation.
+
+Tell me something worth keeping — "remember my sister's birthday is June 3rd" — and I'll store it. Ask for it later, in this chat or a brand-new one — "when is my sister's birthday?" — and I'll look it up. If it isn't in memory, I'll note the question so you can fill it in.
+
+That's the whole idea: say it once, and I remember.`;
+
 	async function submit() {
 		const text = input.trim();
 		if (!text || chat.busy) return;
@@ -63,6 +70,9 @@
 
 <div class="chat">
 	<div class="messages">
+		{#if items.length === 0}
+			<div class="bubble assistant">{intro}</div>
+		{/if}
 		{#each items as item}
 			{#if item.kind === "tool"}
 				<div class="tool">{item.text}</div>
