@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { chat } from '$lib/chat.svelte';
 	import { t } from '$lib/i18n.svelte';
@@ -13,7 +13,7 @@
 	let drawerOpen = $state(false);
 
 	// Every memex we open joins the switcher, most recent first; a 404 means it is gone.
-	$effect(() => {
+	afterNavigate(() => {
 		const current = page.data.memex;
 		if (current) remember({ id: current.id, title: current.title });
 		else if (page.status === 404 && page.params.id) forget(page.params.id);
