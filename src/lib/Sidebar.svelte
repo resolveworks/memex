@@ -83,9 +83,9 @@
 		transition: transform 200ms ease;
 	}
 
-	/* One row shape shared by the section label, empty state, requests and settings. */
+	/* Shared row shape; the container owns the horizontal gutter. */
 	.row {
-		padding: var(--space-2) var(--space-3);
+		padding-block: var(--space-2);
 		border-radius: var(--radius);
 	}
 
