@@ -87,10 +87,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json({ error: "Request body must be valid JSON" }, { status: 400 });
 	}
 
-	// Auth (bearer token check) is enforced here — the single insertion point for this unauthenticated MVP.
+	// Auth slots in here — the single agreed insertion point when this outgrows the unauthenticated MVP.
 
-	// `model` is guaranteed present by src/lib/model.ts.
-	const events = models.streamSimple(model!, body.context, body.options);
+	const events = models.streamSimple(model, body.context, body.options);
 	const encoder = new TextEncoder();
 
 	const stream = new ReadableStream<Uint8Array>({
