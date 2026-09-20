@@ -130,8 +130,8 @@
 		display: flex;
 		flex-direction: column;
 		height: 100%;
-		color: #1a1a1a;
-		background: #f6f6f7;
+		color: var(--ink);
+		background: var(--bg);
 	}
 
 	.messages {
@@ -153,16 +153,16 @@
 
 	.bubble.user {
 		align-self: flex-end;
-		background: #1a73e8;
-		color: #fff;
+		background: var(--accent);
+		color: var(--accent-ink);
 		border-bottom-right-radius: 0.25rem;
 		white-space: pre-wrap;
 	}
 
 	.bubble.assistant {
 		align-self: flex-start;
-		background: #fff;
-		border: 1px solid #e2e2e4;
+		background: var(--surface);
+		border: 1px solid var(--line);
 		border-bottom-left-radius: 0.25rem;
 	}
 
@@ -204,13 +204,13 @@
 	}
 
 	.bubble.assistant :global(:not(pre) > code) {
-		background: #f0f0f2;
+		background: var(--fill);
 		padding: 0.1em 0.35em;
 		border-radius: 0.25rem;
 	}
 
 	.bubble.assistant :global(pre) {
-		background: #f0f0f2;
+		background: var(--fill);
 		padding: 0.5rem 0.75rem;
 		border-radius: 0.375rem;
 		overflow-x: auto;
@@ -222,7 +222,7 @@
 
 	.bubble.assistant :global(th),
 	.bubble.assistant :global(td) {
-		border: 1px solid #e2e2e4;
+		border: 1px solid var(--line);
 		padding: 0.25rem 0.5rem;
 		text-align: left;
 	}
@@ -234,23 +234,23 @@
 		gap: 0.5rem;
 		max-width: 80%;
 		padding: 0.3rem 0.7rem;
-		border: 1px solid #e2e2e4;
+		border: 1px solid var(--line);
 		border-radius: 999px;
-		background: #fff;
+		background: var(--surface);
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 		font-size: 0.78rem;
-		color: #6b6b70;
+		color: var(--muted);
 	}
 
 	.tool-name {
 		font-weight: 600;
-		color: #1a1a1a;
+		color: var(--ink);
 		text-transform: capitalize;
 	}
 
 	.tool-args {
 		padding-left: 0.5rem;
-		border-left: 1px solid #d0d0d4;
+		border-left: 1px solid var(--line);
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 		white-space: nowrap;
 		overflow: hidden;
@@ -261,8 +261,8 @@
 		display: flex;
 		gap: 0.5rem;
 		padding: 0.75rem;
-		border-top: 1px solid #e2e2e4;
-		background: #fff;
+		border-top: 1px solid var(--line);
+		background: var(--surface);
 	}
 
 	textarea {
@@ -270,13 +270,13 @@
 		resize: none;
 		font: inherit;
 		padding: 0.5rem 0.75rem;
-		border: 1px solid #d0d0d4;
+		border: 1px solid var(--line-strong);
 		border-radius: 0.5rem;
 		outline: none;
 	}
 
 	textarea:focus {
-		border-color: #1a73e8;
+		border-color: var(--accent);
 	}
 
 	button {
@@ -284,9 +284,13 @@
 		padding: 0.5rem 1rem;
 		border: none;
 		border-radius: 0.5rem;
-		background: #1a73e8;
-		color: #fff;
+		background: var(--accent);
+		color: var(--accent-ink);
 		cursor: pointer;
+	}
+
+	button:hover:not(:disabled) {
+		background: var(--accent-hover);
 	}
 
 	button:disabled {

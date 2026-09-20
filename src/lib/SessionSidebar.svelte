@@ -94,8 +94,8 @@
 		gap: 0.5rem;
 		width: min(80vw, 18rem);
 		padding: 0.75rem;
-		border-right: 1px solid #e2e2e4;
-		background: #fff;
+		border-right: 1px solid var(--line);
+		background: var(--surface);
 		overflow: hidden;
 		transform: translateX(-100%);
 		transition: transform 200ms ease;
@@ -119,28 +119,28 @@
 		padding: 0.25rem 0.5rem;
 		border: none;
 		background: none;
-		color: #6b6b70;
+		color: var(--muted);
 		cursor: pointer;
 	}
 
 	.close:hover,
 	.delete:hover:not(:disabled) {
-		color: #1a1a1a;
+		color: var(--ink);
 	}
 
 	.new {
 		font: inherit;
 		padding: 0.5rem 0.75rem;
-		border: 1px solid #d0d0d4;
+		border: 1px solid var(--line-strong);
 		border-radius: 0.5rem;
-		background: #fff;
-		color: #1a1a1a;
+		background: var(--surface);
+		color: var(--ink);
 		cursor: pointer;
 		text-align: left;
 	}
 
 	.new:hover:not(:disabled) {
-		border-color: #1a73e8;
+		border-color: var(--accent);
 	}
 
 	nav {
@@ -160,7 +160,7 @@
 
 	.item:hover,
 	.item.active {
-		background: #f0f0f2;
+		background: var(--fill);
 	}
 
 	.item a {
@@ -186,15 +186,15 @@
 		gap: 0.375rem;
 		padding: 0.5rem 0.75rem;
 		border: none;
-		border-top: 1px solid #e2e2e4;
+		border-top: 1px solid var(--line);
 		background: none;
-		color: #1a1a1a;
+		color: var(--ink);
 		font: inherit;
 		cursor: pointer;
 	}
 
 	.settings:hover {
-		color: #1a73e8;
+		color: var(--accent);
 	}
 
 	.settings svg {

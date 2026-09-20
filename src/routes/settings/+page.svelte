@@ -78,22 +78,22 @@
 		border: none;
 		border-radius: 0.5rem;
 		background: none;
-		color: #6b6b70;
+		color: var(--muted);
 		cursor: pointer;
 	}
 
 	.tabs button:hover {
-		color: #1a1a1a;
+		color: var(--ink);
 	}
 
 	.tabs button.active {
-		background: #f0f0f2;
-		color: #1a1a1a;
+		background: var(--fill);
+		color: var(--ink);
 		font-weight: 600;
 	}
 
 	.empty {
-		color: #6b6b70;
+		color: var(--muted);
 	}
 
 	ul {
@@ -110,7 +110,7 @@
 		align-items: center;
 		gap: 0.75rem;
 		padding: 0.75rem;
-		border: 1px solid #e2e2e4;
+		border: 1px solid var(--line);
 		border-radius: 0.5rem;
 	}
 
@@ -127,22 +127,22 @@
 	}
 
 	.value {
-		color: #4a4a4f;
+		color: var(--ink-soft);
 		overflow-wrap: anywhere;
 	}
 
 	button {
 		font: inherit;
 		padding: 0.5rem 0.75rem;
-		border: 1px solid #d0d0d4;
+		border: 1px solid var(--line-strong);
 		border-radius: 0.5rem;
-		background: #fff;
-		color: #1a1a1a;
+		background: var(--surface);
+		color: var(--ink);
 		cursor: pointer;
 	}
 
 	button:hover {
-		border-color: #d33;
-		color: #d33;
+		border-color: var(--danger);
+		color: var(--danger);
 	}
 </style>

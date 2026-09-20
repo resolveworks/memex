@@ -54,21 +54,39 @@
 </div>
 
 <style>
+	:global(:root) {
+		--font-sans: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+		--bg: #f5f2ec;
+		--surface: #ffffff;
+		--ink: #23211d;
+		--ink-soft: #4d473e;
+		--muted: #6f675c;
+		--line: #e6e0d5;
+		--line-strong: #d6cec0;
+		--fill: #ede8df;
+		--accent: #2f5d50;
+		--accent-hover: #264c41;
+		--accent-ink: #ffffff;
+		--danger: #b4442f;
+	}
+
 	:global(html, body) {
 		margin: 0;
 		height: 100%;
+	}
+
+	:global(body) {
+		background: var(--bg);
+		color: var(--ink);
 	}
 
 	.app {
 		display: flex;
 		flex-direction: column;
 		height: 100dvh;
-		font-family:
-			system-ui,
-			-apple-system,
-			'Segoe UI',
-			Roboto,
-			sans-serif;
+		color: var(--ink);
+		background: var(--bg);
+		font-family: var(--font-sans);
 	}
 
 	header {
@@ -77,8 +95,8 @@
 		gap: 0.25rem;
 		flex-shrink: 0;
 		padding: 0.375rem 0.5rem;
-		border-bottom: 1px solid #e2e2e4;
-		background: #fff;
+		border-bottom: 1px solid var(--line);
+		background: var(--surface);
 	}
 
 	.menu {
@@ -86,7 +104,7 @@
 		padding: 0.5rem;
 		border: none;
 		background: none;
-		color: #1a1a1a;
+		color: var(--ink);
 		cursor: pointer;
 	}
 
@@ -98,18 +116,23 @@
 
 	.title {
 		font-weight: 600;
-		color: #1a1a1a;
+		letter-spacing: -0.01em;
+		color: var(--ink);
 		text-decoration: none;
+	}
+
+	.title:hover {
+		color: var(--accent);
 	}
 
 	.language {
 		margin-left: auto;
 		font: inherit;
 		padding: 0.25rem;
-		border: 1px solid #d0d0d4;
+		border: 1px solid var(--line-strong);
 		border-radius: 0.5rem;
-		background: #fff;
-		color: #1a1a1a;
+		background: var(--surface);
+		color: var(--ink);
 	}
 
 	main {
