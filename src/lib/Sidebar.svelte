@@ -124,7 +124,10 @@
 		}
 
 		aside {
-			position: static;
+			position: sticky;
+			top: var(--chrome-h);
+			align-self: start;
+			block-size: calc(100dvh - var(--chrome-h));
 			width: 18rem;
 			flex-shrink: 0;
 			visibility: visible;
