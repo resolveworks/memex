@@ -23,7 +23,7 @@
 	type Item =
 		| { kind: "user"; text: string }
 		| { kind: "assistant"; text: string }
-		| { kind: "tool"; name: string; args: string };
+		| { kind: "tool"; name: string; args: { key: string; value: string }[] };
 
 	function toItems(messages: AgentMessage[]): Item[] {
 		const items: Item[] = [];
@@ -38,19 +38,16 @@
 						items.push({
 							kind: "tool",
 							name: part.name,
-							args: formatToolArgs(part.arguments)
+							args: Object.entries(part.arguments).map(([key, value]) => ({
+								key,
+								value: Array.isArray(value) ? value.join(" · ") : String(value)
+							}))
 						});
 					}
 				}
 			}
 		}
 		return items;
-	}
-
-	function formatToolArgs(args: Record<string, unknown>): string {
-		return Object.values(args)
-			.map((value) => (Array.isArray(value) ? value.join(" · ") : String(value)))
-			.join(" · ");
 	}
 
 	let items = $derived(
@@ -113,7 +110,11 @@
 			{#if item.kind === "tool"}
 				<div class="tool">
 					<span class="tool-name">{item.name}</span>
-					{#if item.args}<span class="tool-args">{item.args}</span>{/if}
+					{#if item.args.length}
+						<span class="tool-args">
+							{#each item.args as arg, i}{#if i}<span class="sep"> · </span>{/if}<span class:clamp={arg.key === "id"}>{arg.value}</span>{/each}
+						</span>
+					{/if}
 				</div>
 			{:else if item.kind === "assistant"}
 				<div class="assistant">{@html md(item.text)}</div>
@@ -292,6 +293,14 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+
+	.tool-args .clamp {
+		display: inline-block;
+		max-width: 6ch;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		vertical-align: bottom;
 	}
 
 	.composer {
