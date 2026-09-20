@@ -4,7 +4,7 @@
 	import { t } from "$lib/i18n.svelte";
 </script>
 
-<Card center gap="0.5rem">
+<Card center>
 	<p class="status">{page.status}</p>
 	<p class="message">{t("error.notFound")}</p>
 	<a href="/">{t("error.newMemex")}</a>

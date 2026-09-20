@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from "$app/state";
+	import Field from "$lib/components/Field.svelte";
 	import Footer from "$lib/components/Footer.svelte";
 	import Select from "$lib/components/Select.svelte";
 	import { i18n, languages, languageName, setLocale, t } from "$lib/i18n.svelte";
@@ -31,15 +32,16 @@
 
 	<Footer>
 		<div class="language">
-			<Select
-				aria-label={t("nav.language")}
-				value={i18n.locale}
-				onchange={(event) => setLocale(event.currentTarget.value)}
-			>
-				{#each languages as code (code)}
-					<option value={code}>{languageName(code)}</option>
-				{/each}
-			</Select>
+			<Field label={t("nav.language")}>
+				<Select
+					value={i18n.locale}
+					onchange={(event) => setLocale(event.currentTarget.value)}
+				>
+					{#each languages as code (code)}
+						<option value={code}>{languageName(code)}</option>
+					{/each}
+				</Select>
+			</Field>
 		</div>
 	</Footer>
 </aside>

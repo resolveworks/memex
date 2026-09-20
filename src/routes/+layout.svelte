@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -111,50 +112,10 @@
 </div>
 
 <style>
-	:global(:root) {
-		--font-sans: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-		--bg: #f5f2ec;
-		--surface: #ffffff;
-		--ink: #23211d;
-		--ink-soft: #4d473e;
-		--muted: #6f675c;
-		--line: #e6e0d5;
-		--line-strong: #d6cec0;
-		--fill: #ede8df;
-		--accent: #2f5d50;
-		--accent-hover: #264c41;
-		--accent-ink: #ffffff;
-		--danger: #b4442f;
-
-		--space-1: 0.25rem;
-		--space-2: 0.5rem;
-		--space-3: 0.75rem;
-		--space-4: 1rem;
-		--space-6: 1.5rem;
-
-		--radius-sm: 0.375rem;
-		--radius: 0.5rem;
-		--radius-lg: 0.75rem;
-		--radius-full: 999px;
-	}
-
-	:global(html, body) {
-		margin: 0;
-		height: 100%;
-	}
-
-	:global(body) {
-		background: var(--bg);
-		color: var(--ink);
-	}
-
 	.app {
 		display: flex;
 		flex-direction: column;
 		height: 100dvh;
-		color: var(--ink);
-		background: var(--bg);
-		font-family: var(--font-sans);
 	}
 
 	.body {
@@ -181,12 +142,6 @@
 		background: none;
 		color: var(--ink);
 		cursor: pointer;
-	}
-
-	.menu svg line {
-		stroke: currentColor;
-		stroke-width: 2;
-		stroke-linecap: round;
 	}
 
 	.actions {
@@ -217,14 +172,6 @@
 	.icon:disabled {
 		opacity: 0.5;
 		cursor: default;
-	}
-
-	.icon svg {
-		fill: none;
-		stroke: currentColor;
-		stroke-width: 2;
-		stroke-linecap: round;
-		stroke-linejoin: round;
 	}
 
 	main {

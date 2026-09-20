@@ -24,16 +24,3 @@
 		<Button type="submit">{t("create.submit")}</Button>
 	</form>
 </Card>
-
-<style>
-	h1 {
-		margin: 0;
-		font-size: 1.25rem;
-	}
-
-	form {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-4);
-	}
-</style>

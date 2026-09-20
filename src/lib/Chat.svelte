@@ -138,7 +138,7 @@
 		</div>
 	</div>
 
-	<Footer style="padding-inline: max(var(--space-3), calc((100% - 48rem) / 2))">
+	<Footer>
 		<form
 			class="composer"
 			onsubmit={(event) => {
@@ -326,9 +326,11 @@
 
 	.composer {
 		display: flex;
-		align-items: flex-end;
+		align-items: center;
 		flex: 1;
 		gap: var(--space-2);
+		max-width: 48rem;
+		margin: 0 auto;
 		padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
 		border: 1px solid var(--line-strong);
 		border-radius: 1.25rem;
@@ -343,7 +345,6 @@
 		flex: 1;
 		min-height: 1.5rem;
 		max-height: 12rem;
-		padding: var(--space-1) 0;
 		border: none;
 		outline: none;
 		background: none;
@@ -375,14 +376,6 @@
 	.send:disabled {
 		opacity: 0.5;
 		cursor: default;
-	}
-
-	.send svg {
-		fill: none;
-		stroke: currentColor;
-		stroke-width: 2;
-		stroke-linecap: round;
-		stroke-linejoin: round;
 	}
 
 	:global(.cursor) {

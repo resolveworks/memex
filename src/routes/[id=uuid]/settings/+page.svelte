@@ -8,7 +8,7 @@
 	let { data } = $props();
 </script>
 
-<Card gap="1.5rem">
+<Card>
 	<h1>{t("settings.heading")}</h1>
 
 	<form method="POST" action="?/rename">
@@ -26,17 +26,6 @@
 </Card>
 
 <style>
-	h1 {
-		margin: 0;
-		font-size: 1.25rem;
-	}
-
-	form {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-3);
-	}
-
 	.language {
 		display: flex;
 		flex-direction: column;
