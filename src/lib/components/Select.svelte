@@ -34,114 +34,107 @@
 
 	const uid = $props.id();
 
-	// The popover owns open state (light dismiss, Escape, top layer); this
-	// mirrors it for aria and keyboard handling.
+	// The popover owns open state (light dismiss, Escape, top layer); we only
+	// mirror it for aria and to know whether the arrows open or navigate.
 	let open = $state(false);
 	let menu = $state<HTMLDivElement | null>(null);
-	let trigger = $state<HTMLButtonElement | null>(null);
 
-	const selectedIndex = $derived(options.findIndex((option) => option.value === value));
-	const selected = $derived(options[selectedIndex]);
+	const selected = $derived(options.find((option) => option.value === value)?.label ?? placeholder);
 
-	let activeIndex = $state(0);
+	function choose(next: string) {
+		menu?.hidePopover();
+		onchange(next);
+	}
 
 	function onToggle(event: ToggleEvent) {
 		open = event.newState === 'open';
-		if (open) activeIndex = Math.max(0, selectedIndex);
-	}
-
-	function choose(index: number) {
-		menu?.hidePopover();
-		trigger?.focus();
-		onchange(options[index].value);
+		if (!open) return;
+		// Focus moves into the menu so Enter/Space are the browser's; the arrows
+		// then walk real focus instead of a mirror index.
+		const current = menu?.querySelector<HTMLElement>('[aria-selected="true"]');
+		(current ?? menu?.querySelector<HTMLElement>('.option, .action'))?.focus();
 	}
 
 	function onkeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape') {
-			menu?.hidePopover();
-		} else if (event.key === 'Enter' || event.key === ' ') {
-			event.preventDefault();
-			if (open) choose(activeIndex);
-			else menu?.showPopover();
-		} else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-			event.preventDefault();
-			if (!open) menu?.showPopover();
-			else {
-				const step = event.key === 'ArrowDown' ? 1 : -1;
-				activeIndex = (activeIndex + step + options.length) % options.length;
+		if (!open) {
+			if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+				event.preventDefault();
+				menu?.showPopover();
 			}
-		} else if (event.key === 'Home' || event.key === 'End') {
-			if (!open) return;
-			event.preventDefault();
-			activeIndex = event.key === 'Home' ? 0 : options.length - 1;
+			return;
 		}
+		const items = [...(menu?.querySelectorAll<HTMLElement>('.option, .action') ?? [])];
+		const at = items.indexOf(document.activeElement as HTMLElement);
+		let next: number;
+		if (event.key === 'ArrowDown') next = at + 1;
+		else if (event.key === 'ArrowUp') next = at - 1;
+		else if (event.key === 'Home') next = 0;
+		else if (event.key === 'End') next = items.length - 1;
+		else return;
+		event.preventDefault();
+		items[(next + items.length) % items.length]?.focus();
 	}
 </script>
 
-<div>
-	{#if name}
-		<input type="hidden" {name} {value} />
-	{/if}
-	<button
-		type="button"
-		class="trigger"
-		bind:this={trigger}
-		style="anchor-name: --select-{uid}"
-		{disabled}
-		role="combobox"
-		aria-haspopup="listbox"
-		aria-controls={`${uid}-options`}
-		aria-expanded={open}
-		aria-label={label}
-		aria-activedescendant={open ? `${uid}-${activeIndex}` : undefined}
-		onclick={() => menu?.togglePopover()}
-		onkeydown={onkeydown}
-	>
-		<span class="value">{selected?.label ?? placeholder}</span>
-		<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-			<polyline points="6 9 12 15 18 9" />
-		</svg>
-	</button>
+{#if name}
+	<input type="hidden" {name} {value} />
+{/if}
+<button
+	type="button"
+	class="trigger"
+	style="anchor-name: --select-{uid}"
+	{disabled}
+	role="combobox"
+	aria-haspopup="listbox"
+	aria-controls={`${uid}-options`}
+	aria-expanded={open}
+	aria-label={label}
+	onclick={() => menu?.togglePopover()}
+	onkeydown={onkeydown}
+>
+	<span class="value">{selected}</span>
+	<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+		<polyline points="6 9 12 15 18 9" />
+	</svg>
+</button>
 
-	<div
-		class="menu"
-		bind:this={menu}
-		popover="auto"
-		style="position-anchor: --select-{uid}; min-width: anchor-size(--select-{uid} width)"
-		ontoggle={onToggle}
-	>
-		<div class="options" id={`${uid}-options`} role="listbox" aria-label={label}>
-			{#each options as option, index (option.value)}
-				<button
-					type="button"
-					id={`${uid}-${index}`}
-					role="option"
-					tabindex="-1"
-					class="option"
-					class:active={index === activeIndex}
-					aria-selected={option.value === value}
-					onclick={() => choose(index)}
-					onmousemove={() => (activeIndex = index)}
+<div
+	class="menu"
+	bind:this={menu}
+	popover="auto"
+	style="position-anchor: --select-{uid}; min-width: anchor-size(--select-{uid} width)"
+	ontoggle={onToggle}
+>
+	<div class="options" id={`${uid}-options`} role="listbox" aria-label={label}>
+		{#each options as option (option.value)}
+			<button
+				type="button"
+				role="option"
+				tabindex="-1"
+				class="option"
+				aria-selected={option.value === value}
+				onclick={() => choose(option.value)}
+				onkeydown={onkeydown}
+			>
+				{option.label}
+			</button>
+		{/each}
+	</div>
+	{#if actions.length}
+		<div class="actions">
+			{#each actions as action (action.href)}
+				<a
+					class="action"
+					class:disabled
+					href={action.href}
+					onclick={() => menu?.hidePopover()}
+					onkeydown={onkeydown}
 				>
-					{option.label}
-				</button>
+					{action.label}
+				</a>
 			{/each}
 		</div>
-		{#if actions.length}
-			<div class="actions">
-				{#each actions as action (action.href)}
-					<a
-						class="action"
-						class:disabled
-						href={action.href}
-						onclick={() => menu?.hidePopover()}
-					>
-						{action.label}
-					</a>
-				{/each}
-			</div>
-		{/if}
-	</div>
+	{/if}
 </div>
 
 <style>
@@ -211,7 +204,12 @@
 		cursor: pointer;
 	}
 
-	.option.active {
+	.option:focus {
+		outline: none;
+	}
+
+	.option:hover,
+	.option:focus {
 		background: var(--fill);
 	}
 
@@ -236,8 +234,10 @@
 		cursor: pointer;
 	}
 
-	.action:hover {
+	.action:hover,
+	.action:focus {
 		background: var(--fill);
+		outline: none;
 	}
 
 	.action.disabled {
