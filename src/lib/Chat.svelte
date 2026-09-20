@@ -157,7 +157,7 @@
 		margin-inline: auto;
 		padding: var(--space-2) var(--space-3);
 		border: 1px solid var(--line-strong);
-		border-radius: var(--radius-full);
+		border-radius: var(--radius-lg);
 		background: var(--surface);
 	}
 
