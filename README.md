@@ -1,42 +1,51 @@
-# sv
+# Memex
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Memex is a deliberately minimal browser chat agent. The agent itself runs in
+the browser (SvelteKit + `@earendil-works/pi-agent-core`) with two
+localStorage-backed tools, `store` and `retrieve`, so it can remember things
+you tell it. "Dumb and simple" is the design goal.
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
+## Quickstart
 
 ```sh
-# recreate this project
-pnpm dlx sv@0.17.0 create --template minimal --types ts --install pnpm .
+pnpm install
+cp .env.example .env   # then set DEEPSEEK_API_KEY
+pnpm dev
 ```
 
-## Developing
+## How it works
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```
+browser                                     server (SvelteKit)
+┌───────────────────────────────┐
+│ Agent (src/lib/agent.ts)      │           ┌──────────────────────────┐
+│  ├─ tools: store / retrieve   │  POST     │ /api/stream/+server.ts   │
+│  │    └─ localStorage         │ ────────► │  ├─ holds DEEPSEEK key   │
+│  └─ streamProxy ──────────────┼─ /api/    │  └─ maps pi-ai events →  │
+│                               │  stream   │     SSE data: lines      │
+└───────────────────────────────┘           └────────────┬─────────────┘
+                                                         │
+                                                         ▼
+                                                   DeepSeek API
 ```
 
-## Building
+The agent runs in the browser; LLM calls go same-origin through `streamProxy`
+to `/api/stream`, which holds the DeepSeek key and streams SSE-style
+`data: {...}\n\n` lines back. The server is model-authoritative: the client's
+`body.model` is ignored.
 
-To create a production version of your app:
+### Source map
 
-```sh
-npm run build
-```
+- `src/lib/agent.ts` — browser `Agent` instance (system prompt, model, tools, `streamFn`).
+- `src/lib/tools.ts` — `store` / `retrieve` tools over localStorage (`memex:` prefix).
+- `src/lib/model.ts` — the single resolved model (`deepseek/deepseek-v4-flash`).
+- `src/lib/server/llm.ts` — server-side model registry with `DEEPSEEK_API_KEY` via `$env/dynamic/private`.
+- `src/routes/api/stream/+server.ts` — streaming proxy endpoint; pi-ai event → proxy event mapping. Auth insertion point marked at the top.
+- `src/routes/+page.svelte` — chat UI (Svelte 5 runes).
+- `src/routes/+layout.svelte` — root layout.
 
-You can preview the production build with `npm run preview`.
+## Notes
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+- Swap the model in `src/lib/model.ts`.
+- Auth slots into the marked comment at the top of the stream handler.
+- Memories live in the browser's localStorage — they are per-browser, not synced.
