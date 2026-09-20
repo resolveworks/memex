@@ -1,6 +1,6 @@
 import { Agent, streamProxy } from "@earendil-works/pi-agent-core";
 import { model } from "./model";
-import { search, store } from "./tools";
+import { request, search, store } from "./tools";
 
 const systemPrompt = `# Identity
 
@@ -19,7 +19,13 @@ Read each user message and decide which function it calls for:
 - **Retrieve** — the user asks for any information, fact, name, preference, or
   anything discussed before. Your job is to search memory before answering. Never say
   you don't know or don't remember something without searching first.
-- **Both** — a single message may need a search, a store, or several of either.
+- **Request** — after thorough searching turns up nothing for a question the user
+  needs answered, call the \`request\` tool with one self-contained question capturing
+  what is missing. It records the gap for the user to fill in later; it does not
+  retrieve anything. Record each missing piece once, then tell the user you have
+  noted the question.
+- **Both** — a single message may need a search, a store, a request, or several of
+  either.
 
 # Searching well
 
@@ -40,7 +46,8 @@ query. When you find a memory, answer from its value, not from your own knowledg
 # Answering
 
 Keep answers short. State the remembered value directly. If thorough searching turns
-up nothing, say plainly that it is not in memory.`;
+up nothing, record the missing information with the \`request\` tool and say plainly
+that it is not in memory.`;
 
 let agent: Agent | undefined;
 
@@ -50,7 +57,7 @@ export function getAgent(): Agent {
 			initialState: {
 				systemPrompt,
 				model,
-				tools: [store, search],
+				tools: [store, search, request],
 			},
 			// Empty authToken is ignored by the server in this MVP; empty proxyUrl targets same-origin /api/stream.
 			streamFn: (m, ctx, opts) => streamProxy(m, ctx, { ...opts, authToken: "", proxyUrl: "" }),

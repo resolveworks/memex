@@ -1,28 +1,54 @@
 <script lang="ts">
 	let { data } = $props();
+
+	let tab = $state<"memories" | "requests">("memories");
 </script>
 
 <div class="settings">
 	<h1>Settings</h1>
-	<h2>Memories</h2>
 
-	{#if data.memories.length === 0}
-		<p class="empty">No memories yet.</p>
+	<div class="tabs">
+		<button class:active={tab === "memories"} onclick={() => (tab = "memories")}>Memories</button>
+		<button class:active={tab === "requests"} onclick={() => (tab = "requests")}>Requests</button>
+	</div>
+
+	{#if tab === "memories"}
+		{#if data.memories.length === 0}
+			<p class="empty">No memories yet.</p>
+		{:else}
+			<ul>
+				{#each data.memories as memory (memory.key)}
+					<li>
+						<div class="memory">
+							<span class="key">{memory.key}</span>
+							<span class="value">{memory.value}</span>
+						</div>
+						<form method="POST" action="?/delete">
+							<input type="hidden" name="key" value={memory.key} />
+							<button aria-label={`Delete ${memory.key}`}>Delete</button>
+						</form>
+					</li>
+				{/each}
+			</ul>
+		{/if}
 	{:else}
-		<ul>
-			{#each data.memories as memory (memory.key)}
-				<li>
-					<div class="memory">
-						<span class="key">{memory.key}</span>
-						<span class="value">{memory.value}</span>
-					</div>
-					<form method="POST" action="?/delete">
-						<input type="hidden" name="key" value={memory.key} />
-						<button aria-label={`Delete ${memory.key}`}>Delete</button>
-					</form>
-				</li>
-			{/each}
-		</ul>
+		{#if data.requests.length === 0}
+			<p class="empty">No requests yet.</p>
+		{:else}
+			<ul>
+				{#each data.requests as item (item.id)}
+					<li>
+						<div class="memory">
+							<span class="value">{item.question}</span>
+						</div>
+						<form method="POST" action="?/deleteRequest">
+							<input type="hidden" name="id" value={item.id} />
+							<button aria-label="Delete request">Delete</button>
+						</form>
+					</li>
+				{/each}
+			</ul>
+		{/if}
 	{/if}
 </div>
 
@@ -38,10 +64,30 @@
 		font-size: 1.5rem;
 	}
 
-	h2 {
-		margin: 0 0 0.75rem;
-		font-size: 1rem;
+	.tabs {
+		display: flex;
+		gap: 0.25rem;
+		margin-bottom: 1rem;
+	}
+
+	.tabs button {
+		font: inherit;
+		padding: 0.5rem 0.75rem;
+		border: none;
+		border-radius: 0.5rem;
+		background: none;
 		color: #6b6b70;
+		cursor: pointer;
+	}
+
+	.tabs button:hover {
+		color: #1a1a1a;
+	}
+
+	.tabs button.active {
+		background: #f0f0f2;
+		color: #1a1a1a;
+		font-weight: 600;
 	}
 
 	.empty {

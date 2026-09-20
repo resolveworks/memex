@@ -31,6 +31,30 @@ const searchParameters = Type.Object({
 	query: Type.String(),
 });
 
+const requestParameters = Type.Object({
+	question: Type.String(),
+});
+
+export const request: AgentTool<typeof requestParameters> = {
+	name: "request",
+	label: "Request",
+	description:
+		"Record a question you could not answer from memory so the user can supply the missing information later. Use this after thorough searching turns up nothing.",
+	parameters: requestParameters,
+	execute: async (_toolCallId, { question }) => {
+		const response = await fetch("/api/requests", {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify({ question }),
+		});
+		if (!response.ok) throw new Error(`Failed to record request (${response.status}).`);
+		return {
+			content: [{ type: "text", text: `Requested information: ${question}` }],
+			details: undefined,
+		};
+	},
+};
+
 export const search: AgentTool<typeof searchParameters> = {
 	name: "search",
 	label: "Search",
