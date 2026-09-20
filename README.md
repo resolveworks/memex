@@ -1,32 +1,31 @@
 # Memex
 
-**The shared memory for the knowledge your team cannot afford to lose.**
+**A memory for you — and for anyone you share it with.**
 
-Memex is a simple conversational assistant that helps a business keep hold of its everyday knowledge. Tell it something once, in ordinary language, and it can recall it later — even in a different conversation or language.
+Memex is a simple conversational assistant that remembers things. Tell it something once, in ordinary language, and it can recall it later — in a new conversation or a different language. Use it just for yourself, or share the link so the people around you draw on the same memory.
 
 ## Why it exists
 
-Every workplace has important knowledge that lives only in people's heads: how to reset the boiler, where a key is kept, what a returning guest prefers, or which steps make an old system work. That is manageable until the person who knows is unavailable, busy, or leaves.
+Everyone has small things they don't want to forget, and so does every group: a gate code, where something is kept, who has the keys, when the next thing is. That knowledge lives in scattered heads, notes, and old chats, and the moment you need one small answer, it can be hard to find.
 
-Traditional documentation rarely solves the whole problem. Writing and maintaining a handbook takes time, and finding one small answer inside it can take almost as long as asking a colleague. This is especially painful for small teams, seasonal businesses, and workplaces where people do not all share the same first language.
+Notes and pinned messages don't quite fix it. They're easy to lose, hard to search, and never in the same place for everyone.
 
-Memex makes capturing and retrieving knowledge feel like a conversation rather than another administrative task. The goal is not to replace human experience, but to make it available to the people who need it — without repeatedly interrupting the people who have it.
+Memex gives you one place that remembers. Add what's worth keeping, in ordinary language, and ask for it back whenever you need it.
 
-## What you can do
+## How it works
 
-- **Keep practical knowledge:** Tell Memex a process, location, preference, workaround, or other fact worth preserving.
-- **Ask in everyday language:** Retrieve what the team knows without remembering a file name, folder, or exact wording.
-- **Continue across conversations:** Shared memories remain available in new chat sessions.
-- **Work across languages:** Ask in your own language and receive the answer in that language.
-- **Discover knowledge gaps:** If an answer has not been recorded, Memex adds the question to a request list so it can be filled in later.
-- **Stay in control:** See unanswered requests in the sidebar and answer them in chat.
+- **Add what matters:** a code, a date, a place, a preference, a plan.
+- **Ask in everyday language:** get it back without knowing a file name, folder, or exact wording.
+- **Ask even when no one has added it yet:** Memex turns the open question into a request you — or anyone you've shared with — can fill in, and it's remembered from then on.
+- **Continue across conversations:** memories stay available in the next chat.
+- **Work across languages:** ask in your own language and get the answer in that language.
+- **Stay in control:** see unanswered requests in the sidebar and answer them in chat.
+- **Share if you want:** anyone with the link uses the same memory. Keep it to yourself if you'd rather.
 
-## Where it can help
+## Who it's for
 
-Memex began with a common challenge in hospitality: seasonal employees arrive quickly, experienced colleagues have little time to train them, and valuable knowledge often leaves again at the end of the season. A hotel, restaurant, or guesthouse could use it to preserve house-specific procedures and give new staff quick answers from day one.
-
-The same pattern exists far beyond hospitality. Memex could support a workshop documenting machine quirks, a volunteer organisation handing over responsibilities, a small office preserving customer knowledge, or a family business preparing for succession. Anywhere knowledge is passed from person to person, Memex can become a memory that stays.
+One person, or a group. A private memory for yourself, or a shared one for friends, families, clubs, colleagues, neighbours. Share the link, or don't — either way it's there when you need it.
 
 ## The idea in one sentence
 
-**Say it once, and it stays with the organisation.**
+**Say it once, and it stays — for you, or for everyone you share it with.**
