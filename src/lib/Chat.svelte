@@ -20,7 +20,7 @@
 	type Item =
 		| { kind: "user"; text: string }
 		| { kind: "assistant"; text: string }
-		| { kind: "tool"; text: string };
+		| { kind: "tool"; name: string; args: string };
 
 	function toItems(messages: AgentMessage[]): Item[] {
 		const items: Item[] = [];
@@ -32,7 +32,11 @@
 				if (text) items.push({ kind: "assistant", text });
 				for (const part of message.content) {
 					if (part.type === "toolCall") {
-						items.push({ kind: "tool", text: formatToolCall(part.name, part.arguments) });
+						items.push({
+							kind: "tool",
+							name: part.name,
+							args: formatToolArgs(part.arguments)
+						});
 					}
 				}
 			}
@@ -40,10 +44,10 @@
 		return items;
 	}
 
-	function formatToolCall(name: string, args: Record<string, unknown>): string {
-		return `${name}(${Object.values(args)
-			.map((value) => JSON.stringify(value))
-			.join(", ")})`;
+	function formatToolArgs(args: Record<string, unknown>): string {
+		return Object.values(args)
+			.map((value) => (Array.isArray(value) ? value.join(" · ") : String(value)))
+			.join(" · ");
 	}
 
 	let items = $derived(
@@ -95,7 +99,10 @@ That's the whole idea: say it once, and I remember.`;
 		{/if}
 		{#each items as item}
 			{#if item.kind === "tool"}
-				<div class="tool">{item.text}</div>
+				<div class="tool">
+					<span class="tool-name">{item.name}</span>
+					{#if item.args}<span class="tool-args">{item.args}</span>{/if}
+				</div>
 			{:else if item.kind === "assistant"}
 				<div class="bubble assistant">{@html md(item.text)}</div>
 			{:else}
@@ -224,11 +231,33 @@ That's the whole idea: say it once, and I remember.`;
 	}
 
 	.tool {
-		align-self: flex-start;
-		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-		font-size: 0.8rem;
+		align-self: center;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		max-width: 80%;
+		padding: 0.3rem 0.7rem;
+		border: 1px solid #e2e2e4;
+		border-radius: 999px;
+		background: #fff;
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+		font-size: 0.78rem;
 		color: #6b6b70;
-		padding: 0.125rem 0.25rem;
+	}
+
+	.tool-name {
+		font-weight: 600;
+		color: #1a1a1a;
+		text-transform: capitalize;
+	}
+
+	.tool-args {
+		padding-left: 0.5rem;
+		border-left: 1px solid #d0d0d4;
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	.composer {
