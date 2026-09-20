@@ -17,5 +17,7 @@
 	"chat.requestIntro": "I couldn't answer this from memory:",
 	"chat.requestHint": "If you know, tell me and I'll remember it.",
 	"chat.placeholder": "Message Memex…",
-	"chat.send": "Send"
+	"chat.send": "Send",
+	"error.notFound": "This page doesn't exist.",
+	"error.newMemex": "Start a new memex"
 }

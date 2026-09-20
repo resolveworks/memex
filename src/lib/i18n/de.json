@@ -17,5 +17,7 @@
 	"chat.requestIntro": "Das konnte ich nicht aus dem Gedächtnis beantworten:",
 	"chat.requestHint": "Wenn Sie es wissen, sagen Sie es mir, und ich merke es mir.",
 	"chat.placeholder": "Nachricht an Memex…",
-	"chat.send": "Senden"
+	"chat.send": "Senden",
+	"error.notFound": "Diese Seite existiert nicht.",
+	"error.newMemex": "Neuen Memex starten"
 }

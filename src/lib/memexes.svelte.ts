@@ -26,3 +26,9 @@ export function remember(memex: KnownMemex): void {
 	list = [memex, ...list.filter((known) => known.id !== memex.id)];
 	write(list);
 }
+
+/** Drops a memex that turned out not to exist. */
+export function forget(id: string): void {
+	list = list.filter((known) => known.id !== id);
+	write(list);
+}

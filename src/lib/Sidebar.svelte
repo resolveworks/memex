@@ -3,15 +3,16 @@
 	import { page } from "$app/state";
 	import { chat, selectRequest } from "$lib/chat.svelte";
 	import { t } from "$lib/i18n.svelte";
-	import { getMemexes, remember } from "$lib/memexes.svelte";
+	import { forget, getMemexes, remember } from "$lib/memexes.svelte";
 	import type { Request as MemexRequest } from "$lib/request";
 
 	let { open, onclose }: { open: boolean; onclose: () => void } = $props();
 
-	// Every memex we open joins the switcher, most recent first.
+	// Every memex we open joins the switcher, most recent first; a 404 means it is gone.
 	$effect(() => {
 		const current = page.data.memex;
 		if (current) remember({ id: current.id, title: current.title });
+		else if (page.status === 404 && page.params.id) forget(page.params.id);
 	});
 
 	// The current memex is selectable even before the effect has recorded it.
