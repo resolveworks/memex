@@ -18,7 +18,7 @@
 		<Button type="submit">{t("settings.save")}</Button>
 	</form>
 
-	<div class="language">
+	<div class="language stack">
 		<span class="label">{t("nav.language")}</span>
 		<span class="value">{languageName(data.memex.language)}</span>
 		<p class="hint">{t("settings.languageLocked")}</p>
@@ -27,14 +27,11 @@
 
 <style>
 	.language {
-		display: flex;
-		flex-direction: column;
 		gap: var(--space-1);
 	}
 
 	.label,
 	.hint {
-		margin: 0;
 		color: var(--muted);
 		font-size: 0.875rem;
 	}

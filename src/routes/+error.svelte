@@ -12,13 +12,11 @@
 
 <style>
 	.status {
-		margin: 0;
 		font-size: 2rem;
 		font-weight: 600;
 	}
 
 	.message {
-		margin: 0;
 		color: var(--muted);
 	}
 

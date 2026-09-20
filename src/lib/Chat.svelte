@@ -86,9 +86,9 @@
 	}
 </script>
 
-<div class="chat">
+<div class="chat stack">
 	<div class="messages" bind:this={viewport} onscroll={onScroll}>
-		<div class="thread">
+		<div class="thread stack">
 		{#each items as item}
 			<ChatMessage kind={item.kind} text={item.text} name={item.name} args={item.args} />
 		{/each}
@@ -118,7 +118,7 @@
 				onkeydown={onKeydown}
 				placeholder={t("chat.placeholder")}
 			></textarea>
-			<button class="send" type="submit" disabled={chat.busy} aria-label={t("chat.send")}>
+			<button class="send center" type="submit" disabled={chat.busy} aria-label={t("chat.send")}>
 				<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
 					<line x1="12" y1="19" x2="12" y2="5" />
 					<polyline points="6 11 12 5 18 11" />
@@ -130,8 +130,7 @@
 
 <style>
 	.chat {
-		display: flex;
-		flex-direction: column;
+		gap: 0;
 		height: 100%;
 		color: var(--ink);
 		background: var(--bg);
@@ -144,12 +143,9 @@
 	}
 
 	.thread {
-		display: flex;
-		flex-direction: column;
 		gap: var(--space-2);
-		width: 100%;
-		max-width: 48rem;
-		margin: 0 auto;
+		max-inline-size: var(--content-max);
+		margin-inline: auto;
 	}
 
 	.composer {
@@ -157,8 +153,8 @@
 		align-items: flex-end;
 		flex: 1;
 		gap: var(--space-2);
-		max-width: 48rem;
-		margin: 0 auto;
+		max-inline-size: var(--content-max);
+		margin-inline: auto;
 		padding: var(--space-2) var(--space-3);
 		border: 1px solid var(--line-strong);
 		border-radius: var(--radius-full);
@@ -177,7 +173,6 @@
 		outline: none;
 		background: none;
 		color: inherit;
-		font: inherit;
 		line-height: var(--space-6);
 		field-sizing: content;
 		resize: none;
@@ -185,18 +180,12 @@
 	}
 
 	.send {
-		display: flex;
-		align-items: center;
-		justify-content: center;
 		flex: none;
-		width: var(--space-6);
-		height: var(--space-6);
-		padding: 0;
-		border: none;
+		inline-size: var(--space-6);
+		block-size: var(--space-6);
 		border-radius: var(--radius-full);
 		background: var(--accent);
 		color: var(--accent-ink);
-		cursor: pointer;
 	}
 
 	.send:hover:not(:disabled) {

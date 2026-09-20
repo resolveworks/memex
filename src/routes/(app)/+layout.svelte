@@ -76,10 +76,10 @@
 			onchange={switchMemex}
 			disabled={chat.busy}
 		/>
-		<div class="actions">
+		<div class="actions cluster">
 			{#if page.params.id}
 				<a
-					class="icon"
+					class="icon center"
 					href={`/${page.params.id}/settings`}
 					aria-label={t('settings.heading')}
 					onclick={follow}
@@ -104,15 +104,15 @@
 
 <style>
 	.app {
-		display: flex;
-		flex-direction: column;
-		height: 100dvh;
+		display: grid;
+		grid-template-rows: auto minmax(0, 1fr);
+		block-size: 100dvh;
 	}
 
 	.body {
-		display: flex;
-		flex: 1;
-		min-height: 0;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		min-block-size: 0;
 	}
 
 	.title {
@@ -127,33 +127,20 @@
 	}
 
 	.menu {
-		display: flex;
-		padding: 0;
-		border: none;
-		background: none;
 		color: var(--ink);
-		cursor: pointer;
 	}
 
 	.actions {
-		display: flex;
-		align-items: center;
+		justify-content: flex-end;
 		gap: var(--space-1);
-		margin-left: auto;
+		margin-inline-start: auto;
 	}
 
 	.icon {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.25rem;
-		height: 2.25rem;
-		padding: 0;
-		border: none;
+		inline-size: 2.25rem;
+		block-size: 2.25rem;
 		border-radius: var(--radius);
-		background: none;
 		color: var(--ink);
-		cursor: pointer;
 	}
 
 	.icon:hover:not(:disabled) {
@@ -166,13 +153,16 @@
 	}
 
 	main {
-		flex: 1;
-		min-height: 0;
+		min-inline-size: 0;
 	}
 
 	@media (min-width: 48rem) {
 		.menu {
 			display: none;
+		}
+
+		.body {
+			grid-template-columns: auto minmax(0, 1fr);
 		}
 	}
 </style>

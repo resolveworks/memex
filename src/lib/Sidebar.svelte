@@ -16,9 +16,9 @@
 {/if}
 
 <aside class:open>
-	<div class="body">
+	<div class="body stack">
 		{#if page.data.requests}
-			<div class="requests">
+			<div class="requests stack">
 				<span class="row section">{t("sidebar.requests")}</span>
 				{#if page.data.requests.length === 0}
 					<p class="row empty">{t("sidebar.noRequests")}</p>
@@ -34,7 +34,7 @@
 	</div>
 
 	<Footer>
-		<div class="language">
+		<div class="language stack">
 			<Select
 				label={t("nav.language")}
 				value={i18n.locale}
@@ -48,16 +48,14 @@
 <style>
 	.scrim {
 		position: fixed;
-		inset: 3rem 0 0 0;
+		inset: var(--chrome-h) 0 0 0;
 		z-index: 1;
-		padding: 0;
-		border: none;
 		background: rgba(0, 0, 0, 0.4);
 	}
 
 	aside {
 		position: fixed;
-		top: 3rem;
+		top: var(--chrome-h);
 		bottom: 0;
 		left: 0;
 		z-index: 2;
@@ -85,8 +83,6 @@
 	}
 
 	.body {
-		display: flex;
-		flex-direction: column;
 		gap: var(--space-2);
 		flex: 1;
 		min-height: 0;
@@ -94,15 +90,13 @@
 	}
 
 	.language {
-		display: flex;
-		flex-direction: column;
+		gap: var(--space-1);
 		flex: 1;
 		min-width: 0;
 	}
 
 	.requests {
-		display: flex;
-		flex-direction: column;
+		gap: 0;
 		flex: 1;
 		min-height: 0;
 		overflow-y: auto;
@@ -117,16 +111,7 @@
 	}
 
 	.empty {
-		margin: 0;
 		color: var(--muted);
-	}
-
-	.requests ul {
-		display: flex;
-		flex-direction: column;
-		margin: 0;
-		padding: 0;
-		list-style: none;
 	}
 
 	.requests li {

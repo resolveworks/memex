@@ -5,15 +5,13 @@
 	let { children, ...rest }: HTMLAttributes<HTMLElement> & { children?: Snippet } = $props();
 </script>
 
-<footer {...rest}>{@render children?.()}</footer>
+<footer class="cluster" {...rest}>{@render children?.()}</footer>
 
 <style>
 	footer {
-		display: flex;
-		align-items: center;
-		gap: var(--space-2);
+		flex-wrap: nowrap;
 		flex-shrink: 0;
-		min-height: 3.5rem;
+		min-block-size: var(--space-14);
 		padding: var(--space-2) var(--space-3);
 	}
 </style>

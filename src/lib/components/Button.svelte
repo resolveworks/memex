@@ -9,13 +9,10 @@
 
 <style>
 	button {
-		font: inherit;
 		padding: var(--space-2) var(--space-4);
-		border: none;
 		border-radius: var(--radius);
 		background: var(--accent);
 		color: var(--accent-ink);
-		cursor: pointer;
 	}
 
 	button:hover:not(:disabled) {

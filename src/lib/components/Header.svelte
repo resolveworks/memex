@@ -5,16 +5,14 @@
 	let { children, ...rest }: HTMLAttributes<HTMLElement> & { children?: Snippet } = $props();
 </script>
 
-<header {...rest}>{@render children?.()}</header>
+<header class="cluster" {...rest}>{@render children?.()}</header>
 
 <style>
 	header {
-		display: flex;
-		align-items: center;
-		gap: var(--space-2);
+		flex-wrap: nowrap;
 		flex-shrink: 0;
-		height: 3rem;
-		padding: 0 var(--space-3);
+		block-size: var(--chrome-h);
+		padding-inline: var(--space-3);
 		border-bottom: 1px solid var(--line);
 		background: var(--surface);
 	}

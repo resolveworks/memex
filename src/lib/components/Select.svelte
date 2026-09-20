@@ -144,14 +144,12 @@
 		justify-content: space-between;
 		gap: var(--space-2);
 		width: 100%;
-		font: inherit;
 		padding: var(--space-2) var(--space-3);
 		border: 1px solid var(--line-strong);
 		border-radius: var(--radius);
 		background: var(--surface);
 		color: var(--ink);
 		text-align: left;
-		cursor: pointer;
 	}
 
 	.trigger:focus {
@@ -191,17 +189,13 @@
 	.option {
 		display: block;
 		width: 100%;
-		font: inherit;
 		text-align: left;
 		padding: var(--space-2) var(--space-3);
-		border: none;
-		background: none;
 		color: inherit;
 		border-radius: var(--radius-sm);
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-		cursor: pointer;
 	}
 
 	.option:focus {
@@ -224,7 +218,6 @@
 	.action {
 		display: block;
 		width: 100%;
-		font: inherit;
 		text-align: left;
 		padding: var(--space-2) var(--space-3);
 		border-radius: var(--radius-sm);

@@ -72,7 +72,7 @@
 		display: inline-block;
 		width: 0.5ch;
 		height: 1em;
-		margin-left: 0.1ch;
+		margin-inline-start: 0.1ch;
 		vertical-align: text-bottom;
 		background: currentColor;
 		animation: blink 1s steps(1) infinite;
@@ -97,13 +97,27 @@
 	.assistant :global(ol),
 	.assistant :global(blockquote),
 	.assistant :global(pre),
-	.assistant :global(table) {
+	.assistant :global(table),
+	.assistant :global(h1),
+	.assistant :global(h2),
+	.assistant :global(h3),
+	.assistant :global(h4),
+	.assistant :global(h5),
+	.assistant :global(h6) {
 		margin: var(--space-2) 0;
 	}
 
 	.assistant :global(ul),
 	.assistant :global(ol) {
-		padding-left: 1.25rem;
+		padding-inline-start: var(--space-4);
+	}
+
+	.assistant :global(ul) {
+		list-style: disc;
+	}
+
+	.assistant :global(ol) {
+		list-style: decimal;
 	}
 
 	.assistant :global(h1),
@@ -117,7 +131,7 @@
 	}
 
 	.assistant :global(code) {
-		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-family: var(--font-mono);
 		font-size: 0.875em;
 	}
 
@@ -181,9 +195,9 @@
 	}
 
 	.tool-args {
-		padding-left: var(--space-2);
-		border-left: 1px solid var(--line);
-		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		padding-inline-start: var(--space-2);
+		border-inline-start: 1px solid var(--line);
+		font-family: var(--font-mono);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;

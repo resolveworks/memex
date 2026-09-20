@@ -4,15 +4,13 @@
 	let { label, children }: { label: string; children: Snippet } = $props();
 </script>
 
-<label>
+<label class="stack">
 	{label}
 	{@render children()}
 </label>
 
 <style>
 	label {
-		display: flex;
-		flex-direction: column;
 		gap: var(--space-1);
 		color: var(--muted);
 		font-size: 0.875rem;

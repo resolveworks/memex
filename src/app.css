@@ -1,48 +1,134 @@
-/* Design tokens */
-:root {
-	--font-sans: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-	--bg: #f5f2ec;
-	--surface: #ffffff;
-	--ink: #23211d;
-	--ink-soft: #4d473e;
-	--muted: #6f675c;
-	--line: #e6e0d5;
-	--line-strong: #d6cec0;
-	--fill: #ede8df;
-	--accent: #2f5d50;
-	--accent-hover: #264c41;
-	--accent-ink: #ffffff;
-	--danger: #b4442f;
+/* Layered so component styles (unlayered) can always override a primitive. */
+@layer reset, tokens, base, primitives;
 
-	--space-1: 0.25rem;
-	--space-2: 0.5rem;
-	--space-3: 0.75rem;
-	--space-4: 1rem;
-	--space-6: 1.5rem;
+@layer reset {
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
 
-	--radius-sm: 0.375rem;
-	--radius: 0.5rem;
-	--radius-lg: 0.75rem;
-	--radius-full: 999px;
+	* {
+		margin: 0;
+	}
+
+	html,
+	body {
+		height: 100%;
+	}
+
+	body {
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+	}
+
+	button,
+	input,
+	select,
+	textarea {
+		font: inherit;
+		color: inherit;
+		letter-spacing: inherit;
+	}
+
+	button {
+		padding: 0;
+		border: none;
+		background: none;
+		cursor: pointer;
+	}
+
+	img,
+	svg,
+	video {
+		display: block;
+		max-width: 100%;
+	}
+
+	ul,
+	ol {
+		padding: 0;
+		list-style: none;
+	}
 }
 
-html,
-body {
-	margin: 0;
-	height: 100%;
+@layer tokens {
+	:root {
+		--font-sans: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+		--font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+		--bg: #f5f2ec;
+		--surface: #ffffff;
+		--ink: #23211d;
+		--ink-soft: #4d473e;
+		--muted: #6f675c;
+		--line: #e6e0d5;
+		--line-strong: #d6cec0;
+		--fill: #ede8df;
+		--accent: #2f5d50;
+		--accent-hover: #264c41;
+		--accent-ink: #ffffff;
+		--danger: #b4442f;
+
+		/* Every step is a multiple of one fluid unit, so the whole scale
+		   grows with the viewport instead of hand-picked rems. */
+		--space-unit: clamp(0.25rem, 0.2378rem + 0.0543vw, 0.28125rem);
+		--space-1: calc(var(--space-unit) * 1);
+		--space-2: calc(var(--space-unit) * 2);
+		--space-3: calc(var(--space-unit) * 3);
+		--space-4: calc(var(--space-unit) * 4);
+		--space-6: calc(var(--space-unit) * 6);
+		--space-8: calc(var(--space-unit) * 8);
+		--space-12: calc(var(--space-unit) * 12);
+		--space-14: calc(var(--space-unit) * 14);
+
+		--radius-sm: 0.375rem;
+		--radius: 0.5rem;
+		--radius-lg: 0.75rem;
+		--radius-full: 999px;
+
+		--content-max: 48rem;
+		--panel-max: 22rem;
+		--chrome-h: 3rem;
+	}
 }
 
-body {
-	background: var(--bg);
-	color: var(--ink);
-	font-family: var(--font-sans);
+@layer base {
+	body {
+		background: var(--bg);
+		color: var(--ink);
+		font-family: var(--font-sans);
+	}
+
+	/* Every UI icon is a stroke icon drawn in currentColor */
+	svg {
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
 }
 
-/* Every UI icon is a stroke icon drawn in currentColor */
-svg {
-	fill: none;
-	stroke: currentColor;
-	stroke-width: 2;
-	stroke-linecap: round;
-	stroke-linejoin: round;
+@layer primitives {
+	/* Vertical flow with a consistent gap between children. */
+	.stack {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-4);
+	}
+
+	/* Horizontal flow that wraps. */
+	.cluster {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	/* Centres a piece of content inside the space it is given. */
+	.center {
+		display: grid;
+		place-items: center;
+	}
 }

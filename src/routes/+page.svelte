@@ -13,7 +13,7 @@
 	);
 </script>
 
-<div class="home">
+<div class="home center">
 	<Card>
 		<h1>{t("create.heading")}</h1>
 		<form method="POST" use:enhance>
@@ -36,9 +36,6 @@
 
 <style>
 	.home {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		min-height: 100dvh;
+		min-block-size: 100dvh;
 	}
 </style>
