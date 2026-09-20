@@ -34,27 +34,23 @@
 	form {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: var(--space-3);
 	}
 
 	.language {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: var(--space-1);
 	}
 
-	.label {
+	.label,
+	.hint {
+		margin: 0;
 		color: var(--muted);
 		font-size: 0.875rem;
 	}
 
 	.value {
 		font-weight: 600;
-	}
-
-	.hint {
-		margin: 0;
-		color: var(--muted);
-		font-size: 0.875rem;
 	}
 </style>

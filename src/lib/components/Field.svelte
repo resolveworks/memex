@@ -13,7 +13,7 @@
 	label {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: var(--space-1);
 		color: var(--muted);
 		font-size: 0.875rem;
 	}

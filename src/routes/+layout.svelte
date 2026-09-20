@@ -1,11 +1,11 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { chat } from '$lib/chat.svelte';
-	import { i18n, languages, languageName, setLocale, t } from '$lib/i18n.svelte';
+	import { chat, newChat } from '$lib/chat.svelte';
+	import { i18n, t } from '$lib/i18n.svelte';
 	import { getMemexes } from '$lib/memexes.svelte';
 	import Header from '$lib/components/Header.svelte';
-	import Select from '$lib/components/Select.svelte';
 	import Sidebar from '$lib/Sidebar.svelte';
 
 	let { children } = $props();
@@ -19,6 +19,11 @@
 
 	function follow(event: MouseEvent) {
 		if (chat.busy) event.preventDefault();
+	}
+
+	function startNewChat() {
+		newChat();
+		if (!page.data.memex && home !== page.url.pathname) goto(home);
 	}
 
 	$effect(() => {
@@ -52,16 +57,28 @@
 			{/if}
 		</button>
 		<a class="title" href={home} onclick={follow}>{page.data.memex?.title ?? "Memex"}</a>
-		<div class="language">
-			<Select
-				aria-label={t('nav.language')}
-				value={i18n.locale}
-				onchange={(event) => setLocale(event.currentTarget.value)}
+		<div class="actions">
+			<button
+				class="icon"
+				aria-label={t('chat.new')}
+				disabled={chat.busy}
+				onclick={startNewChat}
 			>
-				{#each languages as code (code)}
-					<option value={code}>{languageName(code)}</option>
-				{/each}
-			</Select>
+				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+					<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+					<path
+						d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"
+					/>
+				</svg>
+			</button>
+			<a class="icon" href="/settings" aria-label={t('nav.settings')} onclick={follow}>
+				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+					<path
+						d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+					/>
+					<circle cx="12" cy="12" r="3" />
+				</svg>
+			</a>
 		</div>
 	</Header>
 	<div class="body">
@@ -87,6 +104,17 @@
 		--accent-hover: #264c41;
 		--accent-ink: #ffffff;
 		--danger: #b4442f;
+
+		--space-1: 0.25rem;
+		--space-2: 0.5rem;
+		--space-3: 0.75rem;
+		--space-4: 1rem;
+		--space-6: 1.5rem;
+
+		--radius-sm: 0.375rem;
+		--radius: 0.5rem;
+		--radius-lg: 0.75rem;
+		--radius-full: 999px;
 	}
 
 	:global(html, body) {
@@ -119,6 +147,9 @@
 		letter-spacing: -0.01em;
 		color: var(--ink);
 		text-decoration: none;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.title:hover {
@@ -127,7 +158,7 @@
 
 	.menu {
 		display: flex;
-		padding: 0.5rem;
+		padding: var(--space-2);
 		border: none;
 		background: none;
 		color: var(--ink);
@@ -140,8 +171,42 @@
 		stroke-linecap: round;
 	}
 
-	.language {
+	.actions {
+		display: flex;
+		align-items: center;
+		gap: var(--space-1);
 		margin-left: auto;
+	}
+
+	.icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		padding: 0;
+		border: none;
+		border-radius: var(--radius);
+		background: none;
+		color: var(--ink);
+		cursor: pointer;
+	}
+
+	.icon:hover:not(:disabled) {
+		background: var(--fill);
+	}
+
+	.icon:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+
+	.icon svg {
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linecap: round;
+		stroke-linejoin: round;
 	}
 
 	main {

@@ -11,9 +11,9 @@
 	footer {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		flex-shrink: 0;
 		min-height: 3.5rem;
-		padding: 0.5rem 0.75rem;
+		padding: var(--space-2) var(--space-3);
 	}
 </style>

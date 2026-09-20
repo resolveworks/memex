@@ -13,6 +13,7 @@
 	"settings.save": "Speichern",
 	"settings.languageLocked": "Alles, woran ich mich erinnere, ist in dieser Sprache gespeichert und kann nach dem Erstellen des Memex nicht mehr geändert werden.",
 	"chat.placeholder": "Nachricht an Memex…",
+	"chat.new": "Neuer Chat",
 	"chat.send": "Senden",
 	"chat.thinking": "Denkt nach",
 	"error.notFound": "Diese Seite existiert nicht.",

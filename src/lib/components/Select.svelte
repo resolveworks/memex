@@ -10,9 +10,9 @@
 <style>
 	select {
 		font: inherit;
-		padding: 0.5rem 0.75rem;
+		padding: var(--space-2) var(--space-3);
 		border: 1px solid var(--line-strong);
-		border-radius: 0.5rem;
+		border-radius: var(--radius);
 		outline: none;
 		background: var(--surface);
 		color: var(--ink);

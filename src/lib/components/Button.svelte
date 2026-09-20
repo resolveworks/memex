@@ -10,9 +10,9 @@
 <style>
 	button {
 		font: inherit;
-		padding: 0.5rem 1rem;
+		padding: var(--space-2) var(--space-4);
 		border: none;
-		border-radius: 0.5rem;
+		border-radius: var(--radius);
 		background: var(--accent);
 		color: var(--accent-ink);
 		cursor: pointer;

@@ -18,9 +18,9 @@
 		flex-direction: column;
 		max-width: 22rem;
 		margin: 3rem auto;
-		padding: 1.5rem;
+		padding: var(--space-6);
 		border: 1px solid var(--line);
-		border-radius: 0.75rem;
+		border-radius: var(--radius-lg);
 		background: var(--surface);
 	}
 

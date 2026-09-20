@@ -50,13 +50,13 @@
 	<div class="body">
 		{#if page.data.requests}
 			<div class="requests">
-				<span class="section">{t("sidebar.requests")}</span>
+				<span class="row section">{t("sidebar.requests")}</span>
 				{#if page.data.requests.length === 0}
-					<p class="empty">{t("sidebar.noRequests")}</p>
+					<p class="row empty">{t("sidebar.noRequests")}</p>
 				{:else}
 					<ul>
 						{#each page.data.requests as request (request.id)}
-							<li>{request.text}</li>
+							<li class="row">{request.text}</li>
 						{/each}
 					</ul>
 				{/if}
@@ -67,7 +67,7 @@
 	<Footer>
 		<div class="footer-stack">
 			{#if page.params.id}
-				<a class="settings" href={`/${page.params.id}/settings`} onclick={follow}>
+				<a class="row settings" href={`/${page.params.id}/settings`} onclick={follow}>
 					<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
 						<path
 							d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
@@ -125,22 +125,25 @@
 		transition: transform 200ms ease;
 	}
 
+	/* One row shape shared by the section label, empty state, requests and settings. */
+	.row {
+		padding: var(--space-2) var(--space-3);
+		border-radius: var(--radius);
+	}
+
 	.body {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		flex: 1;
 		min-height: 0;
-		padding: 0.75rem;
+		padding: var(--space-3);
 	}
 
 	.settings {
 		display: flex;
 		align-items: center;
-		gap: 0.375rem;
-		align-self: stretch;
-		padding: 0.375rem 0.75rem;
-		border-radius: 0.5rem;
+		gap: var(--space-2);
 		color: var(--muted);
 		text-decoration: none;
 	}
@@ -161,21 +164,19 @@
 	.footer-stack {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		flex: 1;
 	}
 
 	.requests {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
 		flex: 1;
 		min-height: 0;
 		overflow-y: auto;
 	}
 
 	.section {
-		padding-left: 0.75rem;
 		font-size: 0.75rem;
 		font-weight: 600;
 		letter-spacing: 0.05em;
@@ -185,21 +186,18 @@
 
 	.empty {
 		margin: 0;
-		padding-left: 0.75rem;
 		color: var(--muted);
 	}
 
 	.requests ul {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
 		margin: 0;
 		padding: 0;
 		list-style: none;
 	}
 
 	.requests li {
-		padding: 0.5rem 0.75rem;
 		color: var(--ink-soft);
 	}
 

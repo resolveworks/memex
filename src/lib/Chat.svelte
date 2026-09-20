@@ -138,7 +138,7 @@
 		</div>
 	</div>
 
-	<Footer style="padding-inline: max(0.75rem, calc((100% - 48rem) / 2))">
+	<Footer style="padding-inline: max(var(--space-3), calc((100% - 48rem) / 2))">
 		<form
 			class="composer"
 			onsubmit={(event) => {
@@ -175,13 +175,13 @@
 	.messages {
 		flex: 1;
 		overflow-y: auto;
-		padding: 1rem;
+		padding: var(--space-4);
 	}
 
 	.thread {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		width: 100%;
 		max-width: 48rem;
 		margin: 0 auto;
@@ -189,8 +189,8 @@
 
 	.bubble {
 		max-width: 75%;
-		padding: 0.5rem 0.75rem;
-		border-radius: 0.75rem;
+		padding: var(--space-2) var(--space-3);
+		border-radius: var(--radius-lg);
 		line-height: 1.4;
 		overflow-wrap: anywhere;
 	}
@@ -199,14 +199,14 @@
 		align-self: flex-end;
 		background: var(--accent);
 		color: var(--accent-ink);
-		border-bottom-right-radius: 0.25rem;
+		border-bottom-right-radius: var(--radius-sm);
 		white-space: pre-wrap;
 	}
 
 	.assistant {
 		align-self: flex-start;
 		max-width: 90%;
-		padding: 0.25rem 0;
+		padding: var(--space-1) 0;
 		line-height: 1.4;
 		overflow-wrap: anywhere;
 	}
@@ -225,7 +225,7 @@
 	.assistant :global(blockquote),
 	.assistant :global(pre),
 	.assistant :global(table) {
-		margin: 0.5rem 0;
+		margin: var(--space-2) 0;
 	}
 
 	.assistant :global(ul),
@@ -251,13 +251,13 @@
 	.assistant :global(:not(pre) > code) {
 		background: var(--fill);
 		padding: 0.1em 0.35em;
-		border-radius: 0.25rem;
+		border-radius: var(--radius-sm);
 	}
 
 	.assistant :global(pre) {
 		background: var(--fill);
-		padding: 0.5rem 0.75rem;
-		border-radius: 0.375rem;
+		padding: var(--space-2) var(--space-3);
+		border-radius: var(--radius-sm);
 		overflow-x: auto;
 	}
 
@@ -268,9 +268,9 @@
 	.error {
 		align-self: flex-start;
 		max-width: 90%;
-		padding: 0.5rem 0.75rem;
+		padding: var(--space-2) var(--space-3);
 		border: 1px solid var(--danger);
-		border-radius: 0.375rem;
+		border-radius: var(--radius-sm);
 		color: var(--danger);
 		line-height: 1.4;
 		white-space: pre-wrap;
@@ -280,7 +280,7 @@
 	.assistant :global(th),
 	.assistant :global(td) {
 		border: 1px solid var(--line);
-		padding: 0.25rem 0.5rem;
+		padding: var(--space-1) var(--space-2);
 		text-align: left;
 	}
 
@@ -288,14 +288,14 @@
 		align-self: center;
 		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		max-width: 80%;
-		padding: 0.3rem 0.7rem;
+		padding: var(--space-1) var(--space-3);
 		border: 1px solid var(--line);
-		border-radius: 999px;
+		border-radius: var(--radius-full);
 		background: var(--surface);
 		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-		font-size: 0.78rem;
+		font-size: 0.75rem;
 		color: var(--muted);
 	}
 
@@ -308,7 +308,7 @@
 	}
 
 	.tool-args {
-		padding-left: 0.5rem;
+		padding-left: var(--space-2);
 		border-left: 1px solid var(--line);
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 		white-space: nowrap;
@@ -328,8 +328,8 @@
 		display: flex;
 		align-items: flex-end;
 		flex: 1;
-		gap: 0.5rem;
-		padding: 0.375rem 0.375rem 0.375rem 0.875rem;
+		gap: var(--space-2);
+		padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
 		border: 1px solid var(--line-strong);
 		border-radius: 1.25rem;
 		background: var(--surface);
@@ -343,7 +343,7 @@
 		flex: 1;
 		min-height: 1.5rem;
 		max-height: 12rem;
-		padding: 0.4rem 0;
+		padding: var(--space-1) 0;
 		border: none;
 		outline: none;
 		background: none;
@@ -403,8 +403,8 @@
 
 	.thinking {
 		display: inline-flex;
-		gap: 0.25rem;
-		padding: 0.5rem 0;
+		gap: var(--space-1);
+		padding: var(--space-2) 0;
 	}
 
 	.dot {

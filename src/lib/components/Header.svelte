@@ -11,10 +11,10 @@
 	header {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: var(--space-2);
 		flex-shrink: 0;
 		height: 3rem;
-		padding: 0 0.75rem;
+		padding: 0 var(--space-3);
 		border-bottom: 1px solid var(--line);
 		background: var(--surface);
 	}
