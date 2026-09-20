@@ -1,8 +1,13 @@
 <script lang="ts">
 	import type { AgentMessage } from "@earendil-works/pi-agent-core";
 	import { contentText } from "@earendil-works/pi-ai";
+	import { marked } from "marked";
 	import { goto } from "$app/navigation";
 	import { chat, open, send } from "$lib/chat.svelte";
+
+	function md(text: string): string {
+		return marked(text, { async: false });
+	}
 
 	let { id }: { id?: string } = $props();
 
@@ -71,13 +76,15 @@ That's the whole idea: say it once, and I remember.`;
 <div class="chat">
 	<div class="messages">
 		{#if items.length === 0}
-			<div class="bubble assistant">{intro}</div>
+			<div class="bubble assistant">{@html md(intro)}</div>
 		{/if}
 		{#each items as item}
 			{#if item.kind === "tool"}
 				<div class="tool">{item.text}</div>
+			{:else if item.kind === "assistant"}
+				<div class="bubble assistant">{@html md(item.text)}</div>
 			{:else}
-				<div class="bubble {item.kind}">{item.text}</div>
+				<div class="bubble user">{item.text}</div>
 			{/if}
 		{/each}
 	</div>
@@ -122,7 +129,6 @@ That's the whole idea: say it once, and I remember.`;
 		padding: 0.5rem 0.75rem;
 		border-radius: 0.75rem;
 		line-height: 1.4;
-		white-space: pre-wrap;
 		overflow-wrap: anywhere;
 	}
 
@@ -131,6 +137,7 @@ That's the whole idea: say it once, and I remember.`;
 		background: #1a73e8;
 		color: #fff;
 		border-bottom-right-radius: 0.25rem;
+		white-space: pre-wrap;
 	}
 
 	.bubble.assistant {
@@ -138,6 +145,67 @@ That's the whole idea: say it once, and I remember.`;
 		background: #fff;
 		border: 1px solid #e2e2e4;
 		border-bottom-left-radius: 0.25rem;
+	}
+
+	.bubble.assistant :global(*:first-child) {
+		margin-top: 0;
+	}
+
+	.bubble.assistant :global(*:last-child) {
+		margin-bottom: 0;
+	}
+
+	.bubble.assistant :global(p),
+	.bubble.assistant :global(ul),
+	.bubble.assistant :global(ol),
+	.bubble.assistant :global(blockquote),
+	.bubble.assistant :global(pre),
+	.bubble.assistant :global(table) {
+		margin: 0.5rem 0;
+	}
+
+	.bubble.assistant :global(ul),
+	.bubble.assistant :global(ol) {
+		padding-left: 1.25rem;
+	}
+
+	.bubble.assistant :global(h1),
+	.bubble.assistant :global(h2),
+	.bubble.assistant :global(h3),
+	.bubble.assistant :global(h4),
+	.bubble.assistant :global(h5),
+	.bubble.assistant :global(h6) {
+		font-size: 1rem;
+		font-weight: 600;
+	}
+
+	.bubble.assistant :global(code) {
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 0.875em;
+	}
+
+	.bubble.assistant :global(:not(pre) > code) {
+		background: #f0f0f2;
+		padding: 0.1em 0.35em;
+		border-radius: 0.25rem;
+	}
+
+	.bubble.assistant :global(pre) {
+		background: #f0f0f2;
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.375rem;
+		overflow-x: auto;
+	}
+
+	.bubble.assistant :global(table) {
+		border-collapse: collapse;
+	}
+
+	.bubble.assistant :global(th),
+	.bubble.assistant :global(td) {
+		border: 1px solid #e2e2e4;
+		padding: 0.25rem 0.5rem;
+		text-align: left;
 	}
 
 	.tool {
