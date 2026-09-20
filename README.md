@@ -1,61 +1,32 @@
 # Memex
 
-Memex is a deliberately minimal browser chat agent. The agent itself runs in
-the browser (SvelteKit + `@earendil-works/pi-agent-core`) with two server-backed
-tools, `store` and `search`, so it can remember things you tell it. "Dumb and
-simple" is the design goal.
+**The shared memory for the knowledge your team cannot afford to lose.**
 
-## Quickstart
+Memex is a simple conversational assistant that helps a business keep hold of its everyday knowledge. Tell it something once, in ordinary language, and it can recall it later — even in a different conversation or language.
 
-```sh
-pnpm install
-cp .env.example .env   # then set DEEPSEEK_API_KEY
-pnpm dev
-```
+## Why it exists
 
-## How it works
+Every workplace has important knowledge that lives only in people's heads: how to reset the boiler, where a key is kept, what a returning guest prefers, or which steps make an old system work. That is manageable until the person who knows is unavailable, busy, or leaves.
 
-```
-browser                                       server (SvelteKit)
-┌─────────────────────────────┐             ┌──────────────────────────────┐
-│ Agent (src/lib/agent.ts)    │  /api/stream│ /api/stream/+server.ts       │
-│  ├─ streamProxy ────────────┼────────────►│  ├─ holds DEEPSEEK key       │
-│  └─ tools: store / search   │  /api/      │  └─ maps pi-ai events →      │
-│       └─ fetch ─────────────┼─ memories ─►│     SSE data: lines          │
-└─────────────────────────────┘             ├──────────────────────────────┤
-                                            │ /api/memories/+server.ts     │
-                                            │  └─ server/storage.ts        │
-                                            │       └─ data/memories.json  │
-                                            └───────────────┬──────────────┘
-                                                            ▼
-                                                      DeepSeek API
-```
+Traditional documentation rarely solves the whole problem. Writing and maintaining a handbook takes time, and finding one small answer inside it can take almost as long as asking a colleague. This is especially painful for small teams, seasonal businesses, and workplaces where people do not all share the same first language.
 
-The agent runs in the browser; LLM calls go same-origin through `streamProxy`
-to `/api/stream`, which holds the DeepSeek key and streams SSE-style
-`data: {...}\n\n` lines back. The server is model-authoritative: the client's
-`body.model` is ignored.
+Memex makes capturing and retrieving knowledge feel like a conversation rather than another administrative task. The goal is not to replace human experience, but to make it available to the people who need it — without repeatedly interrupting the people who have it.
 
-Memories live on the server in `data/memories.json` (a flat JSON array).
-`search` does a naive, index-free full-text match: the queries are split into
-words, and a memory matches if any of those words appears in its key or value.
+## What you can do
 
-### Source map
+- **Keep practical knowledge:** Tell Memex a process, location, preference, workaround, or other fact worth preserving.
+- **Ask in everyday language:** Retrieve what the team knows without remembering a file name, folder, or exact wording.
+- **Continue across conversations:** Shared memories remain available in new chat sessions.
+- **Work across languages:** Ask in your own language and receive the answer in that language.
+- **Discover knowledge gaps:** If an answer has not been recorded, Memex adds the question to a request list so it can be filled in later.
+- **Stay in control:** Review and remove stored memories and unanswered requests.
 
-- `src/lib/agent.ts` — browser `Agent` instance (system prompt, model, tools, `streamFn`).
-- `src/lib/tools.ts` — `store` / `search` tools; each calls `/api/memories`.
-- `src/lib/memory.ts` — the shared `Memory` record type.
-- `src/lib/server/storage.ts` — server-only JSON-file storage: `list` / `put` / `search`.
-- `src/routes/api/memories/+server.ts` — `GET` list or repeated `?q=` search, `POST` upsert.
-- `src/lib/model.ts` — the single resolved model (`deepseek/deepseek-v4-flash`).
-- `src/lib/server/llm.ts` — server-side model registry with `DEEPSEEK_API_KEY` via `$env/dynamic/private`.
-- `src/routes/api/stream/+server.ts` — streaming proxy endpoint; pi-ai event → proxy event mapping. Auth insertion point marked at the top.
-- `src/routes/+page.svelte` — chat UI (Svelte 5 runes).
-- `src/routes/+layout.svelte` — root layout.
+## Where it can help
 
-## Notes
+Memex began with a common challenge in hospitality: seasonal employees arrive quickly, experienced colleagues have little time to train them, and valuable knowledge often leaves again at the end of the season. A hotel, restaurant, or guesthouse could use it to preserve house-specific procedures and give new staff quick answers from day one.
 
-- Swap the model in `src/lib/model.ts`.
-- Auth slots into the marked comment at the top of the stream handler.
-- Memories live on the server in `data/memories.json` — shared across sessions and browsers. `/data` is gitignored.
-- The search is index-free and scans every memory on each call. Fine for MVP-sized stores.
+The same pattern exists far beyond hospitality. Memex could support a workshop documenting machine quirks, a volunteer organisation handing over responsibilities, a small office preserving customer knowledge, or a family business preparing for succession. Anywhere knowledge is passed from person to person, Memex can become a memory that stays.
+
+## The idea in one sentence
+
+**Say it once, and it stays with the organisation.**
