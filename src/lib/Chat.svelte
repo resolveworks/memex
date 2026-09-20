@@ -326,14 +326,14 @@
 
 	.composer {
 		display: flex;
-		align-items: center;
+		align-items: flex-end;
 		flex: 1;
 		gap: var(--space-2);
 		max-width: 48rem;
 		margin: 0 auto;
-		padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+		padding: var(--space-2) var(--space-3);
 		border: 1px solid var(--line-strong);
-		border-radius: 1.25rem;
+		border-radius: var(--radius-full);
 		background: var(--surface);
 	}
 
@@ -343,13 +343,14 @@
 
 	textarea {
 		flex: 1;
-		min-height: 1.5rem;
+		padding: 0;
 		max-height: 12rem;
 		border: none;
 		outline: none;
 		background: none;
 		color: inherit;
 		font: inherit;
+		line-height: var(--space-6);
 		resize: none;
 		overflow-y: auto;
 	}
@@ -359,11 +360,11 @@
 		align-items: center;
 		justify-content: center;
 		flex: none;
-		width: 2rem;
-		height: 2rem;
+		width: var(--space-6);
+		height: var(--space-6);
 		padding: 0;
 		border: none;
-		border-radius: 50%;
+		border-radius: var(--radius-full);
 		background: var(--accent);
 		color: var(--accent-ink);
 		cursor: pointer;
