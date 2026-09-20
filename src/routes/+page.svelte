@@ -13,21 +13,32 @@
 	);
 </script>
 
-<Card>
-	<h1>{t("create.heading")}</h1>
-	<form method="POST" use:enhance>
-		<Field label={t("create.title")}>
-			<Input name="title" required />
-		</Field>
-		<Field label={t("nav.language")}>
-			<Select
-				name="language"
-				label={t("nav.language")}
-				value={language}
-				options={languageOptions}
-				onchange={(value) => (language = value)}
-			/>
-		</Field>
-		<Button type="submit">{t("create.submit")}</Button>
-	</form>
-</Card>
+<div class="home">
+	<Card>
+		<h1>{t("create.heading")}</h1>
+		<form method="POST" use:enhance>
+			<Field label={t("create.title")}>
+				<Input name="title" required />
+			</Field>
+			<Field label={t("nav.language")}>
+				<Select
+					name="language"
+					label={t("nav.language")}
+					value={language}
+					options={languageOptions}
+					onchange={(value) => (language = value)}
+				/>
+			</Field>
+			<Button type="submit">{t("create.submit")}</Button>
+		</form>
+	</Card>
+</div>
+
+<style>
+	.home {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 100dvh;
+	}
+</style>

@@ -40,7 +40,6 @@
 				value={i18n.locale}
 				options={languageOptions}
 				onchange={setLocale}
-				placement="top"
 			/>
 		</div>
 	</Footer>

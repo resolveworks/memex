@@ -2,8 +2,12 @@
 	export interface SelectOption {
 		value: string;
 		label: string;
-		/** An action rather than a peer choice, e.g. "Create new"; styled apart. */
-		action?: boolean;
+	}
+
+	/** A link below the options, e.g. "Create new"; it navigates instead of selecting. */
+	export interface SelectAction {
+		href: string;
+		label: string;
 	}
 </script>
 
@@ -11,25 +15,29 @@
 	let {
 		value,
 		options,
+		actions = [],
 		label,
 		name,
-		placement = 'bottom',
+		placeholder = '',
 		disabled = false,
 		onchange
 	}: {
 		value: string;
 		options: SelectOption[];
+		actions?: SelectAction[];
 		label: string;
 		name?: string;
-		placement?: 'bottom' | 'top';
+		placeholder?: string;
 		disabled?: boolean;
 		onchange: (value: string) => void;
 	} = $props();
 
 	const uid = $props.id();
 
+	// The popover owns open state (light dismiss, Escape, top layer); this
+	// mirrors it for aria and keyboard handling.
 	let open = $state(false);
-	let root = $state<HTMLDivElement | null>(null);
+	let menu = $state<HTMLDivElement | null>(null);
 	let trigger = $state<HTMLButtonElement | null>(null);
 
 	const selectedIndex = $derived(options.findIndex((option) => option.value === value));
@@ -37,47 +45,40 @@
 
 	let activeIndex = $state(0);
 
-	function toggle() {
-		open = !open;
-		if (open) activeIndex = selectedIndex;
+	function onToggle(event: ToggleEvent) {
+		open = event.newState === 'open';
+		if (open) activeIndex = Math.max(0, selectedIndex);
 	}
 
 	function choose(index: number) {
-		open = false;
+		menu?.hidePopover();
 		trigger?.focus();
 		onchange(options[index].value);
 	}
 
 	function onkeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
-			open = false;
+			menu?.hidePopover();
 		} else if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
 			if (open) choose(activeIndex);
-			else toggle();
+			else menu?.showPopover();
 		} else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
 			event.preventDefault();
-			if (!open) {
-				toggle();
-				return;
+			if (!open) menu?.showPopover();
+			else {
+				const step = event.key === 'ArrowDown' ? 1 : -1;
+				activeIndex = (activeIndex + step + options.length) % options.length;
 			}
-			const step = event.key === 'ArrowDown' ? 1 : -1;
-			activeIndex = (activeIndex + step + options.length) % options.length;
+		} else if (event.key === 'Home' || event.key === 'End') {
+			if (!open) return;
+			event.preventDefault();
+			activeIndex = event.key === 'Home' ? 0 : options.length - 1;
 		}
-	}
-
-	function onwindowclick(event: MouseEvent) {
-		if (open && !root?.contains(event.target as Node)) open = false;
-	}
-
-	function onfocusout(event: FocusEvent) {
-		if (!root?.contains(event.relatedTarget as Node)) open = false;
 	}
 </script>
 
-<svelte:window onclick={onwindowclick} />
-
-<div class="select" class:top={placement === 'top'} bind:this={root} onfocusout={onfocusout}>
+<div>
 	{#if name}
 		<input type="hidden" {name} {value} />
 	{/if}
@@ -85,24 +86,31 @@
 		type="button"
 		class="trigger"
 		bind:this={trigger}
+		style="anchor-name: --select-{uid}"
 		{disabled}
 		role="combobox"
 		aria-haspopup="listbox"
-		aria-controls={`${uid}-menu`}
+		aria-controls={`${uid}-options`}
 		aria-expanded={open}
 		aria-label={label}
 		aria-activedescendant={open ? `${uid}-${activeIndex}` : undefined}
-		onclick={toggle}
+		onclick={() => menu?.togglePopover()}
 		onkeydown={onkeydown}
 	>
-		<span class="value">{selected?.label}</span>
+		<span class="value">{selected?.label ?? placeholder}</span>
 		<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
 			<polyline points="6 9 12 15 18 9" />
 		</svg>
 	</button>
 
-	{#if open}
-		<div class="menu" id={`${uid}-menu`} role="listbox" aria-label={label}>
+	<div
+		class="menu"
+		bind:this={menu}
+		popover="auto"
+		style="position-anchor: --select-{uid}; min-width: anchor-size(--select-{uid} width)"
+		ontoggle={onToggle}
+	>
+		<div class="options" id={`${uid}-options`} role="listbox" aria-label={label}>
 			{#each options as option, index (option.value)}
 				<button
 					type="button"
@@ -110,7 +118,6 @@
 					role="option"
 					tabindex="-1"
 					class="option"
-					class:action={option.action}
 					class:active={index === activeIndex}
 					aria-selected={option.value === value}
 					onclick={() => choose(index)}
@@ -120,14 +127,24 @@
 				</button>
 			{/each}
 		</div>
-	{/if}
+		{#if actions.length}
+			<div class="actions">
+				{#each actions as action (action.href)}
+					<a
+						class="action"
+						class:disabled
+						href={action.href}
+						onclick={() => menu?.hidePopover()}
+					>
+						{action.label}
+					</a>
+				{/each}
+			</div>
+		{/if}
+	</div>
 </div>
 
 <style>
-	.select {
-		position: relative;
-	}
-
 	.trigger {
 		display: flex;
 		align-items: center;
@@ -160,12 +177,13 @@
 		white-space: nowrap;
 	}
 
+	/* Anchored to the trigger and flipped by the browser when the viewport
+	   leaves no room below; the top layer means no z-index or clipping. */
 	.menu {
-		position: absolute;
-		top: calc(100% + var(--space-1));
-		left: 0;
-		z-index: 10;
-		min-width: 100%;
+		position: fixed;
+		position-area: bottom span-right;
+		margin: var(--space-1) 0;
+		position-try-fallbacks: flip-block;
 		max-width: 24rem;
 		max-height: 15rem;
 		overflow-y: auto;
@@ -173,12 +191,8 @@
 		border: 1px solid var(--line-strong);
 		border-radius: var(--radius);
 		background: var(--surface);
+		color: inherit;
 		box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
-	}
-
-	.top .menu {
-		top: auto;
-		bottom: calc(100% + var(--space-1));
 	}
 
 	.option {
@@ -201,10 +215,33 @@
 		background: var(--fill);
 	}
 
-	.option.action {
+	.actions {
+		display: flex;
+		flex-direction: column;
 		margin-top: var(--space-1);
 		border-top: 1px solid var(--line);
+		padding-top: var(--space-1);
+	}
+
+	.action {
+		display: block;
+		width: 100%;
+		font: inherit;
+		text-align: left;
+		padding: var(--space-2) var(--space-3);
+		border-radius: var(--radius-sm);
 		color: var(--accent);
 		font-weight: 600;
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	.action:hover {
+		background: var(--fill);
+	}
+
+	.action.disabled {
+		pointer-events: none;
+		opacity: 0.5;
 	}
 </style>
