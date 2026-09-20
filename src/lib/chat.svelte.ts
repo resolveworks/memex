@@ -57,11 +57,3 @@ export function send(text: string): void {
 	chat.busy = true;
 	void agent.prompt(text);
 }
-
-/** Ends the current conversation, keeping the memex and the memories stored in it. */
-export function newChat(): void {
-	if (chat.busy) return;
-	agent.reset();
-	chat.messages = [];
-	chat.streaming = undefined;
-}

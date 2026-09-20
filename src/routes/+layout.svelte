@@ -2,9 +2,9 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { chat, newChat } from '$lib/chat.svelte';
+	import { chat } from '$lib/chat.svelte';
 	import { i18n, t } from '$lib/i18n.svelte';
-	import { getMemexes } from '$lib/memexes.svelte';
+	import { forget, getMemexes, remember } from '$lib/memexes.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Sidebar from '$lib/Sidebar.svelte';
 
@@ -12,18 +12,31 @@
 
 	let drawerOpen = $state(false);
 
-	// The logo returns to the selected memex, never the create page.
-	const home = $derived(
-		page.data.memex ? `/${page.data.memex.id}` : getMemexes()[0] ? `/${getMemexes()[0].id}` : '/'
-	);
+	// Every memex we open joins the switcher, most recent first; a 404 means it is gone.
+	$effect(() => {
+		const current = page.data.memex;
+		if (current) remember({ id: current.id, title: current.title });
+		else if (page.status === 404 && page.params.id) forget(page.params.id);
+	});
+
+	// The current memex is selectable even before the effect has recorded it.
+	const memexes = $derived.by(() => {
+		const known = getMemexes();
+		const current = page.data.memex;
+		if (current && !known.some((memex) => memex.id === current.id)) {
+			return [{ id: current.id, title: current.title }, ...known];
+		}
+		return known;
+	});
+
+	function switchMemex(event: Event) {
+		const id = (event.currentTarget as HTMLSelectElement).value;
+		if (id === page.params.id) return;
+		goto(`/${id}`);
+	}
 
 	function follow(event: MouseEvent) {
 		if (chat.busy) event.preventDefault();
-	}
-
-	function startNewChat() {
-		newChat();
-		if (!page.data.memex && home !== page.url.pathname) goto(home);
 	}
 
 	$effect(() => {
@@ -56,29 +69,37 @@
 				</svg>
 			{/if}
 		</button>
-		<a class="title" href={home} onclick={follow}>{page.data.memex?.title ?? "Memex"}</a>
-		<div class="actions">
-			<button
-				class="icon"
-				aria-label={t('chat.new')}
+		<label class="switcher">
+			<select
+				aria-label={t('sidebar.memexes')}
+				value={page.params.id}
+				onchange={switchMemex}
 				disabled={chat.busy}
-				onclick={startNewChat}
 			>
-				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-					<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-					<path
-						d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"
-					/>
-				</svg>
-			</button>
-			<a class="icon" href="/settings" aria-label={t('nav.settings')} onclick={follow}>
-				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-					<path
-						d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
-					/>
-					<circle cx="12" cy="12" r="3" />
-				</svg>
-			</a>
+				{#each memexes as memex (memex.id)}
+					<option value={memex.id}>{memex.title}</option>
+				{/each}
+			</select>
+			<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+				<path d="m6 9 6 6 6-6" />
+			</svg>
+		</label>
+		<div class="actions">
+			{#if page.params.id}
+				<a
+					class="icon"
+					href={`/${page.params.id}/settings`}
+					aria-label={t('settings.heading')}
+					onclick={follow}
+				>
+					<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+						<path
+							d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+						/>
+						<circle cx="12" cy="12" r="3" />
+					</svg>
+				</a>
+			{/if}
 		</div>
 	</Header>
 	<div class="body">
@@ -142,18 +163,47 @@
 		min-height: 0;
 	}
 
-	.title {
-		font-weight: 600;
-		letter-spacing: -0.01em;
-		color: var(--ink);
-		text-decoration: none;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+	.switcher {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		min-width: 0;
 	}
 
-	.title:hover {
+	.switcher select {
+		appearance: none;
+		min-width: 0;
+		max-width: min(60vw, 24rem);
+		padding: 0 1.5rem 0 0;
+		border: none;
+		background: none;
+		color: var(--ink);
+		font: inherit;
+		font-weight: 600;
+		letter-spacing: -0.01em;
+		text-overflow: ellipsis;
+		cursor: pointer;
+	}
+
+	.switcher select:hover:not(:disabled) {
 		color: var(--accent);
+	}
+
+	.switcher select:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+
+	.switcher svg {
+		position: absolute;
+		right: 0;
+		color: var(--muted);
+		pointer-events: none;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linecap: round;
+		stroke-linejoin: round;
 	}
 
 	.menu {
