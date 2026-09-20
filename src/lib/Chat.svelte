@@ -98,7 +98,7 @@
 		{#if chat.request}
 			<div class="bubble assistant request">
 				<p>{t("chat.requestIntro")}</p>
-				<p class="question">{chat.request.question}</p>
+				<p class="question">{chat.request.text}</p>
 				<p>{t("chat.requestHint")}</p>
 			</div>
 		{/if}

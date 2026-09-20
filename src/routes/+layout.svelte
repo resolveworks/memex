@@ -2,7 +2,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { page } from '$app/state';
 	import { chat } from '$lib/chat.svelte';
-	import { i18n, t } from '$lib/i18n.svelte';
+	import { i18n, languages, languageName, setLocale, t } from '$lib/i18n.svelte';
 	import { getMemexes } from '$lib/memexes.svelte';
 	import Sidebar from '$lib/Sidebar.svelte';
 
@@ -43,6 +43,16 @@
 			</svg>
 		</button>
 		<a class="title" href={home} onclick={follow}>{page.data.memex?.title ?? "Memex"}</a>
+		<select
+			class="language"
+			aria-label={t('nav.language')}
+			value={i18n.locale}
+			onchange={(event) => setLocale(event.currentTarget.value)}
+		>
+			{#each languages as code (code)}
+				<option value={code}>{languageName(code)}</option>
+			{/each}
+		</select>
 	</header>
 	<main>
 		{@render children()}
@@ -120,6 +130,16 @@
 		stroke: currentColor;
 		stroke-width: 2;
 		stroke-linecap: round;
+	}
+
+	.language {
+		font: inherit;
+		margin-left: auto;
+		padding: 0.375rem 0.5rem;
+		border: 1px solid var(--line-strong);
+		border-radius: 0.5rem;
+		background: var(--surface);
+		color: var(--ink);
 	}
 
 	main {

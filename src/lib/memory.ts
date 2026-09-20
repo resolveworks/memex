@@ -1,5 +1,6 @@
 export interface Memory {
-	key: string;
-	value: string;
+	id: string;
+	text: string;
+	createdAt: string;
 	updatedAt: string;
 }

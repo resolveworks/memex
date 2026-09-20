@@ -1,5 +1,6 @@
 export interface Request {
 	id: string;
-	question: string;
+	text: string;
 	createdAt: string;
+	updatedAt: string;
 }

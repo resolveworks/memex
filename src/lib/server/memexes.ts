@@ -26,6 +26,12 @@ export function get(id: string): Memex | undefined {
 	return db.select().from(memexes).where(eq(memexes.id, id)).get();
 }
 
+/** Renames a memex. The language is fixed for the memex's lifetime. */
+export function rename(id: string, title: string): void {
+	if (title.trim() === "") throw new Error("A memex needs a title.");
+	db.update(memexes).set({ title }).where(eq(memexes.id, id)).run();
+}
+
 export function exists(id: string): boolean {
 	return get(id) !== undefined;
 }

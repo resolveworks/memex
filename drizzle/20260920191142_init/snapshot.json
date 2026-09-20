@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "ab78b661-82dc-4940-8919-e81024e8b464",
+  "id": "d000e531-852a-4fc2-bd79-02ab12c0208e",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -34,9 +34,39 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
+      "name": "title",
+      "entityType": "columns",
+      "table": "memexes"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "language",
+      "entityType": "columns",
+      "table": "memexes"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
       "name": "created_at",
       "entityType": "columns",
       "table": "memexes"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "memories"
     },
     {
       "type": "text",
@@ -54,7 +84,7 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
-      "name": "key",
+      "name": "text",
       "entityType": "columns",
       "table": "memories"
     },
@@ -64,7 +94,7 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
-      "name": "value",
+      "name": "created_at",
       "entityType": "columns",
       "table": "memories"
     },
@@ -104,7 +134,7 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
-      "name": "question",
+      "name": "text",
       "entityType": "columns",
       "table": "requests"
     },
@@ -115,6 +145,16 @@
       "default": null,
       "generated": null,
       "name": "created_at",
+      "entityType": "columns",
+      "table": "requests"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
       "entityType": "columns",
       "table": "requests"
     },
@@ -150,21 +190,20 @@
     },
     {
       "columns": [
-        "memex_id",
-        "key"
+        "id"
       ],
       "nameExplicit": false,
-      "name": "memories_pk",
-      "entityType": "pks",
-      "table": "memories"
+      "name": "memexes_pk",
+      "table": "memexes",
+      "entityType": "pks"
     },
     {
       "columns": [
         "id"
       ],
       "nameExplicit": false,
-      "name": "memexes_pk",
-      "table": "memexes",
+      "name": "memories_pk",
+      "table": "memories",
       "entityType": "pks"
     },
     {

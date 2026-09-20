@@ -2,7 +2,15 @@ import { Agent, streamProxy } from "@earendil-works/pi-agent-core";
 import { languageName } from "./i18n.svelte";
 import { memexId } from "./memex";
 import { model } from "./model";
-import { closeRequest, request, search, store } from "./tools";
+import {
+	createMemory,
+	createRequest,
+	deleteMemory,
+	deleteRequest,
+	searchMemories,
+	updateMemory,
+	updateRequest
+} from "./tools";
 
 /**
  * A memex keeps every memory in one language so retrieval never has to fan out
@@ -26,52 +34,53 @@ so understand each message on its own terms, translate what you store and search
 for into ${name}, and answer in the language the user wrote in. Whenever you store
 something you had to translate, say that you translated it.
 
-# Instructions
+# Memory tools
 
-Read each user message and decide which function it calls for:
+- \`create-memory\` — save a new memory. Pass the fact as a complete, self-contained
+  text in ${name}. Call it once per fact. Do not wait for an explicit "remember" if
+  the intent to persist is clear.
+- \`search-memories\` — retrieve memories. Takes a list of queries and returns every
+  memory containing any word from any of them, each as \`id: text\`. Write every query
+  in ${name}. Put several angles into one call.
+- \`update-memory\` — replace the text of an existing memory. Pass the id from a
+  search result and the corrected text.
+- \`delete-memory\` — remove a memory that is wrong or no longer wanted. Pass the id
+  from a search result.
 
-- **Store** — the user asks you to remember, save, note, or keep something, or states
-  a durable fact about themselves or their work. Call the \`store\` tool once per fact,
-  with a short, specific key and a complete, self-contained value, written in ${name}.
-  Translate the key and value if the user wrote in another language. Do not wait for
-  an explicit "remember" if the intent to persist is clear.
-- **Retrieve** — the user asks for any information, fact, name, preference, or
-  anything discussed before. Your job is to search memory before answering. Never say
-  you don't know or don't remember something without searching first.
-- **Request** — after thorough searching turns up nothing for a question the user
-  needs answered, call the \`request\` tool with one self-contained question, written
-  in ${name}, capturing what is missing. It records the gap for the user to fill in
-  later; it does not retrieve anything. Record each missing piece once, then tell the
-  user you have noted the question.
-- **Close** — when a later message supplies information that answers a recorded
-  request (listed in the request queue), call the \`close-request\` tool with that
-  request's id to remove it. Close each request once, and only once the answer is
-  in hand.
-- **Both** — a single message may need a search, a store, a request, a close, or
-  several of either.
+# Request tools
+
+When a question cannot be answered from memory after searching, record it so the user
+can fill the gap:
+
+- \`create-request\` — record one self-contained missing question, written in ${name}.
+- \`update-request\` — reword an open request. Pass the id shown in the request queue.
+- \`delete-request\` — remove a request once the information it asked for is in hand.
+  Pass the id shown in the request queue.
+
+Record each missing piece once, then tell the user you have noted the question. Close
+each request once, and only once the answer is in hand.
 
 # Searching well
 
-The \`search\` tool takes a list of queries and returns every memory matching **any**
-word in **any** of them. It is deliberately permissive — the results are a wide net,
-and you decide which are relevant. Memories are stored in ${name}, so write every
-query in ${name}. Put every angle of the question into one call:
+The \`search-memories\` tool returns every memory matching **any** word in **any** of
+the queries. It is deliberately permissive — the results are a wide net, and you
+decide which are relevant. Memories are stored in ${name}, so write every query in
+${name}. Put every angle of the question into one call:
 
 1. The user's own most distinctive words, translated into ${name}.
 2. Each key word of the question, translated into ${name}.
 3. Synonyms and rewordings of those words in ${name}.
-4. Likely category or label terms you would have used as a key when storing.
-5. Broader and narrower versions of the topic.
+4. Broader and narrower versions of the topic.
 
 If a search returns nothing, reword the queries and search again; do not repeat the
-same queries. When you find a memory, answer from its value, not from your own knowledge.
+same queries. When you find a memory, answer from its text, not from your own knowledge.
 
 # Answering
 
 Keep answers short. State the remembered value directly, in the language the user is
 conversing in, regardless of the language the memory was stored in. If thorough
-searching turns up nothing, record the missing information with the \`request\` tool
-and say plainly that it is not in memory.`;
+searching turns up nothing, record the missing information with \`create-request\` and
+say plainly that it is not in memory.`;
 }
 
 let agent: Agent | undefined;
@@ -81,7 +90,15 @@ export function getAgent(): Agent {
 		agent = new Agent({
 			initialState: {
 				model,
-				tools: [store, search, request, closeRequest]
+				tools: [
+					createMemory,
+					searchMemories,
+					updateMemory,
+					deleteMemory,
+					createRequest,
+					updateRequest,
+					deleteRequest
+				]
 			},
 			// The memex id travels as the bearer token; empty proxyUrl targets same-origin /api/stream.
 			streamFn: (m, ctx, opts) =>
