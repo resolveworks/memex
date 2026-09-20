@@ -1,6 +1,10 @@
 {
 	"nav.settings": "Einstellungen",
 	"nav.language": "Sprache",
+	"sidebar.open": "Seitenleiste öffnen",
+	"sidebar.close": "Seitenleiste schließen",
+	"sidebar.memexes": "Memexe",
+	"sidebar.newMemex": "Neuer Memex",
 	"create.heading": "Neuer Memex",
 	"create.title": "Titel",
 	"create.submit": "Erstellen",

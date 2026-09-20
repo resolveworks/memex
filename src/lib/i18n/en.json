@@ -1,6 +1,10 @@
 {
 	"nav.settings": "Settings",
 	"nav.language": "Language",
+	"sidebar.open": "Open sidebar",
+	"sidebar.close": "Close sidebar",
+	"sidebar.memexes": "Memexes",
+	"sidebar.newMemex": "New memex",
 	"create.heading": "New memex",
 	"create.title": "Title",
 	"create.submit": "Create",
