@@ -50,6 +50,21 @@
 		toItems(chat.streaming ? [...chat.messages, chat.streaming] : chat.messages)
 	);
 
+	let viewport = $state<HTMLDivElement>();
+	// Whether the view was at the bottom before the latest content arrived, so
+	// streaming keeps following the answer without yanking a reader back down.
+	let pinned = $state(true);
+
+	function onScroll() {
+		if (!viewport) return;
+		pinned = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 24;
+	}
+
+	$effect(() => {
+		void items;
+		if (pinned && viewport) viewport.scrollTop = viewport.scrollHeight;
+	});
+
 	// Static welcome shown only on an empty chat; never sent to the model or saved.
 	const intro = `I'm Memex, a memory that outlives the conversation.
 
@@ -74,7 +89,7 @@ That's the whole idea: say it once, and I remember.`;
 </script>
 
 <div class="chat">
-	<div class="messages">
+	<div class="messages" bind:this={viewport} onscroll={onScroll}>
 		{#if items.length === 0}
 			<div class="bubble assistant">{@html md(intro)}</div>
 		{/if}
