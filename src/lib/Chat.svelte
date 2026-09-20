@@ -95,7 +95,8 @@
 
 <div class="chat">
 	<div class="messages" bind:this={viewport} onscroll={onScroll}>
-		{#if chat.request}
+		<div class="thread">
+			{#if chat.request}
 			<div class="bubble assistant request">
 				<p>{t("chat.requestIntro")}</p>
 				<p class="question">{chat.request.text}</p>
@@ -117,6 +118,7 @@
 				<div class="bubble user">{item.text}</div>
 			{/if}
 		{/each}
+		</div>
 	</div>
 
 	<form
@@ -148,10 +150,16 @@
 	.messages {
 		flex: 1;
 		overflow-y: auto;
+		padding: 1rem;
+	}
+
+	.thread {
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
-		padding: 1rem;
+		width: 100%;
+		max-width: 48rem;
+		margin: 0 auto;
 	}
 
 	.bubble {
@@ -311,5 +319,11 @@
 	button:disabled {
 		opacity: 0.5;
 		cursor: default;
+	}
+
+	@media (min-width: 48rem) {
+		.composer {
+			padding-inline: max(0.75rem, calc((100% - 48rem) / 2));
+		}
 	}
 </style>

@@ -58,7 +58,7 @@
 	<button class="scrim" aria-label={t("sidebar.close")} onclick={onclose}></button>
 {/if}
 
-<aside class:open inert={!open}>
+<aside class:open>
 	<div class="head">
 		<span>{t("sidebar.memexes")}</span>
 		<button class="close" aria-label={t("sidebar.close")} onclick={onclose}>×</button>
@@ -140,12 +140,15 @@
 		border-right: 1px solid var(--line);
 		background: var(--surface);
 		overflow: hidden;
+		visibility: hidden;
 		transform: translateX(-100%);
-		transition: transform 200ms ease;
+		transition: transform 200ms ease, visibility 0s linear 200ms;
 	}
 
 	aside.open {
+		visibility: visible;
 		transform: translateX(0);
+		transition: transform 200ms ease;
 	}
 
 	.head {
@@ -283,5 +286,24 @@
 		background: var(--fill);
 		color: var(--ink);
 		font-weight: 600;
+	}
+
+	@media (min-width: 48rem) {
+		.scrim {
+			display: none;
+		}
+
+		aside {
+			position: static;
+			width: 18rem;
+			flex-shrink: 0;
+			visibility: visible;
+			transform: none;
+			transition: none;
+		}
+
+		.close {
+			display: none;
+		}
 	}
 </style>

@@ -29,35 +29,37 @@
 </svelte:head>
 
 <div class="app">
-	<header>
-		<button
-			class="menu"
-			aria-label={t('sidebar.open')}
-			aria-expanded={drawerOpen}
-			onclick={() => (drawerOpen = true)}
-		>
-			<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-				<line x1="3" y1="6" x2="21" y2="6" />
-				<line x1="3" y1="12" x2="21" y2="12" />
-				<line x1="3" y1="18" x2="21" y2="18" />
-			</svg>
-		</button>
-		<a class="title" href={home} onclick={follow}>{page.data.memex?.title ?? "Memex"}</a>
-		<select
-			class="language"
-			aria-label={t('nav.language')}
-			value={i18n.locale}
-			onchange={(event) => setLocale(event.currentTarget.value)}
-		>
-			{#each languages as code (code)}
-				<option value={code}>{languageName(code)}</option>
-			{/each}
-		</select>
-	</header>
-	<main>
-		{@render children()}
-	</main>
 	<Sidebar open={drawerOpen} onclose={() => (drawerOpen = false)} />
+	<div class="content">
+		<header>
+			<button
+				class="menu"
+				aria-label={t('sidebar.open')}
+				aria-expanded={drawerOpen}
+				onclick={() => (drawerOpen = true)}
+			>
+				<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+					<line x1="3" y1="6" x2="21" y2="6" />
+					<line x1="3" y1="12" x2="21" y2="12" />
+					<line x1="3" y1="18" x2="21" y2="18" />
+				</svg>
+			</button>
+			<a class="title" href={home} onclick={follow}>{page.data.memex?.title ?? "Memex"}</a>
+			<select
+				class="language"
+				aria-label={t('nav.language')}
+				value={i18n.locale}
+				onchange={(event) => setLocale(event.currentTarget.value)}
+			>
+				{#each languages as code (code)}
+					<option value={code}>{languageName(code)}</option>
+				{/each}
+			</select>
+		</header>
+		<main>
+			{@render children()}
+		</main>
+	</div>
 </div>
 
 <style>
@@ -89,11 +91,17 @@
 
 	.app {
 		display: flex;
-		flex-direction: column;
 		height: 100dvh;
 		color: var(--ink);
 		background: var(--bg);
 		font-family: var(--font-sans);
+	}
+
+	.content {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		min-width: 0;
 	}
 
 	header {
@@ -145,5 +153,11 @@
 	main {
 		flex: 1;
 		min-height: 0;
+	}
+
+	@media (min-width: 48rem) {
+		.menu {
+			display: none;
+		}
 	}
 </style>
