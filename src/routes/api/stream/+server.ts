@@ -1,5 +1,6 @@
 import type { RequestHandler } from "@sveltejs/kit";
 import { json } from "@sveltejs/kit";
+import { env } from "$env/dynamic/private";
 import type { ProxyAssistantMessageEvent } from "@earendil-works/pi-agent-core";
 import type {
 	AssistantMessage,
@@ -10,7 +11,6 @@ import type {
 import { contentText } from "@earendil-works/pi-ai";
 import { model } from "$lib/model";
 import { memexId } from "$lib/server/auth";
-import { maxMessageWords, maxUserMessages } from "$lib/server/limits";
 import { promptSection } from "$lib/server/requests";
 import { models } from "$lib/server/llm";
 
@@ -90,16 +90,18 @@ function wordCount(text: string): number {
 /** Rejects a context that exceeds the server's abuse limits before any spend happens. */
 function exceedsLimits(context: Context): Response | undefined {
 	const userMessages = context.messages.filter((message) => message.role === "user");
-	if (userMessages.length > maxUserMessages) {
+	const maxMessages = Number(env.MAX_USER_MESSAGES);
+	const maxWords = Number(env.MAX_MESSAGE_WORDS);
+	if (userMessages.length > maxMessages) {
 		return json(
-			{ error: `A chat can hold at most ${maxUserMessages} messages.` },
+			{ error: `A chat can hold at most ${maxMessages} messages.` },
 			{ status: 429 }
 		);
 	}
 	for (const message of userMessages) {
-		if (wordCount(contentText(message.content)) > maxMessageWords) {
+		if (wordCount(contentText(message.content)) > maxWords) {
 			return json(
-				{ error: `A message can hold at most ${maxMessageWords} words.` },
+				{ error: `A message can hold at most ${maxWords} words.` },
 				{ status: 413 }
 			);
 		}
