@@ -37,8 +37,8 @@ to `/api/stream`, which holds the DeepSeek key and streams SSE-style
 `body.model` is ignored.
 
 Memories live on the server in `data/memories.json` (a flat JSON array).
-`search` does a naive, index-free full-text match: the query is split into
-words, each of which must appear in a memory's key or value.
+`search` does a naive, index-free full-text match: the queries are split into
+words, and a memory matches if any of those words appears in its key or value.
 
 ### Source map
 
@@ -46,7 +46,7 @@ words, each of which must appear in a memory's key or value.
 - `src/lib/tools.ts` — `store` / `search` tools; each calls `/api/memories`.
 - `src/lib/memory.ts` — the shared `Memory` record type.
 - `src/lib/server/storage.ts` — server-only JSON-file storage: `list` / `put` / `search`.
-- `src/routes/api/memories/+server.ts` — `GET` list or `?q=` search, `POST` upsert.
+- `src/routes/api/memories/+server.ts` — `GET` list or repeated `?q=` search, `POST` upsert.
 - `src/lib/model.ts` — the single resolved model (`deepseek/deepseek-v4-flash`).
 - `src/lib/server/llm.ts` — server-side model registry with `DEEPSEEK_API_KEY` via `$env/dynamic/private`.
 - `src/routes/api/stream/+server.ts` — streaming proxy endpoint; pi-ai event → proxy event mapping. Auth insertion point marked at the top.

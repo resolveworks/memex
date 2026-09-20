@@ -2,8 +2,8 @@ import { json, type RequestHandler } from "@sveltejs/kit";
 import { list, put, search } from "$lib/server/storage";
 
 export const GET: RequestHandler = ({ url }) => {
-	const query = url.searchParams.get("q");
-	return json(query === null ? list() : search(query));
+	const queries = url.searchParams.getAll("q");
+	return json(queries.length === 0 ? list() : search(queries));
 };
 
 export const POST: RequestHandler = async ({ request }) => {

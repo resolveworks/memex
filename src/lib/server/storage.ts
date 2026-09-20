@@ -36,11 +36,13 @@ export function remove(key: string): void {
 	persist();
 }
 
-export function search(query: string): Memory[] {
-	const terms = query.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+export function search(queries: string[]): Memory[] {
+	const terms = queries
+		.flatMap((query) => query.toLowerCase().split(/[^\p{L}\p{N}]+/u))
+		.filter(Boolean);
 	if (terms.length === 0) return list();
 	return list().filter((memory) => {
 		const haystack = `${memory.key}\n${memory.value}`.toLowerCase();
-		return terms.every((term) => haystack.includes(term));
+		return terms.some((term) => haystack.includes(term));
 	});
 }

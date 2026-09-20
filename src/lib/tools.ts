@@ -28,7 +28,7 @@ export const store: AgentTool<typeof storeParameters> = {
 };
 
 const searchParameters = Type.Object({
-	query: Type.String(),
+	queries: Type.Array(Type.String()),
 });
 
 const requestParameters = Type.Object({
@@ -79,10 +79,12 @@ export const search: AgentTool<typeof searchParameters> = {
 	name: "search",
 	label: "Search",
 	description:
-		"Search everything stored on the server. Matches every word in the query against memory keys and values. Use this to recall information the user asked you to remember.",
+		"Search everything stored on the server. Takes a list of queries and returns every memory matching any word in any of them, so put several angles into one call. Use this to recall information the user asked you to remember.",
 	parameters: searchParameters,
-	execute: async (_toolCallId, { query }) => {
-		const response = await fetch(`/api/memories?q=${encodeURIComponent(query)}`);
+	execute: async (_toolCallId, { queries }) => {
+		const params = new URLSearchParams();
+		for (const query of queries) params.append("q", query);
+		const response = await fetch(`/api/memories?${params}`);
 		if (!response.ok) throw new Error(`Search failed (${response.status}).`);
 		const matches = (await response.json()) as Memory[];
 		const text =

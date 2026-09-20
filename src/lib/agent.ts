@@ -33,19 +33,18 @@ Read each user message and decide which function it calls for:
 
 # Searching well
 
-The \`search\` tool matches **every** word in the query against a memory's key and
-value, so a query only returns memories containing all of its words. A long query is
-a narrow query. Search in a multitude of ways — at least four or five separate
-searches, each from a different angle — instead of one query containing everything:
+The \`search\` tool takes a list of queries and returns every memory matching **any**
+word in **any** of them. It is deliberately permissive — the results are a wide net,
+and you decide which are relevant. Put every angle of the question into one call:
 
-1. The user's own most distinctive word, alone.
-2. Each key word of the question, one per search.
+1. The user's own most distinctive words.
+2. Each key word of the question.
 3. Synonyms and rewordings of those words.
 4. Likely category or label terms you would have used as a key when storing.
-5. A broader version of the topic, then a narrower one.
+5. Broader and narrower versions of the topic.
 
-If a search returns nothing, reword it and search again; do not repeat the same
-query. When you find a memory, answer from its value, not from your own knowledge.
+If a search returns nothing, reword the queries and search again; do not repeat the
+same queries. When you find a memory, answer from its value, not from your own knowledge.
 
 # Answering
 
