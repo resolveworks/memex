@@ -26,6 +26,7 @@
 			</svg>
 		</button>
 		<span class="title">Memex</span>
+		<a class="settings" href="/settings">Settings</a>
 	</header>
 	<main>
 		{@render children()}
@@ -78,6 +79,17 @@
 
 	.title {
 		font-weight: 600;
+	}
+
+	.settings {
+		margin-left: auto;
+		padding: 0.5rem;
+		color: #1a1a1a;
+		text-decoration: none;
+	}
+
+	.settings:hover {
+		color: #1a73e8;
 	}
 
 	main {

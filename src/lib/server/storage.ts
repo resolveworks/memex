@@ -29,6 +29,13 @@ export function put(key: string, value: string): Memory {
 	return memory;
 }
 
+export function remove(key: string): void {
+	const index = memories.findIndex((memory) => memory.key === key);
+	if (index === -1) throw new Error(`No memory with key "${key}".`);
+	memories.splice(index, 1);
+	persist();
+}
+
 export function search(query: string): Memory[] {
 	const terms = query.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
 	if (terms.length === 0) return list();
