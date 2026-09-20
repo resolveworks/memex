@@ -8,6 +8,7 @@ import type {
 	SimpleStreamOptions,
 } from "@earendil-works/pi-ai";
 import { model } from "$lib/model";
+import { promptSection } from "$lib/server/requests";
 import { models } from "$lib/server/llm";
 
 function contentAt(partial: AssistantMessage, index: number) {
@@ -89,7 +90,11 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	// Auth slots in here — the single agreed insertion point when this outgrows the unauthenticated MVP.
 
-	const events = models.streamSimple(model, body.context, body.options);
+	const context: Context = {
+		...body.context,
+		systemPrompt: `${body.context.systemPrompt ?? ""}\n\n${promptSection()}`,
+	};
+	const events = models.streamSimple(model, context, body.options);
 	const encoder = new TextEncoder();
 
 	const stream = new ReadableStream<Uint8Array>({

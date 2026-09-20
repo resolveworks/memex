@@ -21,6 +21,20 @@ export function list(): Request[] {
 	return [...requests].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
+/** Renders the open request queue for inclusion in the system prompt. */
+export function promptSection(): string {
+	const open = list();
+	if (open.length === 0) return "# Request queue\n\nThe request queue is empty.";
+	const items = open.map((request) => `- ${request.id}: ${request.question}`).join("\n");
+	return `# Request queue
+
+These questions were recorded earlier because memory did not answer them. Each line is \`id: question\`.
+
+${items}
+
+When a later message supplies the answer to one of these, call the \`close-request\` tool with that id to remove it from the queue.`;
+}
+
 export function add(question: string): Request {
 	const request: Request = { id: randomUUID(), question, createdAt: new Date().toISOString() };
 	requests.push(request);

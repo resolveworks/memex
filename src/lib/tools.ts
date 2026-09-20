@@ -55,6 +55,26 @@ export const request: AgentTool<typeof requestParameters> = {
 	},
 };
 
+const closeRequestParameters = Type.Object({
+	id: Type.String(),
+});
+
+export const closeRequest: AgentTool<typeof closeRequestParameters> = {
+	name: "close-request",
+	label: "Close request",
+	description:
+		"Remove a recorded request once the information it asked for has been supplied. Pass the id shown for that request in the request queue.",
+	parameters: closeRequestParameters,
+	execute: async (_toolCallId, { id }) => {
+		const response = await fetch(`/api/requests?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+		if (!response.ok) throw new Error(`Failed to close request (${response.status}).`);
+		return {
+			content: [{ type: "text", text: `Closed request ${id}.` }],
+			details: undefined,
+		};
+	},
+};
+
 export const search: AgentTool<typeof searchParameters> = {
 	name: "search",
 	label: "Search",

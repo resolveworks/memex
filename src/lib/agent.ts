@@ -1,6 +1,6 @@
 import { Agent, streamProxy } from "@earendil-works/pi-agent-core";
 import { model } from "./model";
-import { request, search, store } from "./tools";
+import { closeRequest, request, search, store } from "./tools";
 
 const systemPrompt = `# Identity
 
@@ -24,8 +24,12 @@ Read each user message and decide which function it calls for:
   what is missing. It records the gap for the user to fill in later; it does not
   retrieve anything. Record each missing piece once, then tell the user you have
   noted the question.
-- **Both** — a single message may need a search, a store, a request, or several of
-  either.
+- **Close** — when a later message supplies information that answers a recorded
+  request (listed in the request queue), call the \`close-request\` tool with that
+  request's id to remove it. Close each request once, and only once the answer is
+  in hand.
+- **Both** — a single message may need a search, a store, a request, a close, or
+  several of either.
 
 # Searching well
 
@@ -57,7 +61,7 @@ export function getAgent(): Agent {
 			initialState: {
 				systemPrompt,
 				model,
-				tools: [store, search, request],
+				tools: [store, search, request, closeRequest],
 			},
 			// Empty authToken is ignored by the server in this MVP; empty proxyUrl targets same-origin /api/stream.
 			streamFn: (m, ctx, opts) => streamProxy(m, ctx, { ...opts, authToken: "", proxyUrl: "" }),
