@@ -7,8 +7,10 @@ import type {
 	Context,
 	SimpleStreamOptions,
 } from "@earendil-works/pi-ai";
+import { contentText } from "@earendil-works/pi-ai";
 import { model } from "$lib/model";
 import { memexId } from "$lib/server/auth";
+import { maxMessageWords, maxUserMessages } from "$lib/server/limits";
 import { promptSection } from "$lib/server/requests";
 import { models } from "$lib/server/llm";
 
@@ -81,6 +83,29 @@ interface StreamRequest {
 	options?: SimpleStreamOptions;
 }
 
+function wordCount(text: string): number {
+	return text.split(/\s+/).filter(Boolean).length;
+}
+
+/** Rejects a context that exceeds the server's abuse limits before any spend happens. */
+function exceedsLimits(context: Context): Response | undefined {
+	const userMessages = context.messages.filter((message) => message.role === "user");
+	if (userMessages.length > maxUserMessages) {
+		return json(
+			{ error: `A chat can hold at most ${maxUserMessages} messages.` },
+			{ status: 429 }
+		);
+	}
+	for (const message of userMessages) {
+		if (wordCount(contentText(message.content)) > maxMessageWords) {
+			return json(
+				{ error: `A message can hold at most ${maxMessageWords} words.` },
+				{ status: 413 }
+			);
+		}
+	}
+}
+
 export const POST: RequestHandler = async ({ request }) => {
 	const memex = memexId(request);
 	let body: StreamRequest;
@@ -89,6 +114,9 @@ export const POST: RequestHandler = async ({ request }) => {
 	} catch {
 		return json({ error: "Request body must be valid JSON" }, { status: 400 });
 	}
+
+	const rejected = exceedsLimits(body.context);
+	if (rejected) return rejected;
 
 	const context: Context = {
 		...body.context,

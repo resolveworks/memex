@@ -32,6 +32,6 @@ COPY --chown=node:node --from=build /app/drizzle ./drizzle
 RUN mkdir data && chown node:node data
 USER node
 
-ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000 MAX_USER_MESSAGES=10 MAX_MESSAGE_WORDS=2000
 EXPOSE 3000
 CMD ["node", "build"]

@@ -25,6 +25,7 @@
 	type Item =
 		| { kind: "user"; text: string }
 		| { kind: "assistant"; text: string }
+		| { kind: "error"; text: string }
 		| { kind: "tool"; name: string; args: { key: string; value: string }[] };
 
 	function toItems(messages: AgentMessage[]): Item[] {
@@ -35,6 +36,9 @@
 			} else if (message.role === "assistant") {
 				const text = contentText(message.content);
 				if (text) items.push({ kind: "assistant", text });
+				if (message.stopReason === "error" && message.errorMessage) {
+					items.push({ kind: "error", text: message.errorMessage });
+				}
 				for (const part of message.content) {
 					if (part.type === "toolCall") {
 						items.push({
@@ -116,6 +120,8 @@
 						</span>
 					{/if}
 				</div>
+			{:else if item.kind === "error"}
+				<div class="error" role="alert">{item.text}</div>
 			{:else if item.kind === "assistant"}
 				<div class="assistant">{@html streamed(item.text, chat.streaming !== undefined && i === items.length - 1)}</div>
 			{:else}
@@ -257,6 +263,18 @@
 
 	.assistant :global(table) {
 		border-collapse: collapse;
+	}
+
+	.error {
+		align-self: flex-start;
+		max-width: 90%;
+		padding: 0.5rem 0.75rem;
+		border: 1px solid var(--danger);
+		border-radius: 0.375rem;
+		color: var(--danger);
+		line-height: 1.4;
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
 	}
 
 	.assistant :global(th),
