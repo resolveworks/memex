@@ -1,10 +1,18 @@
 import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { Type } from "typebox";
 import type { Memory } from "./memory";
+import { memexId } from "./memex";
+
+function headers(json = false): HeadersInit {
+	return {
+		authorization: `Bearer ${memexId()}`,
+		...(json ? { "content-type": "application/json" } : {})
+	};
+}
 
 const storeParameters = Type.Object({
 	key: Type.String(),
-	value: Type.String(),
+	value: Type.String()
 });
 
 export const store: AgentTool<typeof storeParameters> = {
@@ -16,23 +24,23 @@ export const store: AgentTool<typeof storeParameters> = {
 	execute: async (_toolCallId, { key, value }) => {
 		const response = await fetch("/api/memories", {
 			method: "POST",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({ key, value }),
+			headers: headers(true),
+			body: JSON.stringify({ key, value })
 		});
 		if (!response.ok) throw new Error(`Failed to store "${key}" (${response.status}).`);
 		return {
 			content: [{ type: "text", text: `Stored "${key}".` }],
-			details: undefined,
+			details: undefined
 		};
-	},
+	}
 };
 
 const searchParameters = Type.Object({
-	queries: Type.Array(Type.String()),
+	queries: Type.Array(Type.String())
 });
 
 const requestParameters = Type.Object({
-	question: Type.String(),
+	question: Type.String()
 });
 
 export const request: AgentTool<typeof requestParameters> = {
@@ -44,19 +52,19 @@ export const request: AgentTool<typeof requestParameters> = {
 	execute: async (_toolCallId, { question }) => {
 		const response = await fetch("/api/requests", {
 			method: "POST",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({ question }),
+			headers: headers(true),
+			body: JSON.stringify({ question })
 		});
 		if (!response.ok) throw new Error(`Failed to record request (${response.status}).`);
 		return {
 			content: [{ type: "text", text: `Requested information: ${question}` }],
-			details: undefined,
+			details: undefined
 		};
-	},
+	}
 };
 
 const closeRequestParameters = Type.Object({
-	id: Type.String(),
+	id: Type.String()
 });
 
 export const closeRequest: AgentTool<typeof closeRequestParameters> = {
@@ -66,13 +74,16 @@ export const closeRequest: AgentTool<typeof closeRequestParameters> = {
 		"Remove a recorded request once the information it asked for has been supplied. Pass the id shown for that request in the request queue.",
 	parameters: closeRequestParameters,
 	execute: async (_toolCallId, { id }) => {
-		const response = await fetch(`/api/requests?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+		const response = await fetch(`/api/requests?id=${encodeURIComponent(id)}`, {
+			method: "DELETE",
+			headers: headers()
+		});
 		if (!response.ok) throw new Error(`Failed to close request (${response.status}).`);
 		return {
 			content: [{ type: "text", text: `Closed request ${id}.` }],
-			details: undefined,
+			details: undefined
 		};
-	},
+	}
 };
 
 export const search: AgentTool<typeof searchParameters> = {
@@ -84,7 +95,7 @@ export const search: AgentTool<typeof searchParameters> = {
 	execute: async (_toolCallId, { queries }) => {
 		const params = new URLSearchParams();
 		for (const query of queries) params.append("q", query);
-		const response = await fetch(`/api/memories?${params}`);
+		const response = await fetch(`/api/memories?${params}`, { headers: headers() });
 		if (!response.ok) throw new Error(`Search failed (${response.status}).`);
 		const matches = (await response.json()) as Memory[];
 		const text =
@@ -93,7 +104,7 @@ export const search: AgentTool<typeof searchParameters> = {
 				: matches.map((memory) => `${memory.key}: ${memory.value}`).join("\n");
 		return {
 			content: [{ type: "text", text }],
-			details: undefined,
+			details: undefined
 		};
-	},
+	}
 };

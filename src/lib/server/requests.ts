@@ -1,29 +1,21 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { and, desc, eq } from "drizzle-orm";
 import type { Request } from "$lib/request";
+import { db } from "./db";
+import { requests } from "./db/schema";
 
-const FILE = resolve("data/requests.json");
-
-function load(): Request[] {
-	if (!existsSync(FILE)) return [];
-	return JSON.parse(readFileSync(FILE, "utf8")) as Request[];
+export function list(memexId: string): Request[] {
+	return db
+		.select()
+		.from(requests)
+		.where(eq(requests.memexId, memexId))
+		.orderBy(desc(requests.createdAt))
+		.all();
 }
 
-const requests = load();
-
-function persist() {
-	mkdirSync(dirname(FILE), { recursive: true });
-	writeFileSync(FILE, JSON.stringify(requests, null, 2));
-}
-
-export function list(): Request[] {
-	return [...requests].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-}
-
-/** Renders the open request queue for inclusion in the system prompt. */
-export function promptSection(): string {
-	const open = list();
+/** Renders a memex's open request queue for inclusion in the system prompt. */
+export function promptSection(memexId: string): string {
+	const open = list(memexId);
 	if (open.length === 0) return "# Request queue\n\nThe request queue is empty.";
 	const items = open.map((request) => `- ${request.id}: ${request.question}`).join("\n");
 	return `# Request queue
@@ -35,16 +27,16 @@ ${items}
 When a later message supplies the answer to one of these, call the \`close-request\` tool with that id to remove it from the queue.`;
 }
 
-export function add(question: string): Request {
+export function add(memexId: string, question: string): Request {
 	const request: Request = { id: randomUUID(), question, createdAt: new Date().toISOString() };
-	requests.push(request);
-	persist();
+	db.insert(requests).values({ memexId, ...request }).run();
 	return request;
 }
 
-export function remove(id: string): void {
-	const index = requests.findIndex((request) => request.id === id);
-	if (index === -1) throw new Error(`No request with id "${id}".`);
-	requests.splice(index, 1);
-	persist();
+export function remove(memexId: string, id: string): void {
+	const result = db
+		.delete(requests)
+		.where(and(eq(requests.memexId, memexId), eq(requests.id, id)))
+		.run();
+	if (result.changes === 0) throw new Error(`No request with id "${id}".`);
 }

@@ -1,12 +1,7 @@
 {
-	"nav.openSessions": "Open sessions",
 	"nav.settings": "Settings",
 	"nav.language": "Language",
-	"sidebar.sessions": "Sessions",
-	"sidebar.close": "Close sessions",
-	"sidebar.newChat": "New chat",
-	"sidebar.delete": "Delete session",
-	"chat.intro": "I'm Memex, the memory of your house — the knowledge that usually walks out the door with your staff.\n\nTell me something worth keeping — \"the boiler key is in the office, code 4711\" — and I'll store it. Ask for it later, in this chat or a brand-new one — \"where's the boiler key?\" — and I'll look it up. If it isn't in memory, I'll note the question so you can fill it in.\n\nThat's the whole idea: say it once, and it stays in the house.",
+	"chat.intro": "I'm Memex, the memory of your house — the knowledge that usually walks out the door with your staff.\n\nTell me something worth keeping — \"the boiler key is in the office, code 4711\" — and I'll store it. Ask for it later, now or when you return — \"where's the boiler key?\" — and I'll look it up. If it isn't in memory, I'll note the question so you can fill it in.\n\nThat's the whole idea: say it once, and it stays in the house.",
 	"chat.placeholder": "Message Memex…",
 	"chat.send": "Send",
 	"settings.title": "Settings",

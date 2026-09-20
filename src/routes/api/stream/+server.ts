@@ -8,6 +8,7 @@ import type {
 	SimpleStreamOptions,
 } from "@earendil-works/pi-ai";
 import { model } from "$lib/model";
+import { memexId } from "$lib/server/auth";
 import { promptSection } from "$lib/server/requests";
 import { models } from "$lib/server/llm";
 
@@ -81,6 +82,7 @@ interface StreamRequest {
 }
 
 export const POST: RequestHandler = async ({ request }) => {
+	const memex = memexId(request);
 	let body: StreamRequest;
 	try {
 		body = (await request.json()) as StreamRequest;
@@ -88,11 +90,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json({ error: "Request body must be valid JSON" }, { status: 400 });
 	}
 
-	// Auth slots in here — the single agreed insertion point when this outgrows the unauthenticated MVP.
-
 	const context: Context = {
 		...body.context,
-		systemPrompt: `${body.context.systemPrompt ?? ""}\n\n${promptSection()}`,
+		systemPrompt: `${body.context.systemPrompt ?? ""}\n\n${promptSection(memex)}`,
 	};
 	const events = models.streamSimple(model, context, body.options);
 	const encoder = new TextEncoder();

@@ -1,14 +1,12 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
-	import SessionSidebar from '$lib/SessionSidebar.svelte';
+	import { page } from '$app/state';
 	import { chat } from '$lib/chat.svelte';
 	import { i18n, languages, languageName, setLocale, t } from '$lib/i18n.svelte';
 
 	let { children } = $props();
 
-	let drawerOpen = $state(false);
-
-	function newChat(event: MouseEvent) {
+	function newMemex(event: MouseEvent) {
 		if (chat.busy) event.preventDefault();
 	}
 
@@ -23,19 +21,7 @@
 
 <div class="app">
 	<header>
-		<button
-			class="menu"
-			aria-label={t('nav.openSessions')}
-			aria-expanded={drawerOpen}
-			onclick={() => (drawerOpen = true)}
-		>
-			<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-				<line x1="3" y1="6" x2="21" y2="6" />
-				<line x1="3" y1="12" x2="21" y2="12" />
-				<line x1="3" y1="18" x2="21" y2="18" />
-			</svg>
-		</button>
-		<a class="title" href="/" onclick={newChat}>Memex</a>
+		<a class="title" href="/" onclick={newMemex}>Memex</a>
 		<select
 			class="language"
 			aria-label={t('nav.language')}
@@ -46,11 +32,20 @@
 				<option value={code}>{languageName(code)}</option>
 			{/each}
 		</select>
+		{#if page.params.id}
+			<a class="settings" href={`/m/${page.params.id}/settings`} aria-label={t('nav.settings')}>
+				<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+					<path
+						d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+					/>
+					<circle cx="12" cy="12" r="3" />
+				</svg>
+			</a>
+		{/if}
 	</header>
 	<main>
 		{@render children()}
 	</main>
-	<SessionSidebar open={drawerOpen} onclose={() => (drawerOpen = false)} />
 </div>
 
 <style>
@@ -99,21 +94,6 @@
 		background: var(--surface);
 	}
 
-	.menu {
-		display: flex;
-		padding: 0.5rem;
-		border: none;
-		background: none;
-		color: var(--ink);
-		cursor: pointer;
-	}
-
-	.menu svg line {
-		stroke: currentColor;
-		stroke-width: 2;
-		stroke-linecap: round;
-	}
-
 	.title {
 		font-weight: 600;
 		letter-spacing: -0.01em;
@@ -133,6 +113,24 @@
 		border-radius: 0.5rem;
 		background: var(--surface);
 		color: var(--ink);
+	}
+
+	.settings {
+		display: flex;
+		padding: 0.5rem;
+		color: var(--ink);
+	}
+
+	.settings:hover {
+		color: var(--accent);
+	}
+
+	.settings svg {
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linecap: round;
+		stroke-linejoin: round;
 	}
 
 	main {

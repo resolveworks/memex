@@ -2,7 +2,6 @@
 	import type { AgentMessage } from "@earendil-works/pi-agent-core";
 	import { contentText } from "@earendil-works/pi-ai";
 	import { marked } from "marked";
-	import { goto } from "$app/navigation";
 	import { chat, open, send } from "$lib/chat.svelte";
 	import { t } from "$lib/i18n.svelte";
 
@@ -73,12 +72,11 @@
 	// Static welcome shown only on an empty chat; never sent to the model or saved.
 	const intro = $derived(t("chat.intro"));
 
-	async function submit() {
+	function submit() {
 		const text = input.trim();
 		if (!text || chat.busy) return;
 		input = "";
-		const created = send(text);
-		if (created) await goto(`/c/${created}`, { replaceState: true });
+		send(text);
 	}
 
 	function onKeydown(event: KeyboardEvent) {

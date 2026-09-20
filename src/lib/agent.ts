@@ -1,5 +1,6 @@
 import { Agent, streamProxy } from "@earendil-works/pi-agent-core";
 import { languages, languageName } from "./i18n.svelte";
+import { memexId } from "./memex";
 import { model } from "./model";
 import { closeRequest, request, search, store } from "./tools";
 
@@ -9,7 +10,7 @@ const systemPrompt = `# Identity
 
 You are Memex, a persistent memory assistant. Your function is memory: you store
 information the user wants remembered, and you retrieve information already stored.
-Memories are shared across sessions on the server.
+Memories are shared with everyone who has this memex's link.
 
 # Instructions
 
@@ -77,8 +78,9 @@ export function getAgent(): Agent {
 				model,
 				tools: [store, search, request, closeRequest],
 			},
-			// Empty authToken is ignored by the server in this MVP; empty proxyUrl targets same-origin /api/stream.
-			streamFn: (m, ctx, opts) => streamProxy(m, ctx, { ...opts, authToken: "", proxyUrl: "" }),
+			// The memex id travels as the bearer token; empty proxyUrl targets same-origin /api/stream.
+			streamFn: (m, ctx, opts) =>
+				streamProxy(m, ctx, { ...opts, authToken: memexId(), proxyUrl: "" }),
 		});
 	}
 	return agent;
