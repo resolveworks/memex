@@ -3,13 +3,19 @@
 	import { page } from '$app/state';
 	import { chat } from '$lib/chat.svelte';
 	import { i18n, t } from '$lib/i18n.svelte';
+	import { getMemexes } from '$lib/memexes.svelte';
 	import Sidebar from '$lib/Sidebar.svelte';
 
 	let { children } = $props();
 
 	let drawerOpen = $state(false);
 
-	function newMemex(event: MouseEvent) {
+	// The logo returns to the selected memex, never the create page.
+	const home = $derived(
+		page.data.memex ? `/${page.data.memex.id}` : getMemexes()[0] ? `/${getMemexes()[0].id}` : '/'
+	);
+
+	function follow(event: MouseEvent) {
 		if (chat.busy) event.preventDefault();
 	}
 
@@ -36,7 +42,7 @@
 				<line x1="3" y1="18" x2="21" y2="18" />
 			</svg>
 		</button>
-		<a class="title" href="/" onclick={newMemex}>{page.data.memex?.title ?? "Memex"}</a>
+		<a class="title" href={home} onclick={follow}>{page.data.memex?.title ?? "Memex"}</a>
 	</header>
 	<main>
 		{@render children()}
