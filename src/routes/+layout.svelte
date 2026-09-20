@@ -7,7 +7,7 @@
 	import { i18n, t } from '$lib/i18n.svelte';
 	import { forget, getMemexes, remember } from '$lib/memexes.svelte';
 	import Header from '$lib/components/Header.svelte';
-	import Select from '$lib/components/Select.svelte';
+	import Select, { type SelectOption } from '$lib/components/Select.svelte';
 	import Sidebar from '$lib/Sidebar.svelte';
 
 	let { children } = $props();
@@ -31,10 +31,14 @@
 		return known;
 	});
 
-	function switchMemex(event: Event) {
-		const id = (event.currentTarget as HTMLSelectElement).value;
-		if (id === page.params.id) return;
-		goto(`/${id}`);
+	const memexOptions = $derived<SelectOption[]>([
+		...memexes.map((memex) => ({ value: memex.id, label: memex.title })),
+		{ value: '', label: t('sidebar.new'), action: true }
+	]);
+
+	function switchMemex(id: string) {
+		if (id === (page.params.id ?? '')) return;
+		goto(id === '' ? '/' : `/${id}`);
 	}
 
 	// The brand points at the active memex, or the create page when there is none.
@@ -76,15 +80,12 @@
 		</button>
 		<a class="title" href={home} onclick={follow}>Memex</a>
 		<Select
-			aria-label={t('sidebar.memexes')}
-			value={page.params.id}
+			label={t('sidebar.memexes')}
+			value={page.params.id ?? ''}
+			options={memexOptions}
 			onchange={switchMemex}
 			disabled={chat.busy}
-		>
-			{#each memexes as memex (memex.id)}
-				<option value={memex.id}>{memex.title}</option>
-			{/each}
-		</Select>
+		/>
 		<div class="actions">
 			{#if page.params.id}
 				<a

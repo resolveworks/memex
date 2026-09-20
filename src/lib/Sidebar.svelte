@@ -5,6 +5,10 @@
 	import { i18n, languages, languageName, setLocale, t } from "$lib/i18n.svelte";
 
 	let { open, onclose }: { open: boolean; onclose: () => void } = $props();
+
+	const languageOptions = $derived(
+		languages.map((code) => ({ value: code, label: languageName(code) }))
+	);
 </script>
 
 {#if open}
@@ -32,14 +36,12 @@
 	<Footer>
 		<div class="language">
 			<Select
-				aria-label={t("nav.language")}
+				label={t("nav.language")}
 				value={i18n.locale}
-				onchange={(event) => setLocale(event.currentTarget.value)}
-			>
-				{#each languages as code (code)}
-					<option value={code}>{languageName(code)}</option>
-				{/each}
-			</Select>
+				options={languageOptions}
+				onchange={setLocale}
+				placement="top"
+			/>
 		</div>
 	</Footer>
 </aside>

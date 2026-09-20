@@ -6,6 +6,11 @@
 	import Input from "$lib/components/Input.svelte";
 	import Select from "$lib/components/Select.svelte";
 	import { i18n, languages, languageName, t } from "$lib/i18n.svelte";
+
+	let language = $state(i18n.locale);
+	const languageOptions = $derived(
+		languages.map((code) => ({ value: code, label: languageName(code) }))
+	);
 </script>
 
 <Card>
@@ -15,11 +20,13 @@
 			<Input name="title" required />
 		</Field>
 		<Field label={t("nav.language")}>
-			<Select name="language" value={i18n.locale}>
-				{#each languages as code (code)}
-					<option value={code}>{languageName(code)}</option>
-				{/each}
-			</Select>
+			<Select
+				name="language"
+				label={t("nav.language")}
+				value={language}
+				options={languageOptions}
+				onchange={(value) => (language = value)}
+			/>
 		</Field>
 		<Button type="submit">{t("create.submit")}</Button>
 	</form>

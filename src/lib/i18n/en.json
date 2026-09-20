@@ -3,6 +3,7 @@
 	"sidebar.open": "Open sidebar",
 	"sidebar.close": "Close sidebar",
 	"sidebar.memexes": "Memexes",
+	"sidebar.new": "Create new",
 	"sidebar.requests": "Requests",
 	"sidebar.noRequests": "No requests yet.",
 	"create.heading": "New memex",
