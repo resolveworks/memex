@@ -12,7 +12,7 @@
 	"create.submit": "Create",
 	"settings.heading": "Memex settings",
 	"settings.save": "Save",
-	"settings.languageLocked": "The whole database is stored in this language, so it can't be changed after the memex is created.",
+	"settings.languageLocked": "Everything I remember is stored in this language, so it can't be changed after the memex is created.",
 	"chat.intro": "I'm Memex, the memory of your house — the knowledge that usually walks out the door with your staff.\n\nTell me something worth keeping — \"the boiler key is in the office, code 4711\" — and I'll store it. Ask for it later, now or when you return — \"where's the boiler key?\" — and I'll look it up. If it isn't in memory, I'll note the question so you can fill it in.\n\nThat's the whole idea: say it once, and it stays in the house.",
 	"chat.requestIntro": "I couldn't answer this from memory:",
 	"chat.requestHint": "If you know, tell me and I'll remember it.",
