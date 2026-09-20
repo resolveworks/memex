@@ -56,6 +56,21 @@
 			</div>
 		{/each}
 	</nav>
+	<button
+		class="settings"
+		onclick={() => {
+			onclose();
+			goto('/settings');
+		}}
+	>
+		<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+			<path
+				d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+			/>
+			<circle cx="12" cy="12" r="3" />
+		</svg>
+		{t('nav.settings')}
+	</button>
 </aside>
 
 <style>
@@ -81,7 +96,7 @@
 		padding: 0.75rem;
 		border-right: 1px solid #e2e2e4;
 		background: #fff;
-		overflow-y: auto;
+		overflow: hidden;
 		transform: translateX(-100%);
 		transition: transform 200ms ease;
 	}
@@ -132,6 +147,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.125rem;
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
 	}
 
 	.item {
@@ -160,5 +178,30 @@
 	.delete:disabled {
 		opacity: 0.5;
 		cursor: default;
+	}
+
+	.settings {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		padding: 0.5rem 0.75rem;
+		border: none;
+		border-top: 1px solid #e2e2e4;
+		background: none;
+		color: #1a1a1a;
+		font: inherit;
+		cursor: pointer;
+	}
+
+	.settings:hover {
+		color: #1a73e8;
+	}
+
+	.settings svg {
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linecap: round;
+		stroke-linejoin: round;
 	}
 </style>
