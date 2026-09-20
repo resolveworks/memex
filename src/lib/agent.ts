@@ -1,6 +1,9 @@
 import { Agent, streamProxy } from "@earendil-works/pi-agent-core";
+import { languages, languageName } from "./i18n.svelte";
 import { model } from "./model";
 import { closeRequest, request, search, store } from "./tools";
+
+const supportedLanguages = languages.map((code) => `- ${languageName(code)} (${code})`).join("\n");
 
 const systemPrompt = `# Identity
 
@@ -31,6 +34,16 @@ Read each user message and decide which function it calls for:
 - **Both** — a single message may need a search, a store, a request, a close, or
   several of either.
 
+# Languages
+
+The application supports these languages:
+
+${supportedLanguages}
+
+Memories are stored in whatever language the user was speaking at the time, which
+need not be the language of the current conversation. Search in every supported
+language, not only the user's.
+
 # Searching well
 
 The \`search\` tool takes a list of queries and returns every memory matching **any**
@@ -40,8 +53,9 @@ and you decide which are relevant. Put every angle of the question into one call
 1. The user's own most distinctive words.
 2. Each key word of the question.
 3. Synonyms and rewordings of those words.
-4. Likely category or label terms you would have used as a key when storing.
-5. Broader and narrower versions of the topic.
+4. Translations of those words into every supported language listed above.
+5. Likely category or label terms you would have used as a key when storing.
+6. Broader and narrower versions of the topic.
 
 If a search returns nothing, reword the queries and search again; do not repeat the
 same queries. When you find a memory, answer from its value, not from your own knowledge.
