@@ -6,6 +6,7 @@
 	import { i18n, t } from '$lib/i18n.svelte';
 	import { forget, getMemexes, remember } from '$lib/memexes.svelte';
 	import Header from '$lib/components/Header.svelte';
+	import Select from '$lib/components/Select.svelte';
 	import Sidebar from '$lib/Sidebar.svelte';
 
 	let { children } = $props();
@@ -69,21 +70,16 @@
 				</svg>
 			{/if}
 		</button>
-		<label class="switcher">
-			<select
-				aria-label={t('sidebar.memexes')}
-				value={page.params.id}
-				onchange={switchMemex}
-				disabled={chat.busy}
-			>
-				{#each memexes as memex (memex.id)}
-					<option value={memex.id}>{memex.title}</option>
-				{/each}
-			</select>
-			<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-				<path d="m6 9 6 6 6-6" />
-			</svg>
-		</label>
+		<Select
+			aria-label={t('sidebar.memexes')}
+			value={page.params.id}
+			onchange={switchMemex}
+			disabled={chat.busy}
+		>
+			{#each memexes as memex (memex.id)}
+				<option value={memex.id}>{memex.title}</option>
+			{/each}
+		</Select>
 		<div class="actions">
 			{#if page.params.id}
 				<a
@@ -161,49 +157,6 @@
 		display: flex;
 		flex: 1;
 		min-height: 0;
-	}
-
-	.switcher {
-		position: relative;
-		display: inline-flex;
-		align-items: center;
-		min-width: 0;
-	}
-
-	.switcher select {
-		appearance: none;
-		min-width: 0;
-		max-width: min(60vw, 24rem);
-		padding: 0 1.5rem 0 0;
-		border: none;
-		background: none;
-		color: var(--ink);
-		font: inherit;
-		font-weight: 600;
-		letter-spacing: -0.01em;
-		text-overflow: ellipsis;
-		cursor: pointer;
-	}
-
-	.switcher select:hover:not(:disabled) {
-		color: var(--accent);
-	}
-
-	.switcher select:disabled {
-		opacity: 0.5;
-		cursor: default;
-	}
-
-	.switcher svg {
-		position: absolute;
-		right: 0;
-		color: var(--muted);
-		pointer-events: none;
-		fill: none;
-		stroke: currentColor;
-		stroke-width: 2;
-		stroke-linecap: round;
-		stroke-linejoin: round;
 	}
 
 	.menu {
