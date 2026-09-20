@@ -4,6 +4,7 @@
 	import { marked } from "marked";
 	import { goto } from "$app/navigation";
 	import { chat, open, send } from "$lib/chat.svelte";
+	import { t } from "$lib/i18n.svelte";
 
 	function md(text: string): string {
 		return marked(text, { async: false });
@@ -70,11 +71,7 @@
 	});
 
 	// Static welcome shown only on an empty chat; never sent to the model or saved.
-	const intro = `I'm Memex, the memory of your house — the knowledge that usually walks out the door with your staff.
-
-Tell me something worth keeping — "the boiler key is in the office, code 4711" — and I'll store it. Ask for it later, in this chat or a brand-new one — "where's the boiler key?" — and I'll look it up. If it isn't in memory, I'll note the question so you can fill it in.
-
-That's the whole idea: say it once, and it stays in the house.`;
+	const intro = $derived(t("chat.intro"));
 
 	async function submit() {
 		const text = input.trim();
@@ -121,10 +118,10 @@ That's the whole idea: say it once, and it stays in the house.`;
 		<textarea
 			bind:value={input}
 			onkeydown={onKeydown}
-			placeholder="Message Memex…"
+			placeholder={t("chat.placeholder")}
 			rows="1"
 		></textarea>
-		<button type="submit" disabled={chat.busy}>Send</button>
+		<button type="submit" disabled={chat.busy}>{t("chat.send")}</button>
 	</form>
 </div>
 

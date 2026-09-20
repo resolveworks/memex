@@ -2,6 +2,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import SessionSidebar from '$lib/SessionSidebar.svelte';
 	import { chat } from '$lib/chat.svelte';
+	import { i18n, languages, languageName, setLocale, t } from '$lib/i18n.svelte';
 
 	let { children } = $props();
 
@@ -10,6 +11,10 @@
 	function newChat(event: MouseEvent) {
 		if (chat.busy) event.preventDefault();
 	}
+
+	$effect(() => {
+		document.documentElement.lang = i18n.locale;
+	});
 </script>
 
 <svelte:head>
@@ -20,7 +25,7 @@
 	<header>
 		<button
 			class="menu"
-			aria-label="Open sessions"
+			aria-label={t('nav.openSessions')}
 			aria-expanded={drawerOpen}
 			onclick={() => (drawerOpen = true)}
 		>
@@ -31,7 +36,17 @@
 			</svg>
 		</button>
 		<a class="title" href="/" onclick={newChat}>Memex</a>
-		<a class="settings" href="/settings">Settings</a>
+		<a class="settings" href="/settings">{t('nav.settings')}</a>
+		<select
+			class="language"
+			aria-label={t('nav.language')}
+			value={i18n.locale}
+			onchange={(event) => setLocale(event.currentTarget.value)}
+		>
+			{#each languages as code (code)}
+				<option value={code}>{languageName(code)}</option>
+			{/each}
+		</select>
 	</header>
 	<main>
 		{@render children()}
@@ -97,6 +112,16 @@
 
 	.settings:hover {
 		color: #1a73e8;
+	}
+
+	.language {
+		margin-left: 0.25rem;
+		font: inherit;
+		padding: 0.25rem;
+		border: 1px solid #d0d0d4;
+		border-radius: 0.5rem;
+		background: #fff;
+		color: #1a1a1a;
 	}
 
 	main {

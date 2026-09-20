@@ -1,20 +1,22 @@
 <script lang="ts">
+	import { t } from "$lib/i18n.svelte";
+
 	let { data } = $props();
 
 	let tab = $state<"memories" | "requests">("memories");
 </script>
 
 <div class="settings">
-	<h1>Settings</h1>
+	<h1>{t("settings.title")}</h1>
 
 	<div class="tabs">
-		<button class:active={tab === "memories"} onclick={() => (tab = "memories")}>Memories</button>
-		<button class:active={tab === "requests"} onclick={() => (tab = "requests")}>Requests</button>
+		<button class:active={tab === "memories"} onclick={() => (tab = "memories")}>{t("settings.memories")}</button>
+		<button class:active={tab === "requests"} onclick={() => (tab = "requests")}>{t("settings.requests")}</button>
 	</div>
 
 	{#if tab === "memories"}
 		{#if data.memories.length === 0}
-			<p class="empty">No memories yet.</p>
+			<p class="empty">{t("settings.noMemories")}</p>
 		{:else}
 			<ul>
 				{#each data.memories as memory (memory.key)}
@@ -25,7 +27,7 @@
 						</div>
 						<form method="POST" action="?/delete">
 							<input type="hidden" name="key" value={memory.key} />
-							<button aria-label={`Delete ${memory.key}`}>Delete</button>
+							<button aria-label={`${t("settings.delete")} ${memory.key}`}>{t("settings.delete")}</button>
 						</form>
 					</li>
 				{/each}
@@ -33,7 +35,7 @@
 		{/if}
 	{:else}
 		{#if data.requests.length === 0}
-			<p class="empty">No requests yet.</p>
+			<p class="empty">{t("settings.noRequests")}</p>
 		{:else}
 			<ul>
 				{#each data.requests as item (item.id)}
@@ -43,7 +45,7 @@
 						</div>
 						<form method="POST" action="?/deleteRequest">
 							<input type="hidden" name="id" value={item.id} />
-							<button aria-label="Delete request">Delete</button>
+							<button aria-label={t("settings.deleteRequest")}>{t("settings.delete")}</button>
 						</form>
 					</li>
 				{/each}

@@ -2,6 +2,7 @@
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
 	import { chat } from "$lib/chat.svelte";
+	import { t } from "$lib/i18n.svelte";
 	import { deleteSession, getSessions } from "$lib/sessions.svelte";
 
 	let { open, onclose }: { open: boolean; onclose: () => void } = $props();
@@ -31,22 +32,22 @@
 </script>
 
 {#if open}
-	<button class="scrim" aria-label="Close sessions" onclick={onclose}></button>
+	<button class="scrim" aria-label={t("sidebar.close")} onclick={onclose}></button>
 {/if}
 
 <aside class:open inert={!open}>
 	<div class="head">
-		<span>Sessions</span>
-		<button class="close" aria-label="Close sessions" onclick={onclose}>×</button>
+		<span>{t("sidebar.sessions")}</span>
+		<button class="close" aria-label={t("sidebar.close")} onclick={onclose}>×</button>
 	</div>
-	<button class="new" onclick={newChat} disabled={chat.busy}>New chat</button>
+	<button class="new" onclick={newChat} disabled={chat.busy}>{t("sidebar.newChat")}</button>
 	<nav>
 		{#each sessions as session (session.id)}
 			<div class="item" class:active={session.id === page.params.id}>
 				<a href={`/c/${session.id}`} onclick={follow}>{session.title}</a>
 				<button
 					class="delete"
-					aria-label="Delete session"
+					aria-label={t("sidebar.delete")}
 					onclick={() => remove(session.id)}
 					disabled={chat.busy}
 				>
