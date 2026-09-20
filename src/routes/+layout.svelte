@@ -36,6 +36,9 @@
 		goto(`/${id}`);
 	}
 
+	// The brand points at the active memex, or the create page when there is none.
+	const home = $derived(page.data.memex ? `/${page.data.memex.id}` : '/');
+
 	function follow(event: MouseEvent) {
 		if (chat.busy) event.preventDefault();
 	}
@@ -70,6 +73,7 @@
 				</svg>
 			{/if}
 		</button>
+		<a class="title" href={home} onclick={follow}>Memex</a>
 		<Select
 			aria-label={t('sidebar.memexes')}
 			value={page.params.id}
@@ -157,6 +161,17 @@
 		display: flex;
 		flex: 1;
 		min-height: 0;
+	}
+
+	.title {
+		font-weight: 600;
+		color: var(--ink);
+		text-decoration: none;
+		white-space: nowrap;
+	}
+
+	.title:hover {
+		color: var(--accent);
 	}
 
 	.menu {
