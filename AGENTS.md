@@ -37,7 +37,7 @@ Never commit or log `DEEPSEEK_API_KEY`. `.env` is gitignored; keep it that way.
 ## Reference
 
 - Installed `node_modules/@earendil-works/*` `.d.ts` files are the API source
-  of truth (pinned 0.85.1).
+  of truth (installed 0.85.1).
 - `~/Projects/pi` is the dev repo at a newer version — consult it for concepts,
   but installed code wins on any discrepancy.
 - Svelte: `~/Projects/svelte`. SvelteKit: `~/Projects/kit`.
