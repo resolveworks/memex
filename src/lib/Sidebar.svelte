@@ -4,7 +4,6 @@
 	import { chat, selectRequest } from "$lib/chat.svelte";
 	import { t } from "$lib/i18n.svelte";
 	import { forget, getMemexes, remember } from "$lib/memexes.svelte";
-	import type { Request as MemexRequest } from "$lib/request";
 
 	let { open, onclose }: { open: boolean; onclose: () => void } = $props();
 
@@ -44,15 +43,6 @@
 		}
 		onclose();
 	}
-
-	// Drop the open request once the agent closes it and the list refreshes.
-	$effect(() => {
-		const requests = page.data.requests;
-		const selected = chat.request;
-		if (requests && selected && !requests.some((request: MemexRequest) => request.id === selected.id)) {
-			chat.request = undefined;
-		}
-	});
 </script>
 
 {#if open}
@@ -89,7 +79,7 @@
 					{#each page.data.requests as request (request.id)}
 						<li>
 							<button
-								class:active={chat.request?.id === request.id}
+								class:active={chat.requestId === request.id}
 								onclick={() => {
 									selectRequest(request);
 									onclose();

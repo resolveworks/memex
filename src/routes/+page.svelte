@@ -1,41 +1,23 @@
 <script lang="ts">
-	import { goto } from "$app/navigation";
+	import { enhance } from "$app/forms";
 	import { i18n, languages, languageName, t } from "$lib/i18n.svelte";
-
-	let title = $state("");
-	let language = $state(i18n.locale);
-	let busy = $state(false);
-
-	async function create(event: SubmitEvent) {
-		event.preventDefault();
-		if (busy) return;
-		busy = true;
-		const response = await fetch("/api/memexes", {
-			method: "POST",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({ title, language })
-		});
-		if (!response.ok) throw new Error(`Failed to create a memex (${response.status}).`);
-		const { id } = (await response.json()) as { id: string };
-		await goto(`/${id}`);
-	}
 </script>
 
-<form class="create" onsubmit={create}>
+<form class="create" method="POST" use:enhance>
 	<h1>{t("create.heading")}</h1>
 	<label>
 		{t("create.title")}
-		<input bind:value={title} required />
+		<input name="title" required />
 	</label>
 	<label>
 		{t("nav.language")}
-		<select bind:value={language}>
+		<select name="language" value={i18n.locale}>
 			{#each languages as code (code)}
 				<option value={code}>{languageName(code)}</option>
 			{/each}
 		</select>
 	</label>
-	<button type="submit" disabled={busy}>{t("create.submit")}</button>
+	<button type="submit">{t("create.submit")}</button>
 </form>
 
 <style>

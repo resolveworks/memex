@@ -2,7 +2,7 @@
 	import type { AgentMessage } from "@earendil-works/pi-agent-core";
 	import { contentText } from "@earendil-works/pi-ai";
 	import { marked } from "marked";
-	import { chat, open, send } from "$lib/chat.svelte";
+	import { chat, open, selectedRequest, send } from "$lib/chat.svelte";
 	import { t } from "$lib/i18n.svelte";
 
 	function md(text: string): string {
@@ -12,6 +12,7 @@
 	let { id, language }: { id: string; language: string } = $props();
 
 	let input = $state("");
+	let request = $derived(selectedRequest());
 
 	$effect(() => {
 		void open(id, language);
@@ -71,7 +72,7 @@
 
 	// A newly selected request is the first message, so bring it into view.
 	$effect(() => {
-		if (chat.request && viewport) viewport.scrollTop = 0;
+		if (request && viewport) viewport.scrollTop = 0;
 	});
 
 	// Static welcome shown only on an empty chat; never sent to the model or saved.
@@ -96,14 +97,14 @@
 <div class="chat">
 	<div class="messages" bind:this={viewport} onscroll={onScroll}>
 		<div class="thread">
-			{#if chat.request}
+			{#if request}
 			<div class="bubble assistant request">
 				<p>{t("chat.requestIntro")}</p>
-				<p class="question">{chat.request.text}</p>
+				<p class="question">{request.text}</p>
 				<p>{t("chat.requestHint")}</p>
 			</div>
 		{/if}
-		{#if !chat.request && items.length === 0}
+		{#if !request && items.length === 0}
 			<div class="bubble assistant">{@html md(intro)}</div>
 		{/if}
 		{#each items as item}

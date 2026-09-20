@@ -1,3 +1,4 @@
+import { page } from "$app/state";
 import { invalidateAll } from "$app/navigation";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import { getAgent, useLanguage } from "./agent";
@@ -7,8 +8,8 @@ export const chat = $state<{
 	messages: AgentMessage[];
 	streaming: AgentMessage | undefined;
 	busy: boolean;
-	request: Request | undefined;
-}>({ messages: [], streaming: undefined, busy: false, request: undefined });
+	requestId: string | undefined;
+}>({ messages: [], streaming: undefined, busy: false, requestId: undefined });
 
 let currentId: string | undefined;
 let openToken = 0;
@@ -52,12 +53,17 @@ export async function open(id: string, language: string): Promise<void> {
 	chat.messages = [];
 	chat.streaming = undefined;
 	chat.busy = false;
-	chat.request = undefined;
+	chat.requestId = undefined;
 }
 
 /** Opens a recorded request in the chat, where the assistant restates it. */
 export function selectRequest(request: Request): void {
-	chat.request = request;
+	chat.requestId = request.id;
+}
+
+/** The selected request, resolved against the live list so it clears once the agent closes it. */
+export function selectedRequest(): Request | undefined {
+	return page.data.requests?.find((request: Request) => request.id === chat.requestId);
 }
 
 export function send(text: string): void {
