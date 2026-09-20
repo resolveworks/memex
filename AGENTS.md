@@ -1,8 +1,8 @@
 # Working with Memex
 
 Memex is a deliberately minimal browser chat agent: a SvelteKit app running
-`@earendil-works/pi-agent-core` in the browser with two localStorage-backed
-tools. "Dumb and simple" is a design goal — resist scope creep.
+`@earendil-works/pi-agent-core` in the browser with two server-backed tools.
+"Dumb and simple" is a design goal — resist scope creep.
 
 ## Commands
 
@@ -21,8 +21,10 @@ Never commit or log `DEEPSEEK_API_KEY`. `.env` is gitignored; keep it that way.
   SSE-style `data: {...}\n\n` lines mapping pi-ai events to proxy events.
 - The server is **model-authoritative**: the model is resolved in
   `src/lib/model.ts` and the client's `body.model` is ignored.
-- Tools: `store` / `retrieve` in `src/lib/tools.ts`, backed by localStorage
-  under the `memex:` key prefix. A missing key throws.
+- Tools: `store` / `search` in `src/lib/tools.ts`. Each calls `/api/memories`,
+  which reads and writes `data/memories.json` through `src/lib/server/storage.ts`.
+- `search` is index-free: the query is split into words, each of which must
+  appear in a memory's key or value.
 - No auth yet. The marked comment at the top of the stream handler is the
   agreed single insertion point.
 
