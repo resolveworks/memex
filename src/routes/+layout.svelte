@@ -176,7 +176,7 @@
 
 	.menu {
 		display: flex;
-		padding: var(--space-2);
+		padding: 0;
 		border: none;
 		background: none;
 		color: var(--ink);
