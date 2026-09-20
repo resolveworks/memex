@@ -100,14 +100,14 @@
 	<div class="messages" bind:this={viewport} onscroll={onScroll}>
 		<div class="thread">
 			{#if request}
-			<div class="bubble assistant request">
+			<div class="request">
 				<p>{t("chat.requestIntro")}</p>
 				<p class="question">{request.text}</p>
 				<p>{t("chat.requestHint")}</p>
 			</div>
 		{/if}
 		{#if !request && items.length === 0}
-			<div class="bubble assistant">{@html md(intro)}</div>
+			<div class="assistant">{@html md(intro)}</div>
 		{/if}
 		{#each items as item}
 			{#if item.kind === "tool"}
@@ -116,7 +116,7 @@
 					{#if item.args}<span class="tool-args">{item.args}</span>{/if}
 				</div>
 			{:else if item.kind === "assistant"}
-				<div class="bubble assistant">{@html md(item.text)}</div>
+				<div class="assistant">{@html md(item.text)}</div>
 			{:else}
 				<div class="bubble user">{item.text}</div>
 			{/if}
@@ -183,73 +183,82 @@
 		white-space: pre-wrap;
 	}
 
-	.bubble.assistant {
+	.assistant {
 		align-self: flex-start;
-		background: var(--surface);
+		max-width: 90%;
+		padding: 0.25rem 0;
+		line-height: 1.4;
+		overflow-wrap: anywhere;
+	}
+
+	.request {
+		align-self: stretch;
+		padding: 0.5rem 0.75rem;
 		border: 1px solid var(--line);
-		border-bottom-left-radius: 0.25rem;
+		border-radius: 0.75rem;
+		background: var(--surface);
 	}
 
 	.request .question {
 		font-weight: 600;
 	}
 
-	.bubble.assistant :global(*:first-child) {
+	.assistant :global(*:first-child) {
 		margin-top: 0;
 	}
 
-	.bubble.assistant :global(*:last-child) {
+	.assistant :global(*:last-child) {
 		margin-bottom: 0;
 	}
 
-	.bubble.assistant :global(p),
-	.bubble.assistant :global(ul),
-	.bubble.assistant :global(ol),
-	.bubble.assistant :global(blockquote),
-	.bubble.assistant :global(pre),
-	.bubble.assistant :global(table) {
+	.assistant :global(p),
+	.assistant :global(ul),
+	.assistant :global(ol),
+	.assistant :global(blockquote),
+	.assistant :global(pre),
+	.assistant :global(table) {
 		margin: 0.5rem 0;
 	}
 
-	.bubble.assistant :global(ul),
-	.bubble.assistant :global(ol) {
+	.assistant :global(ul),
+	.assistant :global(ol) {
 		padding-left: 1.25rem;
 	}
 
-	.bubble.assistant :global(h1),
-	.bubble.assistant :global(h2),
-	.bubble.assistant :global(h3),
-	.bubble.assistant :global(h4),
-	.bubble.assistant :global(h5),
-	.bubble.assistant :global(h6) {
+	.assistant :global(h1),
+	.assistant :global(h2),
+	.assistant :global(h3),
+	.assistant :global(h4),
+	.assistant :global(h5),
+	.assistant :global(h6) {
 		font-size: 1rem;
 		font-weight: 600;
 	}
 
-	.bubble.assistant :global(code) {
+	.assistant :global(code) {
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 		font-size: 0.875em;
 	}
 
-	.bubble.assistant :global(:not(pre) > code) {
+	.assistant :global(:not(pre) > code) {
 		background: var(--fill);
 		padding: 0.1em 0.35em;
 		border-radius: 0.25rem;
 	}
 
-	.bubble.assistant :global(pre) {
+	.assistant :global(pre) {
 		background: var(--fill);
 		padding: 0.5rem 0.75rem;
 		border-radius: 0.375rem;
 		overflow-x: auto;
 	}
 
-	.bubble.assistant :global(table) {
+	.assistant :global(table) {
 		border-collapse: collapse;
 	}
 
-	.bubble.assistant :global(th),
-	.bubble.assistant :global(td) {
+	.assistant :global(th),
+	.assistant :global(td) {
 		border: 1px solid var(--line);
 		padding: 0.25rem 0.5rem;
 		text-align: left;
