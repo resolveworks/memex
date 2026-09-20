@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
-	import { chat, selectRequest } from "$lib/chat.svelte";
+	import { chat } from "$lib/chat.svelte";
 	import Footer from "$lib/components/Footer.svelte";
 	import Header from "$lib/components/Header.svelte";
 	import Select from "$lib/components/Select.svelte";
@@ -80,15 +80,7 @@
 				{:else}
 					<ul>
 						{#each page.data.requests as request (request.id)}
-							<li>
-								<button
-									class:active={chat.requestId === request.id}
-									onclick={() => {
-										selectRequest(request);
-										onclose();
-									}}
-								>{request.text}</button>
-							</li>
+							<li>{request.text}</li>
 						{/each}
 					</ul>
 				{/if}
@@ -245,27 +237,9 @@
 		list-style: none;
 	}
 
-	.requests button {
-		width: 100%;
-		font: inherit;
-		text-align: left;
+	.requests li {
 		padding: 0.5rem 0.75rem;
-		border: 1px solid transparent;
-		border-radius: 0.5rem;
-		background: none;
 		color: var(--ink-soft);
-		cursor: pointer;
-	}
-
-	.requests button:hover {
-		background: var(--fill);
-	}
-
-	.requests button.active {
-		border-color: var(--line-strong);
-		background: var(--fill);
-		color: var(--ink);
-		font-weight: 600;
 	}
 
 	@media (min-width: 48rem) {

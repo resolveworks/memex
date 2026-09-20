@@ -2,7 +2,7 @@
 	import type { AgentMessage } from "@earendil-works/pi-agent-core";
 	import { contentText } from "@earendil-works/pi-ai";
 	import { marked } from "marked";
-	import { chat, open, selectedRequest, send } from "$lib/chat.svelte";
+	import { chat, open, send } from "$lib/chat.svelte";
 	import Button from "$lib/components/Button.svelte";
 	import Footer from "$lib/components/Footer.svelte";
 	import { t } from "$lib/i18n.svelte";
@@ -14,7 +14,6 @@
 	let { id, language }: { id: string; language: string } = $props();
 
 	let input = $state("");
-	let request = $derived(selectedRequest());
 
 	$effect(() => {
 		void open(id, language);
@@ -69,11 +68,6 @@
 		if (pinned && viewport) viewport.scrollTop = viewport.scrollHeight;
 	});
 
-	// A newly selected request is the first message, so bring it into view.
-	$effect(() => {
-		if (request && viewport) viewport.scrollTop = 0;
-	});
-
 	// Static welcome shown only on an empty chat; never sent to the model or saved.
 	const intro = $derived(t("chat.intro"));
 
@@ -96,16 +90,9 @@
 <div class="chat">
 	<div class="messages" bind:this={viewport} onscroll={onScroll}>
 		<div class="thread">
-			{#if request}
-			<div class="request">
-				<p>{t("chat.requestIntro")}</p>
-				<p class="question">{request.text}</p>
-				<p>{t("chat.requestHint")}</p>
-			</div>
-		{/if}
-		{#if !request && items.length === 0}
-			<div class="assistant">{@html md(intro)}</div>
-		{/if}
+			{#if items.length === 0}
+				<div class="assistant">{@html md(intro)}</div>
+			{/if}
 		{#each items as item}
 			{#if item.kind === "tool"}
 				<div class="tool">
@@ -192,18 +179,6 @@
 		overflow-wrap: anywhere;
 	}
 
-	.request {
-		align-self: stretch;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid var(--line);
-		border-radius: 0.75rem;
-		background: var(--surface);
-	}
-
-	.request .question {
-		font-weight: 600;
-	}
-
 	.assistant :global(*:first-child) {
 		margin-top: 0;
 	}
@@ -281,6 +256,8 @@
 	}
 
 	.tool-name {
+		flex: none;
+		white-space: nowrap;
 		font-weight: 600;
 		color: var(--ink);
 		text-transform: capitalize;
