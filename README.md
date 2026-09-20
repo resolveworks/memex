@@ -19,7 +19,7 @@ Memex makes capturing and retrieving knowledge feel like a conversation rather t
 - **Continue across conversations:** Shared memories remain available in new chat sessions.
 - **Work across languages:** Ask in your own language and receive the answer in that language.
 - **Discover knowledge gaps:** If an answer has not been recorded, Memex adds the question to a request list so it can be filled in later.
-- **Stay in control:** Review and remove stored memories and unanswered requests.
+- **Stay in control:** See unanswered requests in the sidebar and answer them in chat.
 
 ## Where it can help
 

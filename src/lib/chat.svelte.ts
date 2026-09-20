@@ -1,11 +1,14 @@
+import { invalidateAll } from "$app/navigation";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import { getAgent, useLanguage } from "./agent";
+import type { Request } from "./request";
 
 export const chat = $state<{
 	messages: AgentMessage[];
 	streaming: AgentMessage | undefined;
 	busy: boolean;
-}>({ messages: [], streaming: undefined, busy: false });
+	request: Request | undefined;
+}>({ messages: [], streaming: undefined, busy: false, request: undefined });
 
 let currentId: string | undefined;
 let openToken = 0;
@@ -20,6 +23,8 @@ agent.subscribe((event) => {
 		case "agent_end":
 			chat.busy = false;
 			chat.streaming = undefined;
+			// Pick up requests the run recorded or closed.
+			void invalidateAll();
 			break;
 		case "message_start":
 		case "message_update":
@@ -47,6 +52,12 @@ export async function open(id: string, language: string): Promise<void> {
 	chat.messages = [];
 	chat.streaming = undefined;
 	chat.busy = false;
+	chat.request = undefined;
+}
+
+/** Opens a recorded request in the chat, where the assistant restates it. */
+export function selectRequest(request: Request): void {
+	chat.request = request;
 }
 
 export function send(text: string): void {

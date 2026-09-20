@@ -69,6 +69,11 @@
 		if (pinned && viewport) viewport.scrollTop = viewport.scrollHeight;
 	});
 
+	// A newly selected request is the first message, so bring it into view.
+	$effect(() => {
+		if (chat.request && viewport) viewport.scrollTop = 0;
+	});
+
 	// Static welcome shown only on an empty chat; never sent to the model or saved.
 	const intro = $derived(t("chat.intro"));
 
@@ -76,6 +81,7 @@
 		const text = input.trim();
 		if (!text || chat.busy) return;
 		input = "";
+		pinned = true;
 		send(text);
 	}
 
@@ -89,7 +95,14 @@
 
 <div class="chat">
 	<div class="messages" bind:this={viewport} onscroll={onScroll}>
-		{#if items.length === 0}
+		{#if chat.request}
+			<div class="bubble assistant request">
+				<p>{t("chat.requestIntro")}</p>
+				<p class="question">{chat.request.question}</p>
+				<p>{t("chat.requestHint")}</p>
+			</div>
+		{/if}
+		{#if !chat.request && items.length === 0}
 			<div class="bubble assistant">{@html md(intro)}</div>
 		{/if}
 		{#each items as item}
@@ -162,6 +175,10 @@
 		background: var(--surface);
 		border: 1px solid var(--line);
 		border-bottom-left-radius: 0.25rem;
+	}
+
+	.request .question {
+		font-weight: 600;
 	}
 
 	.bubble.assistant :global(*:first-child) {
