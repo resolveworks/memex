@@ -1,10 +1,15 @@
 <script lang="ts">
 	import favicon from '$lib/assets/favicon.svg';
 	import SessionSidebar from '$lib/SessionSidebar.svelte';
+	import { chat } from '$lib/chat.svelte';
 
 	let { children } = $props();
 
 	let drawerOpen = $state(false);
+
+	function newChat(event: MouseEvent) {
+		if (chat.busy) event.preventDefault();
+	}
 </script>
 
 <svelte:head>
@@ -25,7 +30,7 @@
 				<line x1="3" y1="18" x2="21" y2="18" />
 			</svg>
 		</button>
-		<span class="title">Memex</span>
+		<a class="title" href="/" onclick={newChat}>Memex</a>
 		<a class="settings" href="/settings">Settings</a>
 	</header>
 	<main>
@@ -79,6 +84,8 @@
 
 	.title {
 		font-weight: 600;
+		color: #1a1a1a;
+		text-decoration: none;
 	}
 
 	.settings {
