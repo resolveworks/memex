@@ -2,6 +2,9 @@
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
 	import { chat, selectRequest } from "$lib/chat.svelte";
+	import Footer from "$lib/components/Footer.svelte";
+	import Header from "$lib/components/Header.svelte";
+	import Select from "$lib/components/Select.svelte";
 	import { t } from "$lib/i18n.svelte";
 	import { forget, getMemexes, remember } from "$lib/memexes.svelte";
 
@@ -50,49 +53,50 @@
 {/if}
 
 <aside class:open>
-	<div class="head">
-		<span>{t("sidebar.memexes")}</span>
+	<Header>
+		<span class="head-title">{t("sidebar.memexes")}</span>
 		<button class="close" aria-label={t("sidebar.close")} onclick={onclose}>×</button>
+	</Header>
+
+	<div class="body">
+		<Select
+			aria-label={t("sidebar.memexes")}
+			value={page.params.id}
+			onchange={switchMemex}
+			disabled={chat.busy}
+		>
+			{#each memexes as memex (memex.id)}
+				<option value={memex.id}>{memex.title}</option>
+			{/each}
+		</Select>
+
+		<button class="new" onclick={newMemex} disabled={chat.busy}>{t("sidebar.newMemex")}</button>
+
+		{#if page.data.requests}
+			<div class="requests">
+				<span class="section">{t("sidebar.requests")}</span>
+				{#if page.data.requests.length === 0}
+					<p class="empty">{t("sidebar.noRequests")}</p>
+				{:else}
+					<ul>
+						{#each page.data.requests as request (request.id)}
+							<li>
+								<button
+									class:active={chat.requestId === request.id}
+									onclick={() => {
+										selectRequest(request);
+										onclose();
+									}}
+								>{request.text}</button>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+			</div>
+		{/if}
 	</div>
 
-	<select
-		class="switcher"
-		aria-label={t("sidebar.memexes")}
-		value={page.params.id}
-		onchange={switchMemex}
-		disabled={chat.busy}
-	>
-		{#each memexes as memex (memex.id)}
-			<option value={memex.id}>{memex.title}</option>
-		{/each}
-	</select>
-
-	<button class="new" onclick={newMemex} disabled={chat.busy}>{t("sidebar.newMemex")}</button>
-
-	{#if page.data.requests}
-		<div class="requests">
-			<span class="section">{t("sidebar.requests")}</span>
-			{#if page.data.requests.length === 0}
-				<p class="empty">{t("sidebar.noRequests")}</p>
-			{:else}
-				<ul>
-					{#each page.data.requests as request (request.id)}
-						<li>
-							<button
-								class:active={chat.requestId === request.id}
-								onclick={() => {
-									selectRequest(request);
-									onclose();
-								}}
-							>{request.text}</button>
-						</li>
-					{/each}
-				</ul>
-			{/if}
-		</div>
-	{/if}
-
-	<div class="foot">
+	<Footer>
 		{#if page.params.id}
 			<a class="settings" href={`/${page.params.id}/settings`} onclick={follow}>
 				<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -104,7 +108,7 @@
 				{t("nav.settings")}
 			</a>
 		{/if}
-	</div>
+	</Footer>
 </aside>
 
 <style>
@@ -125,9 +129,7 @@
 		z-index: 2;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
 		width: min(80vw, 18rem);
-		padding: 0.75rem;
 		border-right: 1px solid var(--line);
 		background: var(--surface);
 		overflow: hidden;
@@ -142,15 +144,21 @@
 		transition: transform 200ms ease;
 	}
 
-	.head {
+	.body {
 		display: flex;
-		align-items: center;
-		justify-content: space-between;
+		flex-direction: column;
+		gap: 0.5rem;
+		flex: 1;
+		min-height: 0;
+		padding: 0.75rem;
+	}
+
+	.head-title {
 		font-weight: 600;
-		padding-left: 0.75rem;
 	}
 
 	.close {
+		margin-left: auto;
 		font: inherit;
 		padding: 0.25rem 0.5rem;
 		border: none;
@@ -160,16 +168,6 @@
 	}
 
 	.close:hover {
-		color: var(--ink);
-	}
-
-	.switcher {
-		font: inherit;
-		width: 100%;
-		padding: 0.5rem 0.75rem;
-		border: 1px solid var(--line-strong);
-		border-radius: 0.5rem;
-		background: var(--surface);
 		color: var(--ink);
 	}
 
@@ -188,25 +186,16 @@
 		border-color: var(--accent);
 	}
 
-	.new:disabled,
-	.switcher:disabled {
+	.new:disabled {
 		opacity: 0.5;
 		cursor: default;
-	}
-
-	.foot {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		margin-top: auto;
 	}
 
 	.settings {
 		display: flex;
 		align-items: center;
 		gap: 0.375rem;
-		padding: 0.5rem 0.75rem;
-		border-top: 1px solid var(--line);
+		align-self: stretch;
 		color: var(--ink);
 		text-decoration: none;
 	}

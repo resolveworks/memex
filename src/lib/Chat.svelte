@@ -3,6 +3,8 @@
 	import { contentText } from "@earendil-works/pi-ai";
 	import { marked } from "marked";
 	import { chat, open, selectedRequest, send } from "$lib/chat.svelte";
+	import Button from "$lib/components/Button.svelte";
+	import Footer from "$lib/components/Footer.svelte";
 	import { t } from "$lib/i18n.svelte";
 
 	function md(text: string): string {
@@ -122,21 +124,23 @@
 		</div>
 	</div>
 
-	<form
-		class="composer"
-		onsubmit={(event) => {
-			event.preventDefault();
-			submit();
-		}}
-	>
-		<textarea
-			bind:value={input}
-			onkeydown={onKeydown}
-			placeholder={t("chat.placeholder")}
-			rows="1"
-		></textarea>
-		<button type="submit" disabled={chat.busy}>{t("chat.send")}</button>
-	</form>
+	<Footer style="padding-inline: max(0.75rem, calc((100% - 48rem) / 2))">
+		<form
+			class="composer"
+			onsubmit={(event) => {
+				event.preventDefault();
+				submit();
+			}}
+		>
+			<textarea
+				bind:value={input}
+				onkeydown={onKeydown}
+				placeholder={t("chat.placeholder")}
+				rows="1"
+			></textarea>
+			<Button type="submit" disabled={chat.busy}>{t("chat.send")}</Button>
+		</form>
+	</Footer>
 </div>
 
 <style>
@@ -283,9 +287,8 @@
 
 	.composer {
 		display: flex;
+		flex: 1;
 		gap: 0.5rem;
-		padding: 0.75rem;
-		border-top: 1px solid var(--line);
 	}
 
 	textarea {
@@ -300,30 +303,5 @@
 
 	textarea:focus {
 		border-color: var(--accent);
-	}
-
-	button {
-		font: inherit;
-		padding: 0.5rem 1rem;
-		border: none;
-		border-radius: 0.5rem;
-		background: var(--accent);
-		color: var(--accent-ink);
-		cursor: pointer;
-	}
-
-	button:hover:not(:disabled) {
-		background: var(--accent-hover);
-	}
-
-	button:disabled {
-		opacity: 0.5;
-		cursor: default;
-	}
-
-	@media (min-width: 48rem) {
-		.composer {
-			padding-inline: max(0.75rem, calc((100% - 48rem) / 2));
-		}
 	}
 </style>

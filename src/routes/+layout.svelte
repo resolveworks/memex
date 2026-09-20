@@ -4,6 +4,8 @@
 	import { chat } from '$lib/chat.svelte';
 	import { i18n, languages, languageName, setLocale, t } from '$lib/i18n.svelte';
 	import { getMemexes } from '$lib/memexes.svelte';
+	import Header from '$lib/components/Header.svelte';
+	import Select from '$lib/components/Select.svelte';
 	import Sidebar from '$lib/Sidebar.svelte';
 
 	let { children } = $props();
@@ -31,7 +33,7 @@
 <div class="app">
 	<Sidebar open={drawerOpen} onclose={() => (drawerOpen = false)} />
 	<div class="content">
-		<header>
+		<Header>
 			<button
 				class="menu"
 				aria-label={t('sidebar.open')}
@@ -45,17 +47,18 @@
 				</svg>
 			</button>
 			<a class="title" href={home} onclick={follow}>{page.data.memex?.title ?? "Memex"}</a>
-			<select
-				class="language"
-				aria-label={t('nav.language')}
-				value={i18n.locale}
-				onchange={(event) => setLocale(event.currentTarget.value)}
-			>
-				{#each languages as code (code)}
-					<option value={code}>{languageName(code)}</option>
-				{/each}
-			</select>
-		</header>
+			<div class="language">
+				<Select
+					aria-label={t('nav.language')}
+					value={i18n.locale}
+					onchange={(event) => setLocale(event.currentTarget.value)}
+				>
+					{#each languages as code (code)}
+						<option value={code}>{languageName(code)}</option>
+					{/each}
+				</Select>
+			</div>
+		</Header>
 		<main>
 			{@render children()}
 		</main>
@@ -104,16 +107,6 @@
 		min-width: 0;
 	}
 
-	header {
-		display: flex;
-		align-items: center;
-		gap: 0.25rem;
-		flex-shrink: 0;
-		padding: 0.375rem 0.5rem;
-		border-bottom: 1px solid var(--line);
-		background: var(--surface);
-	}
-
 	.title {
 		font-weight: 600;
 		letter-spacing: -0.01em;
@@ -141,13 +134,7 @@
 	}
 
 	.language {
-		font: inherit;
 		margin-left: auto;
-		padding: 0.375rem 0.5rem;
-		border: 1px solid var(--line-strong);
-		border-radius: 0.5rem;
-		background: var(--surface);
-		color: var(--ink);
 	}
 
 	main {
