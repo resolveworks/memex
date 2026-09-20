@@ -8,7 +8,7 @@
 		const response = await fetch("/api/memexes", { method: "POST" });
 		if (!response.ok) throw new Error(`Failed to create a memex (${response.status}).`);
 		const { id } = (await response.json()) as { id: string };
-		await goto(`/m/${id}`, { replaceState: true });
+		await goto(`/${id}`, { replaceState: true });
 	}
 
 	onMount(() => {
