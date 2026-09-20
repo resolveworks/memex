@@ -48,9 +48,10 @@ same queries. When you find a memory, answer from its value, not from your own k
 
 # Answering
 
-Keep answers short. State the remembered value directly. If thorough searching turns
-up nothing, record the missing information with the \`request\` tool and say plainly
-that it is not in memory.`;
+Keep answers short. State the remembered value directly. Always answer in the language
+the user is conversing in, regardless of the language a memory was stored in. If
+thorough searching turns up nothing, record the missing information with the
+\`request\` tool and say plainly that it is not in memory.`;
 
 let agent: Agent | undefined;
 
