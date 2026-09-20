@@ -21,7 +21,7 @@
 
 <div class="app">
 	<header>
-		<a class="title" href="/" onclick={newMemex}>Memex</a>
+		<a class="title" href="/" onclick={newMemex}>{page.data.memex?.title ?? "Memex"}</a>
 		<select
 			class="language"
 			aria-label={t('nav.language')}

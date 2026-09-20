@@ -1,5 +1,5 @@
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
-import { getAgent } from "./agent";
+import { getAgent, useLanguage } from "./agent";
 
 export const chat = $state<{
 	messages: AgentMessage[];
@@ -33,7 +33,7 @@ agent.subscribe((event) => {
 });
 
 /** Switches to a memex, discarding the previous conversation and any stream in flight. */
-export async function open(id: string | undefined): Promise<void> {
+export async function open(id: string, language: string): Promise<void> {
 	if (id === currentId) return;
 	const token = ++openToken;
 	if (agent.state.isStreaming) {
@@ -43,6 +43,7 @@ export async function open(id: string | undefined): Promise<void> {
 	if (token !== openToken) return;
 	currentId = id;
 	agent.reset();
+	useLanguage(language);
 	chat.messages = [];
 	chat.streaming = undefined;
 	chat.busy = false;

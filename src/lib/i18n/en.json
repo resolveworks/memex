@@ -1,6 +1,9 @@
 {
 	"nav.settings": "Settings",
 	"nav.language": "Language",
+	"create.heading": "New memex",
+	"create.title": "Title",
+	"create.submit": "Create",
 	"chat.intro": "I'm Memex, the memory of your house — the knowledge that usually walks out the door with your staff.\n\nTell me something worth keeping — \"the boiler key is in the office, code 4711\" — and I'll store it. Ask for it later, now or when you return — \"where's the boiler key?\" — and I'll look it up. If it isn't in memory, I'll note the question so you can fill it in.\n\nThat's the whole idea: say it once, and it stays in the house.",
 	"chat.placeholder": "Message Memex…",
 	"chat.send": "Send",

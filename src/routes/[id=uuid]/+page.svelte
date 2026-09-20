@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { page } from "$app/state";
 	import Chat from "$lib/Chat.svelte";
+
+	let { data } = $props();
 </script>
 
-<Chat id={page.params.id} />
+<Chat id={data.memex.id} language={data.memex.language} />

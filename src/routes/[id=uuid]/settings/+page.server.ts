@@ -1,11 +1,8 @@
-import { error } from "@sveltejs/kit";
-import { exists } from "$lib/server/memexes";
 import { list as listMemories, remove as removeMemory } from "$lib/server/storage";
 import { list as listRequests, remove as removeRequest } from "$lib/server/requests";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = ({ params }) => {
-	if (!exists(params.id)) error(404, "No such memex.");
 	return { memories: listMemories(params.id), requests: listRequests(params.id) };
 };
 

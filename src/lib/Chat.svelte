@@ -9,12 +9,12 @@
 		return marked(text, { async: false });
 	}
 
-	let { id }: { id?: string } = $props();
+	let { id, language }: { id: string; language: string } = $props();
 
 	let input = $state("");
 
 	$effect(() => {
-		void open(id);
+		void open(id, language);
 	});
 
 	type Item =

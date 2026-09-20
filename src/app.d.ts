@@ -1,10 +1,15 @@
+import type { Memex } from "$lib/server/memexes";
+
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 declare global {
 	namespace App {
 		// interface Error {}
 		// interface Locals {}
-		// interface PageData {}
+		interface PageData {
+			/** The memex of the current route, set by the `[id=uuid]` layout. */
+			memex?: Memex;
+		}
 		// interface PageState {}
 		// interface Platform {}
 	}

@@ -1,15 +1,31 @@
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import { languages } from "$lib/languages";
 import { db } from "./db";
 import { memexes } from "./db/schema";
 
+export interface Memex {
+	id: string;
+	title: string;
+	language: string;
+	createdAt: string;
+}
+
 /** Creates a memex and returns its id, which is unguessable and doubles as its only credential. */
-export function create(): string {
+export function create(title: string, language: string): string {
+	if (title.trim() === "") throw new Error("A memex needs a title.");
+	if (!languages.includes(language)) throw new Error(`Unsupported language "${language}".`);
 	const id = randomUUID();
-	db.insert(memexes).values({ id, createdAt: new Date().toISOString() }).run();
+	db.insert(memexes)
+		.values({ id, title, language, createdAt: new Date().toISOString() })
+		.run();
 	return id;
 }
 
+export function get(id: string): Memex | undefined {
+	return db.select().from(memexes).where(eq(memexes.id, id)).get();
+}
+
 export function exists(id: string): boolean {
-	return db.select({ id: memexes.id }).from(memexes).where(eq(memexes.id, id)).get() !== undefined;
+	return get(id) !== undefined;
 }

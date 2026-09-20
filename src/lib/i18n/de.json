@@ -1,6 +1,9 @@
 {
 	"nav.settings": "Einstellungen",
 	"nav.language": "Sprache",
+	"create.heading": "Neuer Memex",
+	"create.title": "Titel",
+	"create.submit": "Erstellen",
 	"chat.intro": "Ich bin Memex, das Gedächtnis Ihres Hauses — das Wissen, das sonst mit Ihrem Personal zur Tür hinausgeht.\n\nSagen Sie mir etwas, das es sich zu behalten lohnt — „der Heizungsschlüssel liegt im Büro, Code 4711“ — und ich speichere es. Fragen Sie später danach, jetzt oder wenn Sie zurückkehren — „wo ist der Heizungsschlüssel?“ — und ich schlage es nach. Wenn es nicht im Gedächtnis ist, notiere ich die Frage, damit Sie sie ergänzen können.\n\nDas ist die ganze Idee: einmal gesagt, und es bleibt im Haus.",
 	"chat.placeholder": "Nachricht an Memex…",
 	"chat.send": "Senden",

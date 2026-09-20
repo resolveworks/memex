@@ -2,6 +2,9 @@ import { primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const memexes = sqliteTable("memexes", {
 	id: text("id").primaryKey(),
+	title: text("title").notNull(),
+	// The single language all memories are stored in; the UI and conversation may differ.
+	language: text("language").notNull(),
 	createdAt: text("created_at").notNull()
 });
 
