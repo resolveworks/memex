@@ -27,16 +27,26 @@
 	]);
 
 	const examples = $derived([
-		[
-			{ kind: "user", text: t("landing.example.remember.user1") },
-			{ kind: "assistant", text: t("landing.example.remember.assistant1") },
-			{ kind: "user", text: t("landing.example.remember.user2") },
-			{ kind: "assistant", text: t("landing.example.remember.assistant2") }
-		],
-		[
-			{ kind: "user", text: t("landing.example.ask.user") },
-			{ kind: "assistant", text: t("landing.example.ask.assistant") }
-		]
+		{
+			title: t("landing.example.family.title"),
+			body: t("landing.example.family.body"),
+			question: t("landing.example.family.question")
+		},
+		{
+			title: t("landing.example.world.title"),
+			body: t("landing.example.world.body"),
+			question: t("landing.example.world.question")
+		},
+		{
+			title: t("landing.example.place.title"),
+			body: t("landing.example.place.body"),
+			question: t("landing.example.place.question")
+		},
+		{
+			title: t("landing.example.project.title"),
+			body: t("landing.example.project.body"),
+			question: t("landing.example.project.question")
+		}
 	]);
 </script>
 
@@ -108,11 +118,11 @@
 				<h2>{t("landing.examples.heading")}</h2>
 				<div class="examples">
 					{#each examples as example}
-						<div class="example stack">
-							{#each example as message}
-								<p class="bubble {message.kind}">{message.text}</p>
-							{/each}
-						</div>
+						<article class="example stack">
+							<h3>{example.title}</h3>
+							<p>{example.body}</p>
+							<blockquote>{example.question}</blockquote>
+						</article>
 					{/each}
 				</div>
 			</section>
@@ -250,33 +260,30 @@
 	}
 
 	.example {
-		gap: var(--space-2);
-		padding: var(--space-4);
+		gap: var(--space-3);
+		padding: var(--space-6);
 		border: 1px solid var(--line);
 		border-radius: var(--radius-lg);
 		background: var(--surface);
 		box-shadow: var(--shadow-sm);
 	}
 
-	.bubble {
-		max-inline-size: 85%;
+	.example h3 {
+		font-size: 1.0625rem;
+	}
+
+	.example p {
+		font-size: 0.9375rem;
+	}
+
+	.example blockquote {
+		margin-block-start: auto;
 		padding: var(--space-3) var(--space-4);
 		border-radius: var(--radius-lg);
-		line-height: 1.5;
-		overflow-wrap: anywhere;
-	}
-
-	.bubble.user {
-		align-self: flex-end;
-		background: var(--accent);
-		color: var(--accent-ink);
-		border-bottom-right-radius: var(--radius-sm);
-	}
-
-	.bubble.assistant {
-		align-self: flex-start;
 		background: var(--fill);
-		border-bottom-left-radius: var(--radius-sm);
+		color: var(--ink-soft);
+		font-style: italic;
+		line-height: 1.5;
 	}
 
 	@media (min-width: 48rem) {
