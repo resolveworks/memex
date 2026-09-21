@@ -5,6 +5,7 @@ import type { Memory } from "$lib/memory";
 import { PAGE_SIZE, type Page } from "$lib/page";
 import { db } from "./db";
 import { memories } from "./db/schema";
+import { tokenize } from "./tokenize";
 
 function newestFirst(memexId: string) {
 	return db
@@ -81,7 +82,7 @@ export function terms(memexId: string, language: string, limit: number): TermCou
 	const counts = new Map<string, number>();
 	for (const { text } of rows) {
 		for (const term of new Set(tokenize(text))) {
-			if (term.length < 3 || stop.has(term)) continue;
+			if (stop.has(term)) continue;
 			counts.set(term, (counts.get(term) ?? 0) + 1);
 		}
 	}
@@ -90,14 +91,6 @@ export function terms(memexId: string, language: string, limit: number): TermCou
 		.map(([term, count]) => ({ term, count }))
 		.sort((a, b) => b.count - a.count || a.term.localeCompare(b.term))
 		.slice(0, limit);
-}
-
-/** Splits text into the lowercase terms used by search and term statistics. */
-function tokenize(text: string): string[] {
-	return text
-		.toLowerCase()
-		.split(/[^\p{L}\p{N}]+/u)
-		.filter(Boolean);
 }
 
 export function search(memexId: string, queries: string[]): Memory[] {

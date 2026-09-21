@@ -4,6 +4,7 @@ import { PAGE_SIZE, type Page } from "$lib/page";
 import type { Request } from "$lib/request";
 import { db } from "./db";
 import { requests } from "./db/schema";
+import { tokenize } from "./tokenize";
 
 function newestFirst(memexId: string) {
 	return db
@@ -53,9 +54,7 @@ export function remove(memexId: string, id: string): void {
 }
 
 export function search(memexId: string, queries: string[]): Request[] {
-	const terms = queries
-		.flatMap((query) => query.toLowerCase().split(/[^\p{L}\p{N}]+/u))
-		.filter(Boolean);
+	const terms = queries.flatMap(tokenize);
 	const all = list(memexId);
 	if (terms.length === 0) return all;
 	return all.filter((request) => {

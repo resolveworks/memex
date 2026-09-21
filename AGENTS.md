@@ -22,6 +22,9 @@ Never commit or log `DEEPSEEK_API_KEY`. `.env` is gitignored; keep it that way.
 
 ## Reference
 
+- Stopword lists in `src/lib/i18n/*.json` are copied verbatim from spaCy's
+  `spacy/lang/<lang>/stop_words.py` (contraction forms included). Don't hand-edit
+  or "fix" them.
 - Installed `node_modules/@earendil-works/*` `.d.ts` files are the API source
   of truth (installed 0.85.1).
 - `~/Projects/pi` is the dev repo at a newer version — consult it for concepts,
