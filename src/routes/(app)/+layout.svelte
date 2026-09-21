@@ -105,7 +105,6 @@
 		block-size: 0.5rem;
 		border-radius: var(--radius-full);
 		background: var(--danger);
-		box-shadow: 0 0 0 2px var(--surface);
 	}
 
 	.icon:hover:not(:disabled) {

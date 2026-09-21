@@ -165,10 +165,6 @@
 		padding-block: var(--space-8);
 	}
 
-	.hero :global(.card) {
-		box-shadow: var(--shadow);
-	}
-
 	.hero h1 {
 		font-size: 1.375rem;
 		letter-spacing: -0.01em;
@@ -184,7 +180,6 @@
 	.mascot {
 		display: block;
 		inline-size: 1em;
-		filter: drop-shadow(0 8px 16px rgb(46 38 35 / 0.12));
 	}
 
 	.mascot-wrap :global(.bubble-pop.big) {

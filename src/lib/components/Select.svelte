@@ -183,7 +183,6 @@
 		border-radius: var(--radius);
 		background: var(--surface);
 		color: inherit;
-		box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
 	}
 
 	.option {
