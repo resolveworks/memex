@@ -49,7 +49,7 @@
 		"settings.appLanguageHint": "Ändert nur die Sprache der Benutzeroberfläche. Du kannst mit Memex in jeder Sprache sprechen – er antwortet in der Sprache, in der du schreibst.",
 		"settings.exportHeading": "Deine Daten herunterladen",
 		"settings.export": "Herunterladen",
-		"settings.exportHint": "Speichert alles in diesem Memex – Erinnerungen und Anfragen – als JSON-Datei.",
+		"settings.exportHint": "Speichert alles in diesem Memex – Erinnerungen und Anfragen.",
 		"chat.placeholder": "Nachricht an Memex…",
 		"chat.send": "Senden",
 		"chat.thinking": "Denkt nach",

@@ -49,7 +49,7 @@
 		"settings.appLanguageHint": "Ændrer kun appens grænsefladesprog. Du kan tale med Memex på ethvert sprog — den svarer på det sprog, du skriver.",
 		"settings.exportHeading": "Download dine data",
 		"settings.export": "Download",
-		"settings.exportHint": "Gemmer alt i denne memex — erindringer og forespørgsler — som en JSON-fil.",
+		"settings.exportHint": "Gemmer alt i denne memex — erindringer og forespørgsler.",
 		"chat.placeholder": "Besked til Memex…",
 		"chat.send": "Send",
 		"chat.thinking": "Tænker",

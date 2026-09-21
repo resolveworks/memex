@@ -49,7 +49,7 @@
 		"settings.appLanguageHint": "Zmienia tylko język interfejsu aplikacji. Możesz rozmawiać z Memexem w dowolnym języku — odpowiada w języku, w którym piszesz.",
 		"settings.exportHeading": "Pobierz swoje dane",
 		"settings.export": "Pobierz",
-		"settings.exportHint": "Zapisuje wszystko w tym memexie — wspomnienia i żądania — jako plik JSON.",
+		"settings.exportHint": "Zapisuje wszystko w tym memexie — wspomnienia i żądania.",
 		"chat.placeholder": "Wiadomość do Memexa…",
 		"chat.send": "Wyślij",
 		"chat.thinking": "Myślę",

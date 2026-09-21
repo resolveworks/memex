@@ -49,7 +49,7 @@
 		"settings.appLanguageHint": "Muuttaa vain sovelluksen käyttöliittymän kieltä. Voit puhua Memexille millä tahansa kielellä — se vastaa kielellä, jolla kirjoitat.",
 		"settings.exportHeading": "Lataa tietosi",
 		"settings.export": "Lataa",
-		"settings.exportHint": "Tallentaa kaiken tässä memexissä — muistot ja pyynnöt — JSON-tiedostona.",
+		"settings.exportHint": "Tallentaa kaiken tässä memexissä — muistot ja pyynnöt.",
 		"chat.placeholder": "Viesti Memexille…",
 		"chat.send": "Lähetä",
 		"chat.thinking": "Ajattelee",

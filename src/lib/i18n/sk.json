@@ -49,7 +49,7 @@
 		"settings.appLanguageHint": "Mení iba jazyk rozhrania aplikácie. S Memexom sa môžeš rozprávať v akomkoľvek jazyku — odpovedá v jazyku, v ktorom píšeš.",
 		"settings.exportHeading": "Stiahnuť vaše údaje",
 		"settings.export": "Stiahnuť",
-		"settings.exportHint": "Uloží všetko v tomto memexe — spomienky a požiadavky — ako súbor JSON.",
+		"settings.exportHint": "Uloží všetko v tomto memexe — spomienky a požiadavky.",
 		"chat.placeholder": "Správa pre Memex…",
 		"chat.send": "Odoslať",
 		"chat.thinking": "Premýšľam",

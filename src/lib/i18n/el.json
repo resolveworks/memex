@@ -49,7 +49,7 @@
 		"settings.appLanguageHint": "Αλλάζει μόνο τη γλώσσα της διεπαφής της εφαρμογής. Μπορείς να μιλήσεις στο Memex σε οποιαδήποτε γλώσσα — απαντά στη γλώσσα στην οποία γράφεις.",
 		"settings.exportHeading": "Λήψη των δεδομένων σας",
 		"settings.export": "Λήψη",
-		"settings.exportHint": "Αποθηκεύει τα πάντα σε αυτό το memex — αναμνήσεις και αιτήματα — ως αρχείο JSON.",
+		"settings.exportHint": "Αποθηκεύει τα πάντα σε αυτό το memex — αναμνήσεις και αιτήματα.",
 		"chat.placeholder": "Μήνυμα στο Memex…",
 		"chat.send": "Αποστολή",
 		"chat.thinking": "Σκέφτομαι",

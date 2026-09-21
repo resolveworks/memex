@@ -49,7 +49,7 @@
 		"settings.appLanguageHint": "Csak az alkalmazás felületének nyelvét módosítja. A Memexhez bármilyen nyelven beszélhetsz — abban a nyelvben válaszol, amelyen írsz.",
 		"settings.exportHeading": "Adataid letöltése",
 		"settings.export": "Letöltés",
-		"settings.exportHint": "Minden ebben a memexben — emlékek és kérések — JSON-fájlként mentve.",
+		"settings.exportHint": "Minden ebben a memexben — emlékek és kérések — mentve.",
 		"chat.placeholder": "Üzenet a Memexnek…",
 		"chat.send": "Küldés",
 		"chat.thinking": "Gondolkodom",

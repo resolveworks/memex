@@ -49,7 +49,7 @@
 		"settings.appLanguageHint": "Променя само езика на интерфейса на приложението. Можеш да говориш с Memex на всеки език — отговаря на езика, на който пишеш.",
 		"settings.exportHeading": "Изтегли данните си",
 		"settings.export": "Изтегли",
-		"settings.exportHint": "Записва всичко в този memex — спомени и заявки — като JSON файл.",
+		"settings.exportHint": "Записва всичко в този memex — спомени и заявки.",
 		"chat.placeholder": "Съобщение до Memex…",
 		"chat.send": "Изпрати",
 		"chat.thinking": "Мисля",
