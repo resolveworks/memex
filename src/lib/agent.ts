@@ -133,6 +133,7 @@ export function getAgent(): Agent {
 
 /** The memex state the system prompt is rebuilt from before each turn. */
 interface PromptContext {
+	title: string;
 	memories: number;
 	requests: Request[];
 	terms: TermCount[];
@@ -187,10 +188,10 @@ export async function refreshSystemPrompt(
 	memexLanguage: string,
 	userLanguage: string
 ): Promise<void> {
-	const { memories, requests, terms } = await promptContext();
+	const { title, memories, requests, terms } = await promptContext();
 	const sections = [
 		systemPrompt(memexLanguage, userLanguage, requests.length > 0),
-		`This memex holds ${memories} memories and ${requests.length} open requests.`,
+		`This memex is titled "${title}". It holds ${memories} memories and ${requests.length} open requests.`,
 		termsSection(terms),
 		requestQueueSection(requests)
 	];

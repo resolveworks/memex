@@ -10,8 +10,9 @@ const TERM_LIMIT = 50;
 /** The memex state the client rebuilds the system prompt from before each turn. */
 export const GET: RequestHandler = ({ request }) => {
 	const memex = memexId(request);
-	const language = get(memex)!.language;
+	const { title, language } = get(memex)!;
 	return json({
+		title,
 		memories: total(memex),
 		requests: list(memex),
 		terms: terms(memex, language, TERM_LIMIT)
