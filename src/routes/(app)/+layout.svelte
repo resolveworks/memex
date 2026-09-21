@@ -6,11 +6,8 @@
 	import { forget, getMemexes, remember } from '$lib/memexes.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import Select from '$lib/components/Select.svelte';
-	import Sidebar from '$lib/Sidebar.svelte';
 
 	let { children } = $props();
-
-	let drawerOpen = $state(false);
 
 	// Every memex we open joins the switcher, most recent first; a 404 means it is gone.
 	afterNavigate(() => {
@@ -30,7 +27,7 @@
 	});
 
 	const memexOptions = $derived(memexes.map((memex) => ({ value: memex.id, label: memex.title })));
-	const memexActions = $derived([{ href: '/', label: t('sidebar.new') }]);
+	const memexActions = $derived([{ href: '/', label: t('nav.new') }]);
 
 	function switchMemex(id: string) {
 		if (id === (page.params.id ?? '')) return;
@@ -47,41 +44,49 @@
 
 <div class="app">
 	<Header>
-		<button
-			class="menu"
-			aria-label={drawerOpen ? t('sidebar.close') : t('sidebar.open')}
-			aria-expanded={drawerOpen}
-			onclick={() => (drawerOpen = !drawerOpen)}
-		>
-			{#if drawerOpen}
-				<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-					<line x1="5" y1="5" x2="19" y2="19" />
-					<line x1="19" y1="5" x2="5" y2="19" />
-				</svg>
-			{:else}
-				<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-					<line x1="3" y1="6" x2="21" y2="6" />
-					<line x1="3" y1="12" x2="21" y2="12" />
-					<line x1="3" y1="18" x2="21" y2="18" />
-				</svg>
-			{/if}
-		</button>
 		<a class="title" href={home} onclick={follow}>Memex</a>
 		<Select
-			label={t('sidebar.memexes')}
+			label={t('nav.memexes')}
 			value={page.params.id ?? ''}
 			options={memexOptions}
 			actions={memexActions}
-			placeholder={t('sidebar.new')}
+			placeholder={t('nav.new')}
 			onchange={switchMemex}
 			disabled={chat.busy}
 		/>
-		<div class="actions cluster">
+		<div class="actions">
 			{#if page.params.id}
 				<a
 					class="icon center"
+					href={`/${page.params.id}/memories`}
+					aria-label={t('memories.heading')}
+					onclick={follow}
+				>
+					<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+						<ellipse cx="12" cy="5" rx="9" ry="3" />
+						<path d="M3 5v14a9 3 0 0 0 18 0V5" />
+						<path d="M3 12a9 3 0 0 0 18 0" />
+					</svg>
+				</a>
+				<a
+					class="icon center"
+					href={`/${page.params.id}/requests`}
+					aria-label={t('requests.heading')}
+					onclick={follow}
+				>
+					<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+						<line x1="8" y1="6" x2="21" y2="6" />
+						<line x1="8" y1="12" x2="21" y2="12" />
+						<line x1="8" y1="18" x2="21" y2="18" />
+						<line x1="3" y1="6" x2="3.01" y2="6" />
+						<line x1="3" y1="12" x2="3.01" y2="12" />
+						<line x1="3" y1="18" x2="3.01" y2="18" />
+					</svg>
+				</a>
+				<a
+					class="icon center"
 					href={`/${page.params.id}/settings`}
-					aria-label={t('settings.heading')}
+					aria-label={t('settings.memexHeading')}
 					onclick={follow}
 				>
 					<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -94,12 +99,9 @@
 			{/if}
 		</div>
 	</Header>
-	<div class="body">
-		<Sidebar open={drawerOpen} onclose={() => (drawerOpen = false)} />
-		<main>
-			{@render children()}
-		</main>
-	</div>
+	<main>
+		{@render children()}
+	</main>
 </div>
 
 <style>
@@ -107,12 +109,6 @@
 		display: grid;
 		grid-template-rows: auto minmax(0, 1fr);
 		block-size: 100dvh;
-	}
-
-	.body {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr);
-		min-block-size: 0;
 	}
 
 	.title {
@@ -126,17 +122,18 @@
 		color: var(--accent);
 	}
 
-	.menu {
-		color: var(--ink);
-	}
-
 	.actions {
+		display: flex;
+		align-items: center;
+		flex-wrap: nowrap;
+		flex-shrink: 0;
 		justify-content: flex-end;
 		gap: var(--space-1);
 		margin-inline-start: auto;
 	}
 
 	.icon {
+		flex: none;
 		inline-size: 2.25rem;
 		block-size: 2.25rem;
 		border-radius: var(--radius);
@@ -154,15 +151,7 @@
 
 	main {
 		min-inline-size: 0;
-	}
-
-	@media (min-width: 48rem) {
-		.menu {
-			display: none;
-		}
-
-		.body {
-			grid-template-columns: auto minmax(0, 1fr);
-		}
+		min-block-size: 0;
+		overflow-y: auto;
 	}
 </style>
