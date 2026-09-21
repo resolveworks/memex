@@ -44,6 +44,7 @@
 					onchange={setLocale}
 				/>
 			</Field>
+			<p class="hint">{t("settings.appLanguageHint")}</p>
 		</Card>
 	</div>
 </Page>

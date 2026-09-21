@@ -21,6 +21,7 @@
 	"settings.appHeading": "App-Einstellungen",
 	"settings.save": "Speichern",
 	"settings.languageLocked": "Alles, woran ich mich erinnere, ist in dieser Sprache gespeichert und kann nach dem Erstellen des Memex nicht mehr geändert werden.",
+	"settings.appLanguageHint": "Ändert nur die Sprache der Benutzeroberfläche. Du kannst mit Memex in jeder Sprache sprechen – er antwortet in der Sprache, in der du schreibst.",
 	"chat.placeholder": "Nachricht an Memex…",
 	"chat.send": "Senden",
 	"chat.thinking": "Denkt nach",
