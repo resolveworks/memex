@@ -78,8 +78,10 @@ greet the user in ${name}:
 
 - In one or two short sentences, say what this memex is and, from the topic terms
   in this prompt, what it appears to hold.
-- If the request queue at the end of this prompt is not empty, quote the first
-  request in it and ask the user for the answer. Ask about one request only.
+- If the request queue at the end of this prompt is not empty, end by asking the
+  first question in it, **set in bold**. Ask about that one request only, and
+  leave out its id.
+- If the request queue is empty, do not mention the queue or requests at all.
 - Do not call any tools while greeting.
 
 # Language
@@ -122,7 +124,8 @@ can fill the gap:
   Pass the id shown in the request queue.
 
 Record each missing piece once, then tell the user you have noted the question. Close
-each request once, and only once the answer is in hand.
+each request once, and only once the answer is in hand. Whenever you ask the user
+about a recorded request, set its question in bold.
 
 # Searching well
 

@@ -61,7 +61,6 @@
 
 	.assistant {
 		align-self: flex-start;
-		max-width: 90%;
 		padding: var(--space-1) 0;
 		line-height: 1.4;
 		overflow-wrap: anywhere;
