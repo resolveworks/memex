@@ -89,8 +89,10 @@
 				<ol class="steps">
 					{#each steps as step, i}
 						<li class="step stack">
-							<span class="number" aria-hidden="true">{i + 1}</span>
-							<h3>{step.title}</h3>
+							<div class="step-head">
+								<span class="number" aria-hidden="true">{i + 1}</span>
+								<h3>{step.title}</h3>
+							</div>
 							<p>{step.body}</p>
 						</li>
 					{/each}
@@ -115,11 +117,13 @@
 
 <style>
 	.landing {
+		--landing-max: 64rem;
+
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		gap: var(--space-14);
-		padding: var(--space-8) var(--space-6) var(--space-14);
+		padding: var(--space-12) var(--space-6) var(--space-14);
 	}
 
 	.icon {
@@ -137,26 +141,47 @@
 	.hero {
 		display: grid;
 		grid-template-columns: minmax(0, var(--panel-max));
+		justify-content: center;
 		align-items: center;
 		gap: var(--space-8);
+		inline-size: 100%;
+		max-inline-size: var(--landing-max);
+		padding-block: var(--space-8);
+	}
+
+	.hero :global(.card) {
+		box-shadow: var(--shadow);
+	}
+
+	.hero h1 {
+		font-size: 1.375rem;
+		letter-spacing: -0.01em;
 	}
 
 	.mascot {
 		justify-self: center;
-		inline-size: clamp(10rem, 24vw, 12rem);
+		inline-size: clamp(10rem, 24vw, 13rem);
+		filter: drop-shadow(0 8px 16px rgb(46 38 35 / 0.12));
 	}
 
 	.explain {
 		inline-size: 100%;
-		max-inline-size: var(--content-max);
-		gap: var(--space-12);
+		max-inline-size: var(--landing-max);
+		gap: var(--space-14);
+	}
+
+	.explain > section {
+		gap: var(--space-6);
 	}
 
 	.explain h2 {
 		font-size: 1.5rem;
+		letter-spacing: -0.02em;
+		line-height: 1.2;
 	}
 
 	.explain p {
+		max-inline-size: 65ch;
 		color: var(--ink-soft);
 		line-height: 1.6;
 	}
@@ -167,14 +192,21 @@
 	}
 
 	.step {
-		gap: var(--space-2);
+		gap: var(--space-3);
+	}
+
+	.step-head {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
 	}
 
 	.number {
 		display: grid;
 		place-items: center;
-		inline-size: 1.75rem;
-		block-size: 1.75rem;
+		flex: none;
+		inline-size: 2rem;
+		block-size: 2rem;
 		border-radius: var(--radius-full);
 		background: var(--accent);
 		color: var(--accent-ink);
@@ -189,11 +221,12 @@
 	.step p {
 		color: var(--muted);
 		font-size: 0.9375rem;
+		line-height: 1.55;
 	}
 
 	.examples {
 		display: grid;
-		gap: var(--space-4);
+		gap: var(--space-6);
 	}
 
 	.example {
@@ -202,13 +235,14 @@
 		border: 1px solid var(--line);
 		border-radius: var(--radius-lg);
 		background: var(--surface);
+		box-shadow: var(--shadow-sm);
 	}
 
 	.bubble {
 		max-inline-size: 85%;
-		padding: var(--space-2) var(--space-3);
+		padding: var(--space-3) var(--space-4);
 		border-radius: var(--radius-lg);
-		line-height: 1.4;
+		line-height: 1.5;
 		overflow-wrap: anywhere;
 	}
 
@@ -225,15 +259,14 @@
 		border-bottom-left-radius: var(--radius-sm);
 	}
 
-	@media (min-width: 40rem) {
-		.steps {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
-		}
-	}
-
 	@media (min-width: 48rem) {
 		.hero {
 			grid-template-columns: auto minmax(0, var(--panel-max));
+			gap: var(--space-12);
+		}
+
+		.steps {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 
 		.examples {
