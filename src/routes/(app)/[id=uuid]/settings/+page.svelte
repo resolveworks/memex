@@ -42,6 +42,16 @@
 		</Card>
 
 		<Card>
+			<h2>{t("settings.exportHeading")}</h2>
+
+			<!-- data-sveltekit-reload lets the browser download the response instead of the router fetching it. -->
+			<form class="stack" method="GET" action={`/${data.memex.id}/settings/export`} data-sveltekit-reload>
+				<Button type="submit">{t("settings.export")}</Button>
+			</form>
+			<p class="hint">{t("settings.exportHint")}</p>
+		</Card>
+
+		<Card>
 			<h2>{t("settings.appHeading")}</h2>
 
 			<Field label={t("nav.language")}>

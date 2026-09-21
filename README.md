@@ -6,7 +6,7 @@ Memex is a simple conversational assistant that remembers things. Tell it someth
 
 ## Why it exists
 
-Everyone has small things they don't want to forget, and so does every group: a gate code, where something is kept, who has the keys, when the next thing is. That knowledge lives in scattered heads, notes, and old chats, and the moment you need one small answer, it can be hard to find.
+Everyone has small things they don't want to forget, and so does every group: a date, a place, a plan, who is bringing what, when the next thing is. That knowledge lives in scattered heads, notes, and old chats, and the moment you need one small answer, it can be hard to find.
 
 Notes and pinned messages don't quite fix it. They're easy to lose, hard to search, and never in the same place for everyone.
 
@@ -14,7 +14,7 @@ Memex gives you one place that remembers. Add what's worth keeping, in ordinary 
 
 ## How it works
 
-- **Add what matters:** a code, a date, a place, a preference, a plan.
+- **Add what matters:** dates, places, preferences, plans — the everyday facts a group relies on.
 - **Ask in everyday language:** get it back without knowing a file name, folder, or exact wording.
 - **Ask even when no one has added it yet:** Memex records the open question as a request and brings it back into chat so you — or anyone you've shared with — can fill it in.
 - **Continue across conversations:** memories stay available in the next chat.

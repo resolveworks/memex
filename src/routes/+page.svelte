@@ -7,7 +7,6 @@
 	import Card from "$lib/components/Card.svelte";
 	import Field from "$lib/components/Field.svelte";
 	import Input from "$lib/components/Input.svelte";
-	import Page from "$lib/components/Page.svelte";
 	import Select from "$lib/components/Select.svelte";
 	import { i18n, languages, languageName, t } from "$lib/i18n.svelte";
 	import { getMemexes } from "$lib/memexes.svelte";
@@ -19,6 +18,25 @@
 	const memexOptions = $derived(
 		getMemexes().map((memex) => ({ value: memex.id, label: memex.title }))
 	);
+
+	const steps = $derived([
+		{ title: t("landing.how.remember.title"), body: t("landing.how.remember.body") },
+		{ title: t("landing.how.ask.title"), body: t("landing.how.ask.body") },
+		{ title: t("landing.how.share.title"), body: t("landing.how.share.body") }
+	]);
+
+	const examples = $derived([
+		[
+			{ kind: "user", text: t("landing.example.remember.user1") },
+			{ kind: "assistant", text: t("landing.example.remember.assistant1") },
+			{ kind: "user", text: t("landing.example.remember.user2") },
+			{ kind: "assistant", text: t("landing.example.remember.assistant2") }
+		],
+		[
+			{ kind: "user", text: t("landing.example.ask.user") },
+			{ kind: "assistant", text: t("landing.example.ask.assistant") }
+		]
+	]);
 </script>
 
 <AppShell
@@ -27,7 +45,7 @@
 	options={memexOptions}
 	onchange={(id) => goto(`/${id}`)}
 >
-	<Page width="max-content">
+	<div class="landing">
 		<div class="hero">
 			<img class="mascot" src={mascot} alt="" />
 			<Card>
@@ -49,17 +67,56 @@
 				</form>
 			</Card>
 		</div>
-	</Page>
+
+		<div class="explain stack">
+			<section class="stack">
+				<h2>{t("landing.what.heading")}</h2>
+				<p>{t("landing.what.body")}</p>
+			</section>
+
+			<section class="stack">
+				<h2>{t("landing.how.heading")}</h2>
+				<ol class="steps">
+					{#each steps as step, i}
+						<li class="step stack">
+							<span class="number" aria-hidden="true">{i + 1}</span>
+							<h3>{step.title}</h3>
+							<p>{step.body}</p>
+						</li>
+					{/each}
+				</ol>
+			</section>
+
+			<section class="stack">
+				<h2>{t("landing.examples.heading")}</h2>
+				<div class="examples">
+					{#each examples as example}
+						<div class="example stack">
+							{#each example as message}
+								<p class="bubble {message.kind}">{message.text}</p>
+							{/each}
+						</div>
+					{/each}
+				</div>
+			</section>
+		</div>
+	</div>
 </AppShell>
 
 <style>
+	.landing {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--space-14);
+		padding: var(--space-8) var(--space-6) var(--space-14);
+	}
+
 	.hero {
 		display: grid;
 		grid-template-columns: minmax(0, var(--panel-max));
 		align-items: center;
 		gap: var(--space-8);
-		/* Bias the centred hero upward on mobile, where the short viewport leaves it low. */
-		margin-block-end: calc(var(--space-14) * 2);
 	}
 
 	.mascot {
@@ -67,10 +124,98 @@
 		inline-size: clamp(10rem, 24vw, 12rem);
 	}
 
+	.explain {
+		inline-size: 100%;
+		max-inline-size: var(--content-max);
+		gap: var(--space-12);
+	}
+
+	.explain h2 {
+		font-size: 1.5rem;
+	}
+
+	.explain p {
+		color: var(--ink-soft);
+		line-height: 1.6;
+	}
+
+	.steps {
+		display: grid;
+		gap: var(--space-6);
+	}
+
+	.step {
+		gap: var(--space-2);
+	}
+
+	.number {
+		display: grid;
+		place-items: center;
+		inline-size: 1.75rem;
+		block-size: 1.75rem;
+		border-radius: var(--radius-full);
+		background: var(--accent);
+		color: var(--accent-ink);
+		font-size: 0.875rem;
+		font-weight: 600;
+	}
+
+	.step h3 {
+		font-size: 1rem;
+	}
+
+	.step p {
+		color: var(--muted);
+		font-size: 0.9375rem;
+	}
+
+	.examples {
+		display: grid;
+		gap: var(--space-4);
+	}
+
+	.example {
+		gap: var(--space-2);
+		padding: var(--space-4);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-lg);
+		background: var(--surface);
+	}
+
+	.bubble {
+		max-inline-size: 85%;
+		padding: var(--space-2) var(--space-3);
+		border-radius: var(--radius-lg);
+		line-height: 1.4;
+		overflow-wrap: anywhere;
+	}
+
+	.bubble.user {
+		align-self: flex-end;
+		background: var(--accent);
+		color: var(--accent-ink);
+		border-bottom-right-radius: var(--radius-sm);
+	}
+
+	.bubble.assistant {
+		align-self: flex-start;
+		background: var(--fill);
+		border-bottom-left-radius: var(--radius-sm);
+	}
+
+	@media (min-width: 40rem) {
+		.steps {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+	}
+
 	@media (min-width: 48rem) {
 		.hero {
 			grid-template-columns: auto minmax(0, var(--panel-max));
-			margin-block-end: 0;
+		}
+
+		.examples {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 	}
 </style>
