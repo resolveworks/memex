@@ -7,6 +7,8 @@ import {
 	createRequest,
 	deleteMemory,
 	deleteRequest,
+	listMemories,
+	listRequests,
 	searchMemories,
 	updateMemory,
 	updateRequest
@@ -42,6 +44,9 @@ something you had to translate, say that you translated it.
 - \`search-memories\` — retrieve memories. Takes a list of queries and returns every
   memory containing any word from any of them, each as \`id: text\`. Write every query
   in ${name}. Put several angles into one call.
+- \`list-memories\` — page through every memory, most recently updated first, each as
+  \`id: text\`. Pass the offset reported at the end of a page to continue. Use it to
+  browse the store when searching is not narrowing things down.
 - \`update-memory\` — replace the text of an existing memory. Pass the id from a
   search result and the corrected text.
 - \`delete-memory\` — remove a memory that is wrong or no longer wanted. Pass the id
@@ -53,6 +58,8 @@ When a question cannot be answered from memory after searching, record it so the
 can fill the gap:
 
 - \`create-request\` — record one self-contained missing question, written in ${name}.
+- \`list-requests\` — page through the recorded requests, each as \`id: question\`. Pass the
+  offset reported at the end of a page to continue.
 - \`update-request\` — reword an open request. Pass the id shown in the request queue.
 - \`delete-request\` — remove a request once the information it asked for is in hand.
   Pass the id shown in the request queue.
@@ -93,9 +100,11 @@ export function getAgent(): Agent {
 				tools: [
 					createMemory,
 					searchMemories,
+					listMemories,
 					updateMemory,
 					deleteMemory,
 					createRequest,
+					listRequests,
 					updateRequest,
 					deleteRequest
 				]

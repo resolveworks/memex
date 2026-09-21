@@ -2,6 +2,7 @@ import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { Type } from "typebox";
 import type { Memory } from "./memory";
 import { memexId } from "./memex";
+import type { Page } from "./page";
 
 function headers(json = false): HeadersInit {
 	return {
@@ -57,6 +58,42 @@ export const searchMemories: AgentTool<typeof searchMemoriesParameters> = {
 				: matches.map((memory) => `- ${memory.id}: ${memory.text}`).join("\n");
 		return {
 			content: [{ type: "text", text }],
+			details: undefined
+		};
+	}
+};
+
+const listMemoriesParameters = Type.Object({
+	offset: Type.Optional(
+		Type.Number({
+			description: "Number of memories to skip. Omit or pass 0 for the first page."
+		})
+	)
+});
+
+export const listMemories: AgentTool<typeof listMemoriesParameters> = {
+	name: "list-memories",
+	label: "List memories",
+	description:
+		"List stored memories, most recently updated first, one page at a time, each prefixed with its id. Use this to browse the whole store when searching is not narrowing things down, and pass the offset reported at the end of a page to continue.",
+	parameters: listMemoriesParameters,
+	execute: async (_toolCallId, { offset }) => {
+		const from = offset ?? 0;
+		const response = await fetch(`/api/memories?offset=${from}`, { headers: headers() });
+		if (!response.ok) throw new Error(`Failed to list memories (${response.status}).`);
+		const { items, hasMore } = (await response.json()) as Page<Memory>;
+		if (items.length === 0) {
+			return {
+				content: [{ type: "text", text: "No memories." }],
+				details: undefined
+			};
+		}
+		const lines = items.map((memory) => `- ${memory.id}: ${memory.text}`).join("\n");
+		const more = hasMore
+			? `\n\nMore memories remain. Call list-memories again with offset=${from + items.length}.`
+			: "";
+		return {
+			content: [{ type: "text", text: `${lines}${more}` }],
 			details: undefined
 		};
 	}
@@ -130,6 +167,42 @@ export const createRequest: AgentTool<typeof createRequestParameters> = {
 		const request = (await response.json()) as { id: string };
 		return {
 			content: [{ type: "text", text: `Created request ${request.id}.` }],
+			details: undefined
+		};
+	}
+};
+
+const listRequestsParameters = Type.Object({
+	offset: Type.Optional(
+		Type.Number({
+			description: "Number of requests to skip. Omit or pass 0 for the first page."
+		})
+	)
+});
+
+export const listRequests: AgentTool<typeof listRequestsParameters> = {
+	name: "list-requests",
+	label: "List requests",
+	description:
+		"List the recorded requests, most recently created first, one page at a time, each prefixed with its id. Use this to review the request queue, and pass the offset reported at the end of a page to continue.",
+	parameters: listRequestsParameters,
+	execute: async (_toolCallId, { offset }) => {
+		const from = offset ?? 0;
+		const response = await fetch(`/api/requests?offset=${from}`, { headers: headers() });
+		if (!response.ok) throw new Error(`Failed to list requests (${response.status}).`);
+		const { items, hasMore } = (await response.json()) as Page<{ id: string; text: string }>;
+		if (items.length === 0) {
+			return {
+				content: [{ type: "text", text: "No requests." }],
+				details: undefined
+			};
+		}
+		const lines = items.map((request) => `- ${request.id}: ${request.text}`).join("\n");
+		const more = hasMore
+			? `\n\nMore requests remain. Call list-requests again with offset=${from + items.length}.`
+			: "";
+		return {
+			content: [{ type: "text", text: `${lines}${more}` }],
 			details: undefined
 		};
 	}

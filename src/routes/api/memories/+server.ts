@@ -1,11 +1,13 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { memexId } from "$lib/server/auth";
-import { create, list, remove, search, update } from "$lib/server/storage";
+import { create, page, remove, search, update } from "$lib/server/storage";
 
 export const GET: RequestHandler = ({ request, url }) => {
 	const memex = memexId(request);
 	const queries = url.searchParams.getAll("q");
-	return json(queries.length === 0 ? list(memex) : search(memex, queries));
+	if (queries.length > 0) return json(search(memex, queries));
+	const offset = Number(url.searchParams.get("offset") ?? 0);
+	return json(page(memex, offset));
 };
 
 export const POST: RequestHandler = async ({ request }) => {

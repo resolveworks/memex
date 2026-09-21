@@ -1,6 +1,12 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { memexId } from "$lib/server/auth";
-import { create, remove, update } from "$lib/server/requests";
+import { create, page, remove, update } from "$lib/server/requests";
+
+export const GET: RequestHandler = ({ request, url }) => {
+	const memex = memexId(request);
+	const offset = Number(url.searchParams.get("offset") ?? 0);
+	return json(page(memex, offset));
+};
 
 export const POST: RequestHandler = async ({ request }) => {
 	const memex = memexId(request);

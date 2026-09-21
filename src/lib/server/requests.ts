@@ -1,16 +1,38 @@
 import { randomUUID } from "node:crypto";
-import { and, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq } from "drizzle-orm";
+import { PAGE_SIZE, type Page } from "$lib/page";
 import type { Request } from "$lib/request";
 import { db } from "./db";
 import { requests } from "./db/schema";
 
-export function list(memexId: string): Request[] {
+function newestFirst(memexId: string) {
 	return db
 		.select()
 		.from(requests)
 		.where(eq(requests.memexId, memexId))
-		.orderBy(desc(requests.createdAt))
+		.orderBy(desc(requests.createdAt));
+}
+
+export function list(memexId: string): Request[] {
+	return newestFirst(memexId).all();
+}
+
+/** Total number of requests in a memex. */
+export function total(memexId: string): number {
+	return db
+		.select({ value: count() })
+		.from(requests)
+		.where(eq(requests.memexId, memexId))
+		.get()!.value;
+}
+
+/** One page of a memex's requests, most recently created first. */
+export function page(memexId: string, offset: number): Page<Request> {
+	const rows = newestFirst(memexId)
+		.limit(PAGE_SIZE + 1)
+		.offset(offset)
 		.all();
+	return { items: rows.slice(0, PAGE_SIZE), hasMore: rows.length > PAGE_SIZE };
 }
 
 /** Renders a memex's open request queue for inclusion in the system prompt. */

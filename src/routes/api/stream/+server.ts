@@ -11,7 +11,8 @@ import type {
 import { contentText } from "@earendil-works/pi-ai";
 import { model } from "$lib/model";
 import { memexId } from "$lib/server/auth";
-import { promptSection } from "$lib/server/requests";
+import { promptSection, total as totalRequests } from "$lib/server/requests";
+import { total as totalMemories } from "$lib/server/storage";
 import { models } from "$lib/server/llm";
 
 function contentAt(partial: AssistantMessage, index: number) {
@@ -122,7 +123,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const context: Context = {
 		...body.context,
-		systemPrompt: `${body.context.systemPrompt ?? ""}\n\n${promptSection(memex)}`,
+		systemPrompt: `${body.context.systemPrompt ?? ""}\n\nThis memex holds ${totalMemories(memex)} memories and ${totalRequests(memex)} open requests.\n\n${promptSection(memex)}`,
 	};
 	const events = models.streamSimple(model, context, body.options);
 	const encoder = new TextEncoder();

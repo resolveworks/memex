@@ -1,16 +1,38 @@
 import { randomUUID } from "node:crypto";
-import { and, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq } from "drizzle-orm";
 import type { Memory } from "$lib/memory";
+import { PAGE_SIZE, type Page } from "$lib/page";
 import { db } from "./db";
 import { memories } from "./db/schema";
 
-export function list(memexId: string): Memory[] {
+function newestFirst(memexId: string) {
 	return db
 		.select()
 		.from(memories)
 		.where(eq(memories.memexId, memexId))
-		.orderBy(desc(memories.updatedAt))
+		.orderBy(desc(memories.updatedAt));
+}
+
+export function list(memexId: string): Memory[] {
+	return newestFirst(memexId).all();
+}
+
+/** Total number of memories in a memex. */
+export function total(memexId: string): number {
+	return db
+		.select({ value: count() })
+		.from(memories)
+		.where(eq(memories.memexId, memexId))
+		.get()!.value;
+}
+
+/** One page of a memex's memories, most recently updated first. */
+export function page(memexId: string, offset: number): Page<Memory> {
+	const rows = newestFirst(memexId)
+		.limit(PAGE_SIZE + 1)
+		.offset(offset)
 		.all();
+	return { items: rows.slice(0, PAGE_SIZE), hasMore: rows.length > PAGE_SIZE };
 }
 
 export function create(memexId: string, text: string): Memory {
