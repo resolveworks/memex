@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from "$app/navigation";
 	import { t } from "$lib/i18n.svelte";
 	import Page from "./Page.svelte";
 
@@ -27,6 +28,30 @@
 		pages: number;
 	} = $props();
 
+	// Snapshot the initial query so later prop updates can't clobber in-flight typing.
+	// svelte-ignore state_referenced_locally
+	let term = $state(query);
+	let timer: ReturnType<typeof setTimeout> | undefined;
+
+	// Search is driven by the URL: navigating re-runs the page's load function.
+	function navigate(): void {
+		const params = new URLSearchParams();
+		if (term) params.set("q", term);
+		const search = params.toString();
+		goto(search ? `?${search}` : "?", { replaceState: true, noScroll: true, keepFocus: true });
+	}
+
+	function schedule(): void {
+		clearTimeout(timer);
+		timer = setTimeout(navigate, 250);
+	}
+
+	function submit(event: SubmitEvent): void {
+		event.preventDefault();
+		clearTimeout(timer);
+		navigate();
+	}
+
 	// A link back to the same search on another page; page one keeps the bare URL.
 	function href(target: number): string {
 		const params = new URLSearchParams();
@@ -41,11 +66,12 @@
 	<div class="list stack">
 		<header class="head">
 			<h1>{heading}</h1>
-			<form class="search" method="GET">
+			<form class="search" method="GET" onsubmit={submit}>
 				<input
 					type="search"
 					name="q"
-					value={query}
+					bind:value={term}
+					oninput={schedule}
 					placeholder={searchPlaceholder}
 					aria-label={searchPlaceholder}
 				/>
