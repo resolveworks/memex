@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from "$app/forms";
 	import { goto } from "$app/navigation";
 	import { t } from "$lib/i18n.svelte";
 	import Page from "./Page.svelte";
@@ -31,34 +32,43 @@
 	// Snapshot the initial query so later prop updates can't clobber in-flight typing.
 	// svelte-ignore state_referenced_locally
 	let term = $state(query);
-	let timer: ReturnType<typeof setTimeout> | undefined;
 
 	// Search is driven by the URL: navigating re-runs the page's load function.
-	function navigate(): void {
+	function navigate(value: string): void {
+		term = value;
 		const params = new URLSearchParams();
 		if (term) params.set("q", term);
 		const search = params.toString();
 		goto(search ? `?${search}` : "?", { replaceState: true, noScroll: true, keepFocus: true });
 	}
 
-	function schedule(): void {
-		clearTimeout(timer);
-		timer = setTimeout(navigate, 250);
+	function onInput(event: Event): void {
+		navigate((event.currentTarget as HTMLInputElement).value);
 	}
 
-	function submit(event: SubmitEvent): void {
+	function onSearch(event: SubmitEvent): void {
 		event.preventDefault();
-		clearTimeout(timer);
-		navigate();
+		navigate(term);
 	}
 
-	// A link back to the same search on another page; page one keeps the bare URL.
-	function href(target: number): string {
+	// The current search and page as a query string; page one is left bare.
+	function queryString(target = page): string {
 		const params = new URLSearchParams();
 		if (query) params.set("q", query);
 		if (target > 1) params.set("page", String(target));
-		const search = params.toString();
+		return params.toString();
+	}
+
+	// A link back to the same search on another page.
+	function href(target: number): string {
+		const search = queryString(target);
 		return search ? `?${search}` : "?";
+	}
+
+	// Post to the delete action without dropping the current search and page.
+	function deleteAction(): string {
+		const search = queryString();
+		return search ? `?${search}&/delete` : "?/delete";
 	}
 </script>
 
@@ -66,12 +76,12 @@
 	<div class="list stack">
 		<header class="head">
 			<h1>{heading}</h1>
-			<form class="search" method="GET" onsubmit={submit}>
+			<form class="search" method="GET" onsubmit={onSearch}>
 				<input
 					type="search"
 					name="q"
-					bind:value={term}
-					oninput={schedule}
+					value={term}
+					oninput={onInput}
 					placeholder={searchPlaceholder}
 					aria-label={searchPlaceholder}
 				/>
@@ -91,7 +101,7 @@
 				{#each items as item (item.id)}
 					<li class="item">
 						<span class="text">{item.text}</span>
-						<form method="POST" action="?/delete">
+						<form method="POST" action={deleteAction()} use:enhance>
 							<input type="hidden" name="id" value={item.id} />
 							<button class="delete center" type="submit" aria-label={t("list.delete")}>
 								<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
