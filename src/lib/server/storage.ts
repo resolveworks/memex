@@ -61,10 +61,43 @@ export function remove(memexId: string, id: string): void {
 	if (result.changes === 0) throw new Error(`No memory with id "${id}".`);
 }
 
-export function search(memexId: string, queries: string[]): Memory[] {
-	const terms = queries
-		.flatMap((query) => query.toLowerCase().split(/[^\p{L}\p{N}]+/u))
+export interface TermCount {
+	term: string;
+	count: number;
+}
+
+/** Most common terms across a memex's memories, by number of memories containing each. */
+export function terms(memexId: string, limit: number): TermCount[] {
+	const rows = db
+		.select({ text: memories.text })
+		.from(memories)
+		.where(eq(memories.memexId, memexId))
+		.all();
+
+	const counts = new Map<string, number>();
+	for (const { text } of rows) {
+		for (const term of new Set(tokenize(text))) {
+			if (term.length < 3) continue;
+			counts.set(term, (counts.get(term) ?? 0) + 1);
+		}
+	}
+
+	return [...counts]
+		.map(([term, count]) => ({ term, count }))
+		.sort((a, b) => b.count - a.count || a.term.localeCompare(b.term))
+		.slice(0, limit);
+}
+
+/** Splits text into the lowercase terms used by search and term statistics. */
+function tokenize(text: string): string[] {
+	return text
+		.toLowerCase()
+		.split(/[^\p{L}\p{N}]+/u)
 		.filter(Boolean);
+}
+
+export function search(memexId: string, queries: string[]): Memory[] {
+	const terms = queries.flatMap(tokenize);
 	const all = list(memexId);
 	if (terms.length === 0) return all;
 	return all.filter((memory) => {

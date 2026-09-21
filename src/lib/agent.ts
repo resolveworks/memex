@@ -8,6 +8,7 @@ import {
 	createRequest,
 	deleteMemory,
 	deleteRequest,
+	getTerms,
 	listMemories,
 	listRequests,
 	searchMemories,
@@ -48,6 +49,9 @@ something you had to translate, say that you translated it.
 - \`list-memories\` — page through every memory, most recently updated first, each as
   \`id: text\`. Pass the offset reported at the end of a page to continue. Use it to
   browse the store when searching is not narrowing things down.
+- \`get-terms\` — list the terms that occur in the most memories, each with the number
+  of memories containing it. Use it to see what topics the store covers without
+  searching.
 - \`update-memory\` — replace the text of an existing memory. Pass the id from a
   search result and the corrected text.
 - \`delete-memory\` — remove a memory that is wrong or no longer wanted. Pass the id
@@ -102,6 +106,7 @@ export function getAgent(): Agent {
 					createMemory,
 					searchMemories,
 					listMemories,
+					getTerms,
 					updateMemory,
 					deleteMemory,
 					createRequest,
