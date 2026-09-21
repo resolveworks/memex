@@ -36,17 +36,14 @@ agent.subscribe((event) => {
 	}
 });
 
-/** Switches to a memex, discarding the previous conversation and any stream in flight. */
-export async function open(id: string, language: string): Promise<void> {
-	if (id === currentId) return;
+/** Starts a fresh conversation: aborts any stream in flight, then greets. */
+async function restart(language: string): Promise<void> {
 	const token = ++openToken;
 	if (agent.state.isStreaming) {
 		agent.abort();
 		await agent.waitForIdle();
 	}
 	if (token !== openToken) return;
-	currentId = id;
-	currentLanguage = language;
 	agent.reset();
 	await refreshSystemPrompt(language);
 	if (token !== openToken) return;
@@ -54,6 +51,20 @@ export async function open(id: string, language: string): Promise<void> {
 	chat.streaming = undefined;
 	chat.busy = false;
 	void agent.prompt(greetingMessage());
+}
+
+/** Switches to a memex, discarding the previous conversation and any stream in flight. */
+export async function open(id: string, language: string): Promise<void> {
+	if (id === currentId) return;
+	currentId = id;
+	currentLanguage = language;
+	await restart(language);
+}
+
+/** Discards the conversation with the open memex and starts over with a fresh greeting. */
+export async function clear(): Promise<void> {
+	if (!currentLanguage) throw new Error("No memex open.");
+	await restart(currentLanguage);
 }
 
 export async function send(text: string): Promise<void> {

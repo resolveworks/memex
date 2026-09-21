@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { AgentMessage } from "@earendil-works/pi-agent-core";
 	import { contentText } from "@earendil-works/pi-ai";
-	import { chat, open, send } from "$lib/chat.svelte";
+	import { chat, clear, open, send } from "$lib/chat.svelte";
 	import ChatMessage, { type Item } from "$lib/ChatMessage.svelte";
+	import Button from "$lib/components/Button.svelte";
 	import Footer from "$lib/components/Footer.svelte";
 	import { t } from "$lib/i18n.svelte";
 
@@ -45,6 +46,9 @@
 	}
 
 	let items = $derived(toItems(chat.messages));
+	// The greeting is a user-shaped trigger to the model, so only a real user turn
+	// means the person has actually written something worth clearing.
+	let hasConversation = $derived(chat.messages.some((message) => message.role === "user"));
 
 	const streamText = $derived.by(() => {
 		const message = chat.streaming;
@@ -102,6 +106,17 @@
 				<span class="dot"></span>
 			</div>
 		{/if}
+		{#if hasConversation}
+			<div class="clear">
+				<Button type="button" onclick={clear}>
+					<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+						<polyline points="1 4 1 10 7 10" />
+						<path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+					</svg>
+					{t("chat.clear")}
+				</Button>
+			</div>
+		{/if}
 		</div>
 	</div>
 
@@ -118,12 +133,12 @@
 				onkeydown={onKeydown}
 				placeholder={t("chat.placeholder")}
 			></textarea>
-			<button class="send center" type="submit" disabled={chat.busy} aria-label={t("chat.send")}>
+			<Button icon type="submit" disabled={chat.busy} aria-label={t("chat.send")}>
 				<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
 					<line x1="12" y1="19" x2="12" y2="5" />
 					<polyline points="6 11 12 5 18 11" />
 				</svg>
-			</button>
+			</Button>
 		</form>
 	</Footer>
 </div>
@@ -180,29 +195,15 @@
 		overflow-y: auto;
 	}
 
-	.send {
-		flex: none;
-		inline-size: var(--space-6);
-		block-size: var(--space-6);
-		border-radius: var(--radius-full);
-		background: var(--accent);
-		color: var(--accent-ink);
-	}
-
-	.send:hover:not(:disabled) {
-		background: var(--accent-hover);
-	}
-
-	.send:disabled {
-		opacity: 0.5;
-		cursor: default;
-	}
-
 	.thinking {
 		align-self: flex-start;
 		display: inline-flex;
 		gap: var(--space-1);
 		padding: var(--space-2) 0;
+	}
+
+	.clear {
+		align-self: center;
 	}
 
 	.dot {

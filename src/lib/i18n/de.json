@@ -26,6 +26,7 @@
 		"chat.placeholder": "Nachricht an Memex…",
 		"chat.send": "Senden",
 		"chat.thinking": "Denkt nach",
+		"chat.clear": "Chat leeren",
 		"error.notFound": "Diese Seite existiert nicht.",
 		"error.newMemex": "Neuen Memex starten"
 	},
