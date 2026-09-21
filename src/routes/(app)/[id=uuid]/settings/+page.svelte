@@ -5,6 +5,7 @@
 	import Input from "$lib/components/Input.svelte";
 	import Page from "$lib/components/Page.svelte";
 	import Select from "$lib/components/Select.svelte";
+	import { clear } from "$lib/chat.svelte";
 	import { i18n, languages, languageName, setLocale, t } from "$lib/i18n.svelte";
 
 	let { data } = $props();
@@ -12,6 +13,13 @@
 	const languageOptions = $derived(
 		languages.map((code) => ({ value: code, label: languageName(code) }))
 	);
+
+	// The greeting is generated in the app language, so a switch invalidates the
+	// conversation; the next one greets in the newly chosen language.
+	function chooseLanguage(code: string) {
+		setLocale(code);
+		void clear();
+	}
 </script>
 
 <Page>
@@ -41,7 +49,7 @@
 					label={t("nav.language")}
 					value={i18n.locale}
 					options={languageOptions}
-					onchange={setLocale}
+					onchange={chooseLanguage}
 				/>
 			</Field>
 			<p class="hint">{t("settings.appLanguageHint")}</p>

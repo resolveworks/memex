@@ -62,9 +62,12 @@ export async function open(id: string, memexLanguage: string): Promise<void> {
 	await restart(memexLanguage);
 }
 
-/** Discards the conversation with the open memex and starts over with a fresh greeting. */
+/**
+ * Discards the conversation with the open memex and starts over with a fresh
+ * greeting; a no-op when no memex is open, since there is nothing to discard.
+ */
 export async function clear(): Promise<void> {
-	if (!currentMemexLanguage) throw new Error("No memex open.");
+	if (!currentMemexLanguage) return;
 	await restart(currentMemexLanguage);
 }
 
