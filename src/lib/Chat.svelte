@@ -53,10 +53,28 @@
 	});
 	const thinking = $derived(chat.busy && !streamText);
 
+	let viewport = $state<HTMLDivElement>();
+	// Whether the view was at the bottom before the latest content arrived, so
+	// streaming keeps following the answer without yanking a reader back down.
+	let pinned = $state(true);
+
+	function onScroll() {
+		if (!viewport) return;
+		pinned = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 24;
+	}
+
+	$effect(() => {
+		void items;
+		void thinking;
+		void streamText;
+		if (pinned && viewport) viewport.scrollTop = viewport.scrollHeight;
+	});
+
 	function submit() {
 		const text = input.trim();
 		if (!text || chat.busy) return;
 		input = "";
+		pinned = true;
 		send(text);
 	}
 
@@ -69,7 +87,7 @@
 </script>
 
 <div class="chat stack">
-	<div class="messages">
+	<div class="messages" bind:this={viewport} onscroll={onScroll}>
 		<div class="thread stack">
 		{#each items as item}
 			<ChatMessage kind={item.kind} text={item.text} name={item.name} args={item.args} />
@@ -122,10 +140,6 @@
 		flex: 1;
 		min-block-size: 0;
 		overflow-y: auto;
-		/* Bottom is the scroll origin: the thread grows away from it, so the
-		   view stays pinned to the newest message with no scripting. */
-		display: flex;
-		flex-direction: column-reverse;
 		padding: var(--space-4);
 	}
 
