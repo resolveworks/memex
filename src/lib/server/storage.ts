@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { and, count, desc, eq } from "drizzle-orm";
+import { stopwords } from "$lib/languages";
 import type { Memory } from "$lib/memory";
 import { PAGE_SIZE, type Page } from "$lib/page";
 import { db } from "./db";
@@ -67,7 +68,10 @@ export interface TermCount {
 }
 
 /** Most common terms across a memex's memories, by number of memories containing each. */
-export function terms(memexId: string, limit: number): TermCount[] {
+export function terms(memexId: string, language: string, limit: number): TermCount[] {
+	const stop = stopwords[language];
+	if (!stop) throw new Error(`No stopwords for language "${language}".`);
+
 	const rows = db
 		.select({ text: memories.text })
 		.from(memories)
@@ -77,7 +81,7 @@ export function terms(memexId: string, limit: number): TermCount[] {
 	const counts = new Map<string, number>();
 	for (const { text } of rows) {
 		for (const term of new Set(tokenize(text))) {
-			if (term.length < 3) continue;
+			if (term.length < 3 || stop.has(term)) continue;
 			counts.set(term, (counts.get(term) ?? 0) + 1);
 		}
 	}
