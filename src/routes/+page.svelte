@@ -2,6 +2,7 @@
 	import { enhance } from "$app/forms";
 	import { goto } from "$app/navigation";
 	import mascot from "$lib/assets/mascot1.png";
+	import ChatMessage from "$lib/ChatMessage.svelte";
 	import AppShell from "$lib/components/AppShell.svelte";
 	import Bubble from "$lib/components/Bubble.svelte";
 	import Button from "$lib/components/Button.svelte";
@@ -116,15 +117,15 @@
 
 			<section class="stack">
 				<h2>{t("landing.examples.heading")}</h2>
-				<div class="examples">
+				<ul class="examples">
 					{#each examples as example}
-						<article class="example stack">
+						<li class="example stack">
 							<h3>{example.title}</h3>
 							<p>{example.body}</p>
-							<blockquote>{example.question}</blockquote>
-						</article>
+							<ChatMessage kind="user" text={example.question} />
+						</li>
 					{/each}
-				</div>
+				</ul>
 			</section>
 		</div>
 	</div>
@@ -256,34 +257,21 @@
 
 	.examples {
 		display: grid;
-		gap: var(--space-6);
+		gap: var(--space-8);
 	}
 
 	.example {
-		gap: var(--space-3);
-		padding: var(--space-6);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-lg);
-		background: var(--surface);
-		box-shadow: var(--shadow-sm);
+		gap: var(--space-4);
 	}
 
 	.example h3 {
-		font-size: 1.0625rem;
+		font-size: 1rem;
 	}
 
 	.example p {
+		color: var(--muted);
 		font-size: 0.9375rem;
-	}
-
-	.example blockquote {
-		margin-block-start: auto;
-		padding: var(--space-3) var(--space-4);
-		border-radius: var(--radius-lg);
-		background: var(--fill);
-		color: var(--ink-soft);
-		font-style: italic;
-		line-height: 1.5;
+		line-height: 1.55;
 	}
 
 	@media (min-width: 48rem) {
