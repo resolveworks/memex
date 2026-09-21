@@ -14,6 +14,7 @@
 		"requests.noResults": "Žiadne požiadavky nezodpovedajú hľadaniu.",
 		"list.search": "Hľadať",
 		"list.delete": "Odstrániť",
+		"list.includeDeleted": "Zahrnúť odstránené",
 		"list.previous": "Predchádzajúce",
 		"list.next": "Ďalšie",
 		"create.heading": "Nový memex",

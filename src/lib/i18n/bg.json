@@ -14,6 +14,7 @@
 		"requests.noResults": "Няма заявки, отговарящи на търсенето.",
 		"list.search": "Търсене",
 		"list.delete": "Изтрий",
+		"list.includeDeleted": "Включи изтритите",
 		"list.previous": "Предишна",
 		"list.next": "Следваща",
 		"create.heading": "Нов memex",

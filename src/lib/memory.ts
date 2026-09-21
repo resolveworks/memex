@@ -3,4 +3,5 @@ export interface Memory {
 	text: string;
 	createdAt: string;
 	updatedAt: string;
+	deletedAt: string | null;
 }

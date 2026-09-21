@@ -14,6 +14,7 @@
 		"requests.noResults": "No requests match your search.",
 		"list.search": "Search",
 		"list.delete": "Delete",
+		"list.includeDeleted": "Include deleted",
 		"list.previous": "Previous",
 		"list.next": "Next",
 		"create.heading": "New memex",

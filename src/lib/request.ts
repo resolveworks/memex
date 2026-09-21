@@ -3,4 +3,5 @@ export interface Request {
 	text: string;
 	createdAt: string;
 	updatedAt: string;
+	deletedAt: string | null;
 }

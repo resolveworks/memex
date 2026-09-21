@@ -14,6 +14,7 @@
 		"requests.noResults": "Κανένα αίτημα δεν ταιριάζει με την αναζήτησή σας.",
 		"list.search": "Αναζήτηση",
 		"list.delete": "Διαγραφή",
+		"list.includeDeleted": "Συμπερίληψη διαγραμμένων",
 		"list.previous": "Προηγούμενο",
 		"list.next": "Επόμενο",
 		"create.heading": "Νέο memex",

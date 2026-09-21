@@ -14,6 +14,7 @@
 		"requests.noResults": "Egyetlen kérés sem felel meg a keresésnek.",
 		"list.search": "Keresés",
 		"list.delete": "Törlés",
+		"list.includeDeleted": "Töröltek belefoglalása",
 		"list.previous": "Előző",
 		"list.next": "Következő",
 		"create.heading": "Új memex",

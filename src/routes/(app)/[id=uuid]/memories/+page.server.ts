@@ -10,7 +10,7 @@ function pageNumber(value: string | null, pages: number): number {
 
 export const load: PageServerLoad = ({ params, url }) => {
 	const query = url.searchParams.get("q") ?? "";
-	const matches = query ? search(params.id, [query]) : list(params.id);
+	const matches = query ? search(params.id, [query], true) : list(params.id, true);
 	const pages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
 	const page = pageNumber(url.searchParams.get("page"), pages);
 	return {

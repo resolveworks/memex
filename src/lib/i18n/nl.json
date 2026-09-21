@@ -14,6 +14,7 @@
 		"requests.noResults": "Geen verzoeken gevonden voor je zoekopdracht.",
 		"list.search": "Zoeken",
 		"list.delete": "Verwijderen",
+		"list.includeDeleted": "Verwijderde opnemen",
 		"list.previous": "Vorige",
 		"list.next": "Volgende",
 		"create.heading": "Nieuwe memex",

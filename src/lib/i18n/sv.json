@@ -14,6 +14,7 @@
 		"requests.noResults": "Inga förfrågningar matchar din sökning.",
 		"list.search": "Sök",
 		"list.delete": "Ta bort",
+		"list.includeDeleted": "Inkludera borttagna",
 		"list.previous": "Föregående",
 		"list.next": "Nästa",
 		"create.heading": "Ny memex",

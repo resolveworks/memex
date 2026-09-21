@@ -15,7 +15,9 @@ export const memories = sqliteTable("memories", {
 		.references(() => memexes.id, { onDelete: "cascade" }),
 	text: text("text").notNull(),
 	createdAt: text("created_at").notNull(),
-	updatedAt: text("updated_at").notNull()
+	updatedAt: text("updated_at").notNull(),
+	// Soft delete: null while the memory is live, an ISO timestamp once removed.
+	deletedAt: text("deleted_at")
 });
 
 export const requests = sqliteTable("requests", {
@@ -25,5 +27,7 @@ export const requests = sqliteTable("requests", {
 		.references(() => memexes.id, { onDelete: "cascade" }),
 	text: text("text").notNull(),
 	createdAt: text("created_at").notNull(),
-	updatedAt: text("updated_at").notNull()
+	updatedAt: text("updated_at").notNull(),
+	// Soft delete: null while the request is live, an ISO timestamp once removed.
+	deletedAt: text("deleted_at")
 });

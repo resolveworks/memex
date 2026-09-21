@@ -14,6 +14,7 @@
 		"requests.noResults": "Nenhum pedido corresponde à pesquisa.",
 		"list.search": "Pesquisar",
 		"list.delete": "Eliminar",
+		"list.includeDeleted": "Incluir eliminados",
 		"list.previous": "Anterior",
 		"list.next": "Seguinte",
 		"create.heading": "Novo memex",

@@ -14,6 +14,7 @@
 		"requests.noResults": "Yksikään pyyntö ei vastaa hakuasi.",
 		"list.search": "Hae",
 		"list.delete": "Poista",
+		"list.includeDeleted": "Sisällytä poistetut",
 		"list.previous": "Edellinen",
 		"list.next": "Seuraava",
 		"create.heading": "Uusi memex",

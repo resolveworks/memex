@@ -7,6 +7,7 @@
 	interface Item {
 		id: string;
 		text: string;
+		deletedAt: string | null;
 	}
 
 	let {
@@ -28,6 +29,12 @@
 		page: number;
 		pages: number;
 	} = $props();
+
+	// Deleted rows arrive with the rest; this controls whether they are included.
+	let includeDeleted = $state(false);
+	const visible = $derived(
+		includeDeleted ? items : items.filter((item) => item.deletedAt === null)
+	);
 
 	// Snapshot the initial query so later prop updates can't clobber in-flight typing.
 	// svelte-ignore state_referenced_locally
@@ -94,26 +101,28 @@
 			</form>
 		</header>
 
-		{#if items.length === 0}
+		{#if visible.length === 0}
 			<p class="empty">{query ? noResults : empty}</p>
 		{:else}
 			<ul class="items">
-				{#each items as item (item.id)}
-					<li class="item">
+				{#each visible as item (item.id)}
+					<li class="item" class:deleted={item.deletedAt !== null}>
 						<span class="text">{item.text}</span>
-						<form method="POST" action={deleteAction()} use:enhance>
-							<input type="hidden" name="id" value={item.id} />
-							<button class="delete center" type="submit" aria-label={t("list.delete")}>
-								<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-									<polyline points="3 6 5 6 21 6" />
-									<path
-										d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-									/>
-									<line x1="10" y1="11" x2="10" y2="17" />
-									<line x1="14" y1="11" x2="14" y2="17" />
-								</svg>
-							</button>
-						</form>
+						{#if item.deletedAt === null}
+							<form method="POST" action={deleteAction()} use:enhance>
+								<input type="hidden" name="id" value={item.id} />
+								<button class="delete center" type="submit" aria-label={t("list.delete")}>
+									<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+										<polyline points="3 6 5 6 21 6" />
+										<path
+											d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+										/>
+										<line x1="10" y1="11" x2="10" y2="17" />
+										<line x1="14" y1="11" x2="14" y2="17" />
+									</svg>
+								</button>
+							</form>
+						{/if}
 					</li>
 				{/each}
 			</ul>
@@ -134,6 +143,11 @@
 				{/if}
 			</nav>
 		{/if}
+
+		<label class="toggle">
+			<input type="checkbox" bind:checked={includeDeleted} />
+			{t("list.includeDeleted")}
+		</label>
 	</div>
 </Page>
 
@@ -197,6 +211,10 @@
 		border-block-end: 1px solid var(--line);
 	}
 
+	.item.deleted .text {
+		color: var(--muted);
+	}
+
 	.items > :first-child {
 		border-block-start: 1px solid var(--line);
 	}
@@ -223,6 +241,20 @@
 
 	.empty {
 		color: var(--muted);
+	}
+
+	.toggle {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: var(--space-2);
+		color: var(--muted);
+		font-size: 0.875rem;
+		cursor: pointer;
+	}
+
+	.toggle:hover {
+		color: var(--ink);
 	}
 
 	.pagination {

@@ -14,6 +14,7 @@
 		"requests.noResults": "Nicio cerere nu corespunde căutării.",
 		"list.search": "Caută",
 		"list.delete": "Șterge",
+		"list.includeDeleted": "Include șterse",
 		"list.previous": "Anterior",
 		"list.next": "Următor",
 		"create.heading": "Memex nou",

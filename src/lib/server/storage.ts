@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { and, count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, isNull } from "drizzle-orm";
 import { stopwords } from "$lib/languages";
 import type { Memory } from "$lib/memory";
 import { PAGE_SIZE, type Page } from "$lib/page";
@@ -7,30 +7,38 @@ import { db } from "./db";
 import { memories } from "./db/schema";
 import { tokenize } from "./tokenize";
 
-function newestFirst(memexId: string) {
+/** A memex's memories; deleted ones are included only when asked for. */
+function scope(memexId: string, includeDeleted: boolean) {
+	return and(
+		eq(memories.memexId, memexId),
+		includeDeleted ? undefined : isNull(memories.deletedAt)
+	);
+}
+
+function newestFirst(memexId: string, includeDeleted: boolean) {
 	return db
 		.select()
 		.from(memories)
-		.where(eq(memories.memexId, memexId))
+		.where(scope(memexId, includeDeleted))
 		.orderBy(desc(memories.updatedAt));
 }
 
-export function list(memexId: string): Memory[] {
-	return newestFirst(memexId).all();
+export function list(memexId: string, includeDeleted = false): Memory[] {
+	return newestFirst(memexId, includeDeleted).all();
 }
 
-/** Total number of memories in a memex. */
+/** Total number of live memories in a memex. */
 export function total(memexId: string): number {
 	return db
 		.select({ value: count() })
 		.from(memories)
-		.where(eq(memories.memexId, memexId))
+		.where(scope(memexId, false))
 		.get()!.value;
 }
 
-/** One page of a memex's memories, most recently updated first. */
+/** One page of a memex's live memories, most recently updated first. */
 export function page(memexId: string, offset: number): Page<Memory> {
-	const rows = newestFirst(memexId)
+	const rows = newestFirst(memexId, false)
 		.limit(PAGE_SIZE + 1)
 		.offset(offset)
 		.all();
@@ -39,7 +47,13 @@ export function page(memexId: string, offset: number): Page<Memory> {
 
 export function create(memexId: string, text: string): Memory {
 	const now = new Date().toISOString();
-	const memory: Memory = { id: randomUUID(), text, createdAt: now, updatedAt: now };
+	const memory: Memory = {
+		id: randomUUID(),
+		text,
+		createdAt: now,
+		updatedAt: now,
+		deletedAt: null
+	};
 	db.insert(memories).values({ memexId, ...memory }).run();
 	return memory;
 }
@@ -48,7 +62,9 @@ export function update(memexId: string, id: string, text: string): Memory {
 	const memory = db
 		.update(memories)
 		.set({ text, updatedAt: new Date().toISOString() })
-		.where(and(eq(memories.memexId, memexId), eq(memories.id, id)))
+		.where(
+			and(eq(memories.memexId, memexId), eq(memories.id, id), isNull(memories.deletedAt))
+		)
 		.returning()
 		.get();
 	if (!memory) throw new Error(`No memory with id "${id}".`);
@@ -57,8 +73,11 @@ export function update(memexId: string, id: string, text: string): Memory {
 
 export function remove(memexId: string, id: string): void {
 	const result = db
-		.delete(memories)
-		.where(and(eq(memories.memexId, memexId), eq(memories.id, id)))
+		.update(memories)
+		.set({ deletedAt: new Date().toISOString() })
+		.where(
+			and(eq(memories.memexId, memexId), eq(memories.id, id), isNull(memories.deletedAt))
+		)
 		.run();
 	if (result.changes === 0) throw new Error(`No memory with id "${id}".`);
 }
@@ -68,7 +87,7 @@ export interface TermCount {
 	count: number;
 }
 
-/** Most common terms across a memex's memories, by number of memories containing each. */
+/** Most common terms across a memex's live memories, by number of memories containing each. */
 export function terms(memexId: string, language: string, limit: number): TermCount[] {
 	const stop = stopwords[language];
 	if (!stop) throw new Error(`No stopwords for language "${language}".`);
@@ -76,7 +95,7 @@ export function terms(memexId: string, language: string, limit: number): TermCou
 	const rows = db
 		.select({ text: memories.text })
 		.from(memories)
-		.where(eq(memories.memexId, memexId))
+		.where(scope(memexId, false))
 		.all();
 
 	const counts = new Map<string, number>();
@@ -93,9 +112,9 @@ export function terms(memexId: string, language: string, limit: number): TermCou
 		.slice(0, limit);
 }
 
-export function search(memexId: string, queries: string[]): Memory[] {
+export function search(memexId: string, queries: string[], includeDeleted = false): Memory[] {
 	const terms = queries.flatMap(tokenize);
-	const all = list(memexId);
+	const all = list(memexId, includeDeleted);
 	if (terms.length === 0) return all;
 	return all.filter((memory) => {
 		const haystack = memory.text.toLowerCase();
