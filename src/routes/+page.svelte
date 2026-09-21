@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import { goto } from "$app/navigation";
+	import { page } from "$app/state";
 	import mascot from "$lib/assets/mascot1.png";
 	import ChatMessage from "$lib/ChatMessage.svelte";
 	import AppShell from "$lib/components/AppShell.svelte";
@@ -10,15 +11,14 @@
 	import Field from "$lib/components/Field.svelte";
 	import Input from "$lib/components/Input.svelte";
 	import Select from "$lib/components/Select.svelte";
-	import { i18n, languages, languageName, t } from "$lib/i18n.svelte";
-	import { getMemexes } from "$lib/memexes.svelte";
+	import { languages, languageName, t } from "$lib/i18n";
 
-	let language = $state(i18n.locale);
+	let language = $state(page.data.locale);
 	const languageOptions = $derived(
 		languages.map((code) => ({ value: code, label: languageName(code) }))
 	);
 	const memexOptions = $derived(
-		getMemexes().map((memex) => ({ value: memex.id, label: memex.title }))
+		page.data.memexes.map((memex) => ({ value: memex.id, label: memex.title }))
 	);
 
 	const steps = $derived([

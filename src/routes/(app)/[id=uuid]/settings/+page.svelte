@@ -3,23 +3,11 @@
 	import Card from "$lib/components/Card.svelte";
 	import Field from "$lib/components/Field.svelte";
 	import Input from "$lib/components/Input.svelte";
+	import LocaleSelect from "$lib/components/LocaleSelect.svelte";
 	import Page from "$lib/components/Page.svelte";
-	import Select from "$lib/components/Select.svelte";
-	import { clear } from "$lib/chat.svelte";
-	import { i18n, languages, languageName, setLocale, t } from "$lib/i18n.svelte";
+	import { languageName, t } from "$lib/i18n";
 
 	let { data } = $props();
-
-	const languageOptions = $derived(
-		languages.map((code) => ({ value: code, label: languageName(code) }))
-	);
-
-	// The greeting is generated in the app language, so a switch invalidates the
-	// conversation; the next one greets in the newly chosen language.
-	function chooseLanguage(code: string) {
-		setLocale(code);
-		void clear();
-	}
 </script>
 
 <Page>
@@ -53,16 +41,7 @@
 
 		<Card>
 			<h2>{t("settings.appHeading")}</h2>
-
-			<Field label={t("nav.language")}>
-				<Select
-					label={t("nav.language")}
-					value={i18n.locale}
-					options={languageOptions}
-					onchange={chooseLanguage}
-				/>
-			</Field>
-			<p class="hint">{t("settings.appLanguageHint")}</p>
+			<LocaleSelect />
 		</Card>
 	</div>
 </Page>

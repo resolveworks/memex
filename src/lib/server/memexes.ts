@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { languages } from "$lib/languages";
 import { db } from "./db";
 import { memexes } from "./db/schema";
@@ -24,6 +24,17 @@ export function create(title: string, language: string): string {
 
 export function get(id: string): Memex | undefined {
 	return db.select().from(memexes).where(eq(memexes.id, id)).get();
+}
+
+/** Looks up several memexes at once, returning them in the order the ids were given. */
+export function getMany(ids: string[]): Memex[] {
+	if (ids.length === 0) return [];
+	const rows = db.select().from(memexes).where(inArray(memexes.id, ids)).all();
+	const byId = new Map(rows.map((row) => [row.id, row]));
+	return ids.flatMap((id) => {
+		const row = byId.get(id);
+		return row ? [row] : [];
+	});
 }
 
 /** Renames a memex. The language is fixed for the memex's lifetime. */

@@ -2,7 +2,7 @@
 	import { page } from "$app/state";
 	import Card from "$lib/components/Card.svelte";
 	import Page from "$lib/components/Page.svelte";
-	import { t } from "$lib/i18n.svelte";
+	import { t } from "$lib/i18n";
 </script>
 
 <Page>

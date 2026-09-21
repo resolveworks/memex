@@ -1,6 +1,6 @@
 import { Agent, streamProxy, type AgentMessage } from "@earendil-works/pi-agent-core";
 import type { Message } from "@earendil-works/pi-ai";
-import { languageName } from "./i18n.svelte";
+import { languageName } from "./i18n";
 import { memexId } from "./memex";
 import { model } from "./model";
 import type { Request } from "./request";

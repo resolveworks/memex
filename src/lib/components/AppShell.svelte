@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { t } from '$lib/i18n.svelte';
+	import { t } from '$lib/i18n';
 	import Header from './Header.svelte';
 	import Select, { type SelectAction, type SelectOption } from './Select.svelte';
 

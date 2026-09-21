@@ -1,12 +1,12 @@
 <script lang="ts">
 	import '../app.css';
+	import { page } from '$app/state';
 	import favicon from '$lib/assets/favicon.svg';
-	import { i18n } from '$lib/i18n.svelte';
 
 	let { children } = $props();
 
 	$effect(() => {
-		document.documentElement.lang = i18n.locale;
+		document.documentElement.lang = page.data.locale;
 	});
 </script>
 

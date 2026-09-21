@@ -1,23 +1,15 @@
 <script lang="ts">
-	import { afterNavigate, goto } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { chat } from '$lib/chat.svelte';
-	import { t } from '$lib/i18n.svelte';
-	import { forget, getMemexes, remember } from '$lib/memexes.svelte';
+	import { t } from '$lib/i18n';
 	import AppShell from '$lib/components/AppShell.svelte';
 
 	let { children } = $props();
 
-	// Every memex we open joins the switcher, most recent first; a 404 means it is gone.
-	afterNavigate(() => {
-		const current = page.data.memex;
-		if (current) remember({ id: current.id, title: current.title });
-		else if (page.status === 404 && page.params.id) forget(page.params.id);
-	});
-
-	// The current memex is selectable even before the effect has recorded it.
+	// The current memex is selectable even on the request that first records it.
 	const memexes = $derived.by(() => {
-		const known = getMemexes();
+		const known = page.data.memexes;
 		const current = page.data.memex;
 		if (current && !known.some((memex) => memex.id === current.id)) {
 			return [{ id: current.id, title: current.title }, ...known];
