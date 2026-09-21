@@ -61,9 +61,12 @@ function convertToLlm(messages: AgentMessage[]): Message[] {
  * across translations. The greeting uses the app language because it is sent
  * before the user writes.
  */
-function systemPrompt(memexLanguage: string, userLanguage: string): string {
+function systemPrompt(memexLanguage: string, userLanguage: string, hasRequests: boolean): string {
 	const memexLanguageName = languageName(memexLanguage);
 	const userLanguageName = languageName(userLanguage);
+	const greetingQueue = hasRequests
+		? " End by asking the first question in the request queue below."
+		: "";
 	return `# Identity
 
 You are Memex, a persistent memory assistant. You store what the user wants
@@ -74,8 +77,7 @@ this memex's link.
 
 You speak first: the opening trigger asks for your greeting. In one or two
 short sentences in ${userLanguageName}, say what this memex is and, from the
-topics below, what it holds. If the request queue below is not empty, end by
-asking its first question; otherwise don't mention requests. Call no tools.
+topics below, what it holds.${greetingQueue} Call no tools.
 
 # Language
 
@@ -165,7 +167,7 @@ const REQUEST_QUEUE_PREVIEW = 2;
 
 /** Renders the open request queue for inclusion in the system prompt. */
 function requestQueueSection(requests: Request[]): string {
-	if (requests.length === 0) return "# Request queue\n\nThe request queue is empty.";
+	if (requests.length === 0) return "";
 	const preview = requests.slice(0, REQUEST_QUEUE_PREVIEW);
 	const items = preview.map((request) => `- ${request.id}: ${request.text}`).join("\n");
 	const remaining = requests.length - preview.length;
@@ -186,11 +188,11 @@ export async function refreshSystemPrompt(
 	userLanguage: string
 ): Promise<void> {
 	const { memories, requests, terms } = await promptContext();
-	getAgent().state.systemPrompt = `${systemPrompt(memexLanguage, userLanguage)}
-
-This memex holds ${memories} memories and ${requests.length} open requests.
-
-${termsSection(terms)}
-
-${requestQueueSection(requests)}`;
+	const sections = [
+		systemPrompt(memexLanguage, userLanguage, requests.length > 0),
+		`This memex holds ${memories} memories and ${requests.length} open requests.`,
+		termsSection(terms),
+		requestQueueSection(requests)
+	];
+	getAgent().state.systemPrompt = sections.filter((section) => section !== "").join("\n\n");
 }
