@@ -82,7 +82,13 @@
 <Page width="var(--content-max)">
 	<div class="list stack">
 		<header class="head">
-			<h1>{heading}</h1>
+			<div class="title">
+				<h1>{heading}</h1>
+				<label class="toggle">
+					<input type="checkbox" bind:checked={includeDeleted} />
+					{t("list.includeDeleted")}
+				</label>
+			</div>
 			<form class="search" method="GET" onsubmit={onSearch}>
 				<input
 					type="search"
@@ -143,11 +149,6 @@
 				{/if}
 			</nav>
 		{/if}
-
-		<label class="toggle">
-			<input type="checkbox" bind:checked={includeDeleted} />
-			{t("list.includeDeleted")}
-		</label>
 	</div>
 </Page>
 
@@ -158,9 +159,23 @@
 
 	.head {
 		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		justify-content: space-between;
+		flex-direction: column;
+		align-items: stretch;
+		gap: var(--space-3);
+	}
+
+	@media (min-width: 48rem) {
+		.head {
+			flex-direction: row;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: space-between;
+		}
+	}
+
+	.title {
+		display: flex;
+		align-items: baseline;
 		gap: var(--space-3);
 	}
 
@@ -246,7 +261,6 @@
 	.toggle {
 		display: flex;
 		align-items: center;
-		justify-content: flex-end;
 		gap: var(--space-2);
 		color: var(--muted);
 		font-size: 0.875rem;
