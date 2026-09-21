@@ -74,6 +74,9 @@
 				<line x1="3" y1="12" x2="3.01" y2="12" />
 				<line x1="3" y1="18" x2="3.01" y2="18" />
 			</svg>
+			{#if page.data.requestCount}
+				<span class="badge" aria-hidden="true"></span>
+			{/if}
 		</a>
 		<a
 			class="icon center"
@@ -94,11 +97,23 @@
 
 <style>
 	.icon {
+		position: relative;
 		flex: none;
 		inline-size: 2.25rem;
 		block-size: 2.25rem;
 		border-radius: var(--radius);
 		color: var(--ink);
+	}
+
+	.badge {
+		position: absolute;
+		inset-block-start: 0.25rem;
+		inset-inline-end: 0.25rem;
+		inline-size: 0.5rem;
+		block-size: 0.5rem;
+		border-radius: var(--radius-full);
+		background: var(--danger);
+		box-shadow: 0 0 0 2px var(--surface);
 	}
 
 	.icon:hover:not(:disabled) {

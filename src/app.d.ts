@@ -9,6 +9,8 @@ declare global {
 		interface PageData {
 			/** The memex of the current route, set by the `[id=uuid]` layout. */
 			memex?: Memex;
+			/** Open (non-deleted) request count, set by the `[id=uuid]` layout. */
+			requestCount?: number;
 		}
 		// interface PageState {}
 		// interface Platform {}
