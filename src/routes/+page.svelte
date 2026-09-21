@@ -45,6 +45,16 @@
 	options={memexOptions}
 	onchange={(id) => goto(`/${id}`)}
 >
+	{#snippet toolbar()}
+		<a class="icon center" href="/settings" aria-label={t('settings.appHeading')}>
+			<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+				<path
+					d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+				/>
+				<circle cx="12" cy="12" r="3" />
+			</svg>
+		</a>
+	{/snippet}
 	<div class="landing">
 		<div class="hero">
 			<img class="mascot" src={mascot} alt="" />
@@ -110,6 +120,18 @@
 		align-items: center;
 		gap: var(--space-14);
 		padding: var(--space-8) var(--space-6) var(--space-14);
+	}
+
+	.icon {
+		flex: none;
+		inline-size: 2.25rem;
+		block-size: 2.25rem;
+		border-radius: var(--radius);
+		color: var(--ink);
+	}
+
+	.icon:hover {
+		background: var(--fill);
 	}
 
 	.hero {
