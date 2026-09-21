@@ -52,3 +52,15 @@ export function remove(memexId: string, id: string): void {
 		.run();
 	if (result.changes === 0) throw new Error(`No request with id "${id}".`);
 }
+
+export function search(memexId: string, queries: string[]): Request[] {
+	const terms = queries
+		.flatMap((query) => query.toLowerCase().split(/[^\p{L}\p{N}]+/u))
+		.filter(Boolean);
+	const all = list(memexId);
+	if (terms.length === 0) return all;
+	return all.filter((request) => {
+		const haystack = request.text.toLowerCase();
+		return terms.some((term) => haystack.includes(term));
+	});
+}
