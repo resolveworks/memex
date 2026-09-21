@@ -12,6 +12,7 @@ import {
 	listMemories,
 	listRequests,
 	searchMemories,
+	searchRequests,
 	updateMemory,
 	updateRequest
 } from "./tools";
@@ -63,6 +64,9 @@ When a question cannot be answered from memory after searching, record it so the
 can fill the gap:
 
 - \`create-request\` — record one self-contained missing question, written in ${name}.
+- \`search-requests\` — find recorded requests. Takes a list of queries and returns
+  every request containing any word from any of them, each as \`id: question\`. Use it to
+  check whether a question has already been recorded before adding a duplicate.
 - \`list-requests\` — page through the recorded requests, each as \`id: question\`. Pass the
   offset reported at the end of a page to continue.
 - \`update-request\` — reword an open request. Pass the id shown in the request queue.
@@ -110,6 +114,7 @@ export function getAgent(): Agent {
 					updateMemory,
 					deleteMemory,
 					createRequest,
+					searchRequests,
 					listRequests,
 					updateRequest,
 					deleteRequest

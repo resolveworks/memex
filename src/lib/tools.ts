@@ -3,6 +3,7 @@ import { Type } from "typebox";
 import type { Memory } from "./memory";
 import { memexId } from "./memex";
 import type { Page } from "./page";
+import type { Request } from "./request";
 
 function headers(json = false): HeadersInit {
 	return {
@@ -200,6 +201,33 @@ export const createRequest: AgentTool<typeof createRequestParameters> = {
 		const request = (await response.json()) as { id: string };
 		return {
 			content: [{ type: "text", text: `Created request ${request.id}.` }],
+			details: undefined
+		};
+	}
+};
+
+const searchRequestsParameters = Type.Object({
+	queries: Type.Array(Type.String())
+});
+
+export const searchRequests: AgentTool<typeof searchRequestsParameters> = {
+	name: "search-requests",
+	label: "Search requests",
+	description:
+		"Search the recorded requests. Takes a list of queries and returns every request matching any word in any of them, each prefixed with its id. Use this to check whether a question has already been recorded before adding a duplicate.",
+	parameters: searchRequestsParameters,
+	execute: async (_toolCallId, { queries }) => {
+		const params = new URLSearchParams();
+		for (const query of queries) params.append("q", query);
+		const response = await fetch(`/api/requests?${params}`, { headers: headers() });
+		if (!response.ok) throw new Error(`Search failed (${response.status}).`);
+		const matches = (await response.json()) as Request[];
+		const text =
+			matches.length === 0
+				? "No requests match that search."
+				: matches.map((request) => `- ${request.id}: ${request.text}`).join("\n");
+		return {
+			content: [{ type: "text", text }],
 			details: undefined
 		};
 	}
