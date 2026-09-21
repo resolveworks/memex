@@ -132,15 +132,24 @@ async function promptContext(): Promise<PromptContext> {
 	return (await response.json()) as PromptContext;
 }
 
+/** Show only a couple of requests inline; the rest live behind `list-requests`. */
+const REQUEST_QUEUE_PREVIEW = 2;
+
 /** Renders the open request queue for inclusion in the system prompt. */
 function requestQueueSection(requests: Request[]): string {
 	if (requests.length === 0) return "# Request queue\n\nThe request queue is empty.";
-	const items = requests.map((request) => `- ${request.id}: ${request.text}`).join("\n");
+	const preview = requests.slice(0, REQUEST_QUEUE_PREVIEW);
+	const items = preview.map((request) => `- ${request.id}: ${request.text}`).join("\n");
+	const remaining = requests.length - preview.length;
+	const more =
+		remaining > 0
+			? `\n\n${remaining} more request${remaining === 1 ? "" : "s"} are queued but not shown here.`
+			: "";
 	return `# Request queue
 
 These questions were recorded earlier because memory did not answer them. Each line is \`id: question\`.
 
-${items}
+${items}${more}
 
 When a later message supplies the answer to one of these, call the \`delete-request\` tool with that id to remove it from the queue.`;
 }
