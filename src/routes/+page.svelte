@@ -3,6 +3,7 @@
 	import { goto } from "$app/navigation";
 	import mascot from "$lib/assets/mascot1.png";
 	import AppShell from "$lib/components/AppShell.svelte";
+	import Bubble from "$lib/components/Bubble.svelte";
 	import Button from "$lib/components/Button.svelte";
 	import Card from "$lib/components/Card.svelte";
 	import Field from "$lib/components/Field.svelte";
@@ -57,7 +58,11 @@
 	{/snippet}
 	<div class="landing">
 		<div class="hero">
-			<img class="mascot" src={mascot} alt="" />
+			<div class="mascot-wrap">
+				<img class="mascot" src={mascot} alt="" />
+				<Bubble class="bubble-pop big" size="clamp(1.5rem, 3.5vw, 2.25rem)" />
+				<Bubble class="bubble-pop small" size="clamp(0.9rem, 2vw, 1.25rem)" />
+			</div>
 			<Card>
 				<h1>{t("create.heading")}</h1>
 				<form class="stack" method="POST" use:enhance>
@@ -158,10 +163,25 @@
 		letter-spacing: -0.01em;
 	}
 
-	.mascot {
+	.mascot-wrap {
+		position: relative;
 		justify-self: center;
+	}
+
+	.mascot {
+		display: block;
 		inline-size: clamp(10rem, 24vw, 13rem);
 		filter: drop-shadow(0 8px 16px rgb(46 38 35 / 0.12));
+	}
+
+	.mascot-wrap :global(.bubble-pop.big) {
+		top: -0.75rem;
+		right: 0.25rem;
+	}
+
+	.mascot-wrap :global(.bubble-pop.small) {
+		top: -2.25rem;
+		right: 2.75rem;
 	}
 
 	.explain {
