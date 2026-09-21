@@ -71,8 +71,8 @@
 		<div class="hero">
 			<div class="mascot-wrap">
 				<img class="mascot" src={mascot} alt="" />
-				<Bubble class="bubble-pop big" size="clamp(1.5rem, 3.5vw, 2.25rem)" />
-				<Bubble class="bubble-pop small" size="clamp(0.9rem, 2vw, 1.25rem)" />
+				<Bubble class="bubble-pop big" size="0.173em" />
+				<Bubble class="bubble-pop small" size="0.096em" />
 			</div>
 			<Card>
 				<h1>{t("create.heading")}</h1>
@@ -175,24 +175,26 @@
 	}
 
 	.mascot-wrap {
+		/* One font-size drives the whole mascot + bubble cluster. */
+		font-size: clamp(10rem, 24vw, 13rem);
 		position: relative;
 		justify-self: center;
 	}
 
 	.mascot {
 		display: block;
-		inline-size: clamp(10rem, 24vw, 13rem);
+		inline-size: 1em;
 		filter: drop-shadow(0 8px 16px rgb(46 38 35 / 0.12));
 	}
 
 	.mascot-wrap :global(.bubble-pop.big) {
-		top: -0.75rem;
-		right: 0.25rem;
+		top: -0.058em;
+		right: 0.019em;
 	}
 
 	.mascot-wrap :global(.bubble-pop.small) {
-		top: -2.25rem;
-		right: 2.75rem;
+		top: -0.173em;
+		right: 0.212em;
 	}
 
 	.explain {
