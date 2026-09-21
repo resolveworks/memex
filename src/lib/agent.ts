@@ -76,8 +76,8 @@ this memex's link.
 # Greeting
 
 You speak first: the opening trigger asks for your greeting. In one or two
-short sentences in ${userLanguageName}, say what this memex is and, from the
-topics below, what it holds.${greetingQueue} Call no tools.
+short sentences in ${userLanguageName}, say what this memex holds, drawn from
+the topics below.${greetingQueue} Call no tools.
 
 # Language
 
