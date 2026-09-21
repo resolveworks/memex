@@ -1,6 +1,6 @@
 import { invalidateAll } from "$app/navigation";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
-import { getAgent, useLanguage } from "./agent";
+import { getAgent, refreshSystemPrompt } from "./agent";
 
 export const chat = $state<{
 	messages: AgentMessage[];
@@ -9,6 +9,7 @@ export const chat = $state<{
 }>({ messages: [], streaming: undefined, busy: false });
 
 let currentId: string | undefined;
+let currentLanguage: string | undefined;
 let openToken = 0;
 
 const agent = getAgent();
@@ -45,15 +46,20 @@ export async function open(id: string, language: string): Promise<void> {
 	}
 	if (token !== openToken) return;
 	currentId = id;
+	currentLanguage = language;
 	agent.reset();
-	useLanguage(language);
+	await refreshSystemPrompt(language);
+	if (token !== openToken) return;
 	chat.messages = [];
 	chat.streaming = undefined;
 	chat.busy = false;
 }
 
-export function send(text: string): void {
+export async function send(text: string): Promise<void> {
 	if (chat.busy) return;
+	if (!currentLanguage) throw new Error("No memex open.");
 	chat.busy = true;
+	// Rebuild the prompt so the queue reflects requests the previous turn recorded or closed.
+	await refreshSystemPrompt(currentLanguage);
 	void agent.prompt(text);
 }

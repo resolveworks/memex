@@ -11,8 +11,6 @@ import type {
 import { contentText } from "@earendil-works/pi-ai";
 import { model } from "$lib/model";
 import { memexId } from "$lib/server/auth";
-import { promptSection, total as totalRequests } from "$lib/server/requests";
-import { total as totalMemories } from "$lib/server/storage";
 import { models } from "$lib/server/llm";
 
 function contentAt(partial: AssistantMessage, index: number) {
@@ -110,7 +108,7 @@ function exceedsLimits(context: Context): Response | undefined {
 }
 
 export const POST: RequestHandler = async ({ request }) => {
-	const memex = memexId(request);
+	memexId(request); // Rejects unknown credentials; the stream itself is memex-agnostic.
 	let body: StreamRequest;
 	try {
 		body = (await request.json()) as StreamRequest;
@@ -121,11 +119,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	const rejected = exceedsLimits(body.context);
 	if (rejected) return rejected;
 
-	const context: Context = {
-		...body.context,
-		systemPrompt: `${body.context.systemPrompt ?? ""}\n\nThis memex holds ${totalMemories(memex)} memories and ${totalRequests(memex)} open requests.\n\n${promptSection(memex)}`,
-	};
-	const events = models.streamSimple(model, context, body.options);
+	const events = models.streamSimple(model, body.context, body.options);
 	const encoder = new TextEncoder();
 
 	const stream = new ReadableStream<Uint8Array>({

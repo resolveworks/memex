@@ -2,6 +2,7 @@ import { Agent, streamProxy } from "@earendil-works/pi-agent-core";
 import { languageName } from "./i18n.svelte";
 import { memexId } from "./memex";
 import { model } from "./model";
+import type { Request } from "./request";
 import {
 	createMemory,
 	createRequest,
@@ -117,7 +118,39 @@ export function getAgent(): Agent {
 	return agent;
 }
 
-/** Points the agent at the memex's canonical language before it answers. */
-export function useLanguage(language: string): void {
-	getAgent().state.systemPrompt = systemPrompt(language);
+/** The memex state the system prompt is rebuilt from before each turn. */
+interface PromptContext {
+	memories: number;
+	requests: Request[];
+}
+
+async function promptContext(): Promise<PromptContext> {
+	const response = await fetch("/api/context", {
+		headers: { authorization: `Bearer ${memexId()}` }
+	});
+	if (!response.ok) throw new Error(`Failed to load context (${response.status}).`);
+	return (await response.json()) as PromptContext;
+}
+
+/** Renders the open request queue for inclusion in the system prompt. */
+function requestQueueSection(requests: Request[]): string {
+	if (requests.length === 0) return "# Request queue\n\nThe request queue is empty.";
+	const items = requests.map((request) => `- ${request.id}: ${request.text}`).join("\n");
+	return `# Request queue
+
+These questions were recorded earlier because memory did not answer them. Each line is \`id: question\`.
+
+${items}
+
+When a later message supplies the answer to one of these, call the \`delete-request\` tool with that id to remove it from the queue.`;
+}
+
+/** Points the agent at the memex's language and current store state before it answers. */
+export async function refreshSystemPrompt(language: string): Promise<void> {
+	const { memories, requests } = await promptContext();
+	getAgent().state.systemPrompt = `${systemPrompt(language)}
+
+This memex holds ${memories} memories and ${requests.length} open requests.
+
+${requestQueueSection(requests)}`;
 }

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { and, count, desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { PAGE_SIZE, type Page } from "$lib/page";
 import type { Request } from "$lib/request";
 import { db } from "./db";
@@ -17,15 +17,6 @@ export function list(memexId: string): Request[] {
 	return newestFirst(memexId).all();
 }
 
-/** Total number of requests in a memex. */
-export function total(memexId: string): number {
-	return db
-		.select({ value: count() })
-		.from(requests)
-		.where(eq(requests.memexId, memexId))
-		.get()!.value;
-}
-
 /** One page of a memex's requests, most recently created first. */
 export function page(memexId: string, offset: number): Page<Request> {
 	const rows = newestFirst(memexId)
@@ -33,20 +24,6 @@ export function page(memexId: string, offset: number): Page<Request> {
 		.offset(offset)
 		.all();
 	return { items: rows.slice(0, PAGE_SIZE), hasMore: rows.length > PAGE_SIZE };
-}
-
-/** Renders a memex's open request queue for inclusion in the system prompt. */
-export function promptSection(memexId: string): string {
-	const open = list(memexId);
-	if (open.length === 0) return "# Request queue\n\nThe request queue is empty.";
-	const items = open.map((request) => `- ${request.id}: ${request.text}`).join("\n");
-	return `# Request queue
-
-These questions were recorded earlier because memory did not answer them. Each line is \`id: question\`.
-
-${items}
-
-When a later message supplies the answer to one of these, call the \`delete-request\` tool with that id to remove it from the queue.`;
 }
 
 export function create(memexId: string, text: string): Request {
