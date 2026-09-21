@@ -1,4 +1,5 @@
-import { Agent, streamProxy } from "@earendil-works/pi-agent-core";
+import { Agent, streamProxy, type AgentMessage } from "@earendil-works/pi-agent-core";
+import type { Message } from "@earendil-works/pi-ai";
 import { languageName } from "./i18n.svelte";
 import { memexId } from "./memex";
 import { model } from "./model";
@@ -8,7 +9,6 @@ import {
 	createRequest,
 	deleteMemory,
 	deleteRequest,
-	getTerms,
 	listMemories,
 	listRequests,
 	searchMemories,
@@ -16,6 +16,45 @@ import {
 	updateMemory,
 	updateRequest
 } from "./tools";
+
+/** The opening turn: invisible to the user, a user turn to the model. */
+interface GreetingMessage {
+	role: "greeting";
+	content: [{ type: "text"; text: string }];
+	timestamp: number;
+}
+
+declare module "@earendil-works/pi-agent-core" {
+	interface CustomAgentMessages {
+		greeting: GreetingMessage;
+	}
+}
+
+/** Elicits the model's opening message, paired with the Greeting prompt section. */
+export function greetingMessage(): AgentMessage {
+	return {
+		role: "greeting",
+		content: [
+			{
+				type: "text",
+				text: "The user has opened this memex and is waiting for you to greet them."
+			}
+		],
+		timestamp: Date.now()
+	};
+}
+
+/** The model's view of the transcript: the opening trigger is an ordinary user turn. */
+function convertToLlm(messages: AgentMessage[]): Message[] {
+	return messages.flatMap((message) => {
+		if (message.role === "greeting") {
+			return [{ role: "user" as const, content: message.content, timestamp: message.timestamp }];
+		}
+		return message.role === "user" || message.role === "assistant" || message.role === "toolResult"
+			? [message]
+			: [];
+	});
+}
 
 /**
  * A memex keeps every memory in one language so retrieval never has to fan out
@@ -30,6 +69,18 @@ function systemPrompt(language: string): string {
 You are Memex, a persistent memory assistant. Your function is memory: you store
 information the user wants remembered, and you retrieve information already stored.
 Memories are shared with everyone who has this memex's link.
+
+# Greeting
+
+You speak first. The user opens a memex and waits, before typing anything, for
+your opening message. When the message you are answering is the opening trigger,
+greet the user in ${name}:
+
+- In one or two short sentences, say what this memex is and, from the topic terms
+  in this prompt, what it appears to hold.
+- If the request queue at the end of this prompt is not empty, quote the first
+  request in it and ask the user for the answer. Ask about one request only.
+- Do not call any tools while greeting.
 
 # Language
 
@@ -50,9 +101,6 @@ something you had to translate, say that you translated it.
 - \`list-memories\` — page through every memory, most recently updated first, each as
   \`id: text\`. Pass the offset reported at the end of a page to continue. Use it to
   browse the store when searching is not narrowing things down.
-- \`get-terms\` — list the terms that occur in the most memories, each with the number
-  of memories containing it. Use it to see what topics the store covers without
-  searching.
 - \`update-memory\` — replace the text of an existing memory. Pass the id from a
   search result and the corrected text.
 - \`delete-memory\` — remove a memory that is wrong or no longer wanted. Pass the id
@@ -110,7 +158,6 @@ export function getAgent(): Agent {
 					createMemory,
 					searchMemories,
 					listMemories,
-					getTerms,
 					updateMemory,
 					deleteMemory,
 					createRequest,
@@ -120,6 +167,7 @@ export function getAgent(): Agent {
 					deleteRequest
 				]
 			},
+			convertToLlm,
 			// The memex id travels as the bearer token; empty proxyUrl targets same-origin /api/stream.
 			streamFn: (m, ctx, opts) =>
 				streamProxy(m, ctx, { ...opts, authToken: memexId(), proxyUrl: "" })
@@ -132,6 +180,12 @@ export function getAgent(): Agent {
 interface PromptContext {
 	memories: number;
 	requests: Request[];
+	terms: TermCount[];
+}
+
+interface TermCount {
+	term: string;
+	count: number;
 }
 
 async function promptContext(): Promise<PromptContext> {
@@ -140,6 +194,17 @@ async function promptContext(): Promise<PromptContext> {
 	});
 	if (!response.ok) throw new Error(`Failed to load context (${response.status}).`);
 	return (await response.json()) as PromptContext;
+}
+
+/** Renders the store's most common terms for inclusion in the system prompt. */
+function termsSection(terms: TermCount[]): string {
+	if (terms.length === 0) return "# Topics\n\nThe store is empty.";
+	const items = terms.map(({ term, count }) => `- ${term}: ${count}`).join("\n");
+	return `# Topics
+
+These terms occur in the most memories, each with the number of memories containing it. Use them to judge what the store covers; search or list for anything specific.
+
+${items}`;
 }
 
 /** Show only a couple of requests inline; the rest live behind `list-requests`. */
@@ -166,10 +231,12 @@ When a later message supplies the answer to one of these, call the \`delete-requ
 
 /** Points the agent at the memex's language and current store state before it answers. */
 export async function refreshSystemPrompt(language: string): Promise<void> {
-	const { memories, requests } = await promptContext();
+	const { memories, requests, terms } = await promptContext();
 	getAgent().state.systemPrompt = `${systemPrompt(language)}
 
 This memex holds ${memories} memories and ${requests.length} open requests.
+
+${termsSection(terms)}
 
 ${requestQueueSection(requests)}`;
 }

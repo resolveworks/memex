@@ -1,6 +1,6 @@
 import { invalidateAll } from "$app/navigation";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
-import { getAgent, refreshSystemPrompt } from "./agent";
+import { getAgent, greetingMessage, refreshSystemPrompt } from "./agent";
 
 export const chat = $state<{
 	messages: AgentMessage[];
@@ -53,6 +53,7 @@ export async function open(id: string, language: string): Promise<void> {
 	chat.messages = [];
 	chat.streaming = undefined;
 	chat.busy = false;
+	void agent.prompt(greetingMessage());
 }
 
 export async function send(text: string): Promise<void> {

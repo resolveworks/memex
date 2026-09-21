@@ -100,39 +100,6 @@ export const listMemories: AgentTool<typeof listMemoriesParameters> = {
 	}
 };
 
-const getTermsParameters = Type.Object({
-	limit: Type.Optional(
-		Type.Number({
-			description: "Maximum number of terms to return (default 50, max 200)."
-		})
-	)
-});
-
-export const getTerms: AgentTool<typeof getTermsParameters> = {
-	name: "get-terms",
-	label: "Get terms",
-	description:
-		"Return the terms that occur in the most memories, each with the number of memories containing it. Use this to see what topics the store covers without searching.",
-	parameters: getTermsParameters,
-	execute: async (_toolCallId, { limit }) => {
-		const count = Math.min(limit ?? 50, 200);
-		const response = await fetch(`/api/terms?limit=${count}`, { headers: headers() });
-		if (!response.ok) throw new Error(`Failed to get terms (${response.status}).`);
-		const rows = (await response.json()) as { term: string; count: number }[];
-		if (rows.length === 0) {
-			return {
-				content: [{ type: "text", text: "No terms." }],
-				details: undefined
-			};
-		}
-		const text = rows.map((row) => `- ${row.term}: ${row.count}`).join("\n");
-		return {
-			content: [{ type: "text", text }],
-			details: undefined
-		};
-	}
-};
-
 const updateMemoryParameters = Type.Object({
 	id: Type.String(),
 	text: Type.String()
