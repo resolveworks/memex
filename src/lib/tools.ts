@@ -19,8 +19,7 @@ const createMemoryParameters = Type.Object({
 export const createMemory: AgentTool<typeof createMemoryParameters> = {
 	name: "create-memory",
 	label: "Create memory",
-	description:
-		"Save a new piece of information as a memory. Use this whenever the user asks you to remember something.",
+	description: "Save a new memory with the given text.",
 	parameters: createMemoryParameters,
 	execute: async (_toolCallId, { text }) => {
 		const response = await fetch("/api/memories", {
@@ -45,7 +44,7 @@ export const searchMemories: AgentTool<typeof searchMemoriesParameters> = {
 	name: "search-memories",
 	label: "Search memories",
 	description:
-		"Search the stored memories. Takes a list of queries and returns every memory matching any word in any of them, each prefixed with its id. Use this to recall information the user asked you to remember.",
+		"Return every memory containing any word in any of the queries.",
 	parameters: searchMemoriesParameters,
 	execute: async (_toolCallId, { queries }) => {
 		const params = new URLSearchParams();
@@ -67,7 +66,7 @@ export const searchMemories: AgentTool<typeof searchMemoriesParameters> = {
 const listMemoriesParameters = Type.Object({
 	offset: Type.Optional(
 		Type.Number({
-			description: "Number of memories to skip. Omit or pass 0 for the first page."
+			description: "Memories to skip; omit for the first page."
 		})
 	)
 });
@@ -76,7 +75,7 @@ export const listMemories: AgentTool<typeof listMemoriesParameters> = {
 	name: "list-memories",
 	label: "List memories",
 	description:
-		"List stored memories, most recently updated first, one page at a time, each prefixed with its id. Use this to browse the whole store when searching is not narrowing things down, and pass the offset reported at the end of a page to continue.",
+		"List memories, most recently updated first, one page at a time.",
 	parameters: listMemoriesParameters,
 	execute: async (_toolCallId, { offset }) => {
 		const from = offset ?? 0;
@@ -108,8 +107,7 @@ const updateMemoryParameters = Type.Object({
 export const updateMemory: AgentTool<typeof updateMemoryParameters> = {
 	name: "update-memory",
 	label: "Update memory",
-	description:
-		"Replace the text of an existing memory. Pass the id returned by a search and the corrected text.",
+	description: "Replace a memory's text by id.",
 	parameters: updateMemoryParameters,
 	execute: async (_toolCallId, { id, text }) => {
 		const response = await fetch("/api/memories", {
@@ -132,8 +130,7 @@ const deleteMemoryParameters = Type.Object({
 export const deleteMemory: AgentTool<typeof deleteMemoryParameters> = {
 	name: "delete-memory",
 	label: "Delete memory",
-	description:
-		"Remove a memory that is wrong or no longer wanted. Pass the id returned by a search.",
+	description: "Delete a memory by id.",
 	parameters: deleteMemoryParameters,
 	execute: async (_toolCallId, { id }) => {
 		const response = await fetch(`/api/memories?id=${encodeURIComponent(id)}`, {
@@ -156,7 +153,7 @@ export const createRequest: AgentTool<typeof createRequestParameters> = {
 	name: "create-request",
 	label: "Create request",
 	description:
-		"Record a question you could not answer from memory so the user can supply the missing information later. Use this after thorough searching turns up nothing.",
+		"Record a question memory cannot answer, for the user to fill in later.",
 	parameters: createRequestParameters,
 	execute: async (_toolCallId, { text }) => {
 		const response = await fetch("/api/requests", {
@@ -181,7 +178,7 @@ export const searchRequests: AgentTool<typeof searchRequestsParameters> = {
 	name: "search-requests",
 	label: "Search requests",
 	description:
-		"Search the recorded requests. Takes a list of queries and returns every request matching any word in any of them, each prefixed with its id. Use this to check whether a question has already been recorded before adding a duplicate.",
+		"Return every recorded request containing any word in any of the queries.",
 	parameters: searchRequestsParameters,
 	execute: async (_toolCallId, { queries }) => {
 		const params = new URLSearchParams();
@@ -203,7 +200,7 @@ export const searchRequests: AgentTool<typeof searchRequestsParameters> = {
 const listRequestsParameters = Type.Object({
 	offset: Type.Optional(
 		Type.Number({
-			description: "Number of requests to skip. Omit or pass 0 for the first page."
+			description: "Requests to skip; omit for the first page."
 		})
 	)
 });
@@ -211,8 +208,7 @@ const listRequestsParameters = Type.Object({
 export const listRequests: AgentTool<typeof listRequestsParameters> = {
 	name: "list-requests",
 	label: "List requests",
-	description:
-		"List the recorded requests, most recently created first, one page at a time, each prefixed with its id. Use this to review the request queue, and pass the offset reported at the end of a page to continue.",
+	description: "List recorded requests, one page at a time.",
 	parameters: listRequestsParameters,
 	execute: async (_toolCallId, { offset }) => {
 		const from = offset ?? 0;
@@ -244,8 +240,7 @@ const updateRequestParameters = Type.Object({
 export const updateRequest: AgentTool<typeof updateRequestParameters> = {
 	name: "update-request",
 	label: "Update request",
-	description:
-		"Replace the wording of an open request. Pass the id shown for that request in the request queue.",
+	description: "Reword an open request by id.",
 	parameters: updateRequestParameters,
 	execute: async (_toolCallId, { id, text }) => {
 		const response = await fetch("/api/requests", {
@@ -268,8 +263,7 @@ const deleteRequestParameters = Type.Object({
 export const deleteRequest: AgentTool<typeof deleteRequestParameters> = {
 	name: "delete-request",
 	label: "Delete request",
-	description:
-		"Remove a recorded request once the information it asked for has been supplied. Pass the id shown for that request in the request queue.",
+	description: "Remove a request by id.",
 	parameters: deleteRequestParameters,
 	execute: async (_toolCallId, { id }) => {
 		const response = await fetch(`/api/requests?id=${encodeURIComponent(id)}`, {
