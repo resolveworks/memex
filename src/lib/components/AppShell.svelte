@@ -30,15 +30,17 @@
 <div class="app">
 	<Header>
 		<a class="title" href={home} onclick={onhomeclick}>Memex</a>
-		<Select
-			label={t('nav.memexes')}
-			{value}
-			{options}
-			{actions}
-			placeholder={t('nav.select')}
-			{disabled}
-			{onchange}
-		/>
+		{#if options.length}
+			<Select
+				label={t('nav.memexes')}
+				{value}
+				{options}
+				{actions}
+				placeholder={t('nav.select')}
+				{disabled}
+				{onchange}
+			/>
+		{/if}
 		{#if toolbar}
 			<div class="actions">{@render toolbar()}</div>
 		{/if}
