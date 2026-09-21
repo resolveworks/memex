@@ -58,12 +58,12 @@ function convertToLlm(messages: AgentMessage[]): Message[] {
 
 /**
  * A memex keeps every memory in one language so retrieval never has to fan out
- * across translations. Users may still write in any language: the prompt has the
- * agent translate storage and search into the memex language and answer in the
- * language the user wrote in.
+ * across translations. The greeting uses the app language because it is sent
+ * before the user writes.
  */
-function systemPrompt(language: string): string {
-	const name = languageName(language);
+function systemPrompt(memexLanguage: string, userLanguage: string): string {
+	const memexLanguageName = languageName(memexLanguage);
+	const userLanguageName = languageName(userLanguage);
 	return `# Identity
 
 You are Memex, a persistent memory assistant. You store what the user wants
@@ -73,14 +73,14 @@ this memex's link.
 # Greeting
 
 You speak first: the opening trigger asks for your greeting. In one or two
-short sentences in ${name}, say what this memex is and, from the topics below,
-what it holds. If the request queue below is not empty, end by asking its
-first question; otherwise don't mention requests. Call no tools.
+short sentences in ${userLanguageName}, say what this memex is and, from the
+topics below, what it holds. If the request queue below is not empty, end by
+asking its first question; otherwise don't mention requests. Call no tools.
 
 # Language
 
-This memex has one language: ${name}. Store, update, and search in ${name};
-answer in the language the user wrote in. Say when you store a translation.
+This memex has one language: ${memexLanguageName}. Store, update, and search
+in ${memexLanguageName}; answer in the language the user wrote in.
 
 # Behavior
 
@@ -181,9 +181,12 @@ ${items}${more}`;
 }
 
 /** Points the agent at the memex's language and current store state before it answers. */
-export async function refreshSystemPrompt(language: string): Promise<void> {
+export async function refreshSystemPrompt(
+	memexLanguage: string,
+	userLanguage: string
+): Promise<void> {
 	const { memories, requests, terms } = await promptContext();
-	getAgent().state.systemPrompt = `${systemPrompt(language)}
+	getAgent().state.systemPrompt = `${systemPrompt(memexLanguage, userLanguage)}
 
 This memex holds ${memories} memories and ${requests.length} open requests.
 

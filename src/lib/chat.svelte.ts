@@ -1,6 +1,7 @@
 import { invalidateAll } from "$app/navigation";
 import type { AgentMessage } from "@earendil-works/pi-agent-core";
 import { getAgent, greetingMessage, refreshSystemPrompt } from "./agent";
+import { i18n } from "./i18n.svelte";
 
 export const chat = $state<{
 	messages: AgentMessage[];
@@ -9,7 +10,7 @@ export const chat = $state<{
 }>({ messages: [], streaming: undefined, busy: false });
 
 let currentId: string | undefined;
-let currentLanguage: string | undefined;
+let currentMemexLanguage: string | undefined;
 let openToken = 0;
 
 const agent = getAgent();
@@ -37,7 +38,7 @@ agent.subscribe((event) => {
 });
 
 /** Starts a fresh conversation: aborts any stream in flight, then greets. */
-async function restart(language: string): Promise<void> {
+async function restart(memexLanguage: string): Promise<void> {
 	const token = ++openToken;
 	if (agent.state.isStreaming) {
 		agent.abort();
@@ -45,7 +46,7 @@ async function restart(language: string): Promise<void> {
 	}
 	if (token !== openToken) return;
 	agent.reset();
-	await refreshSystemPrompt(language);
+	await refreshSystemPrompt(memexLanguage, i18n.locale);
 	if (token !== openToken) return;
 	chat.messages = [];
 	chat.streaming = undefined;
@@ -54,24 +55,24 @@ async function restart(language: string): Promise<void> {
 }
 
 /** Switches to a memex, discarding the previous conversation and any stream in flight. */
-export async function open(id: string, language: string): Promise<void> {
+export async function open(id: string, memexLanguage: string): Promise<void> {
 	if (id === currentId) return;
 	currentId = id;
-	currentLanguage = language;
-	await restart(language);
+	currentMemexLanguage = memexLanguage;
+	await restart(memexLanguage);
 }
 
 /** Discards the conversation with the open memex and starts over with a fresh greeting. */
 export async function clear(): Promise<void> {
-	if (!currentLanguage) throw new Error("No memex open.");
-	await restart(currentLanguage);
+	if (!currentMemexLanguage) throw new Error("No memex open.");
+	await restart(currentMemexLanguage);
 }
 
 export async function send(text: string): Promise<void> {
 	if (chat.busy) return;
-	if (!currentLanguage) throw new Error("No memex open.");
+	if (!currentMemexLanguage) throw new Error("No memex open.");
 	chat.busy = true;
 	// Rebuild the prompt so the queue reflects requests the previous turn recorded or closed.
-	await refreshSystemPrompt(currentLanguage);
+	await refreshSystemPrompt(currentMemexLanguage, i18n.locale);
 	void agent.prompt(text);
 }
