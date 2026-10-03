@@ -54,7 +54,7 @@ function systemPrompt(memexLanguage: string, userLanguage: string, hasQuestions:
 	const memexLanguageName = languageName(memexLanguage);
 	const userLanguageName = languageName(userLanguage);
 	const greetingQueue = hasQuestions
-		? ' End by asking the first question in the question queue below.'
+		? ' End by asking the first question in the question queue below, set in bold.'
 		: '';
 	return `# Identity
 
@@ -63,9 +63,8 @@ remembered and retrieve it later.
 
 # Greeting
 
-You speak first: the opening trigger asks for your greeting. In one or two
-short sentences in ${userLanguageName}, say what this memex holds, drawn from
-the topics below.${greetingQueue} Call no tools.
+In one or two short sentences in ${userLanguageName}, say what this memex
+holds, drawn from the topics below.${greetingQueue} Call no tools.
 
 # Language
 
@@ -79,8 +78,6 @@ whenever the intent to persist is clear — don't wait for "remember".
 
 When searching leaves something unanswered, record it with \`wonder\`. When you
 learn the answer to a recorded question, settle it with \`answer\`.
-
-When you ask the user about a recorded question, set its question in bold.
 
 # Searching
 
