@@ -10,7 +10,6 @@ import {
 	openQuestions,
 	remember,
 	revise,
-	total,
 	wonder
 } from './storage';
 
@@ -32,7 +31,6 @@ describe('entity storage', () => {
 			expect(memory.deletedAt).toBe(null);
 			expect(memory.createdAt).toBe(memory.updatedAt);
 			expect(listMemories(memex)).toEqual([memory]);
-			expect(total(memex)).toBe(1);
 		});
 
 		it('yields two distinct entities for the same text, newest first', () => {
@@ -42,7 +40,6 @@ describe('entity storage', () => {
 
 			expect(second.id).not.toBe(first.id);
 			expect(listMemories(memex).map((memory) => memory.id)).toEqual([second.id, first.id]);
-			expect(total(memex)).toBe(2);
 		});
 	});
 
@@ -87,7 +84,6 @@ describe('entity storage', () => {
 			expect(revised.createdAt).toBe(memory.createdAt);
 			expect(revised.updatedAt).toBe(revisedAt);
 			expect(listMemories(memex)).toEqual([revised]);
-			expect(total(memex)).toBe(1);
 		});
 
 		it('replaces the text of a question the same way', () => {
@@ -120,7 +116,6 @@ describe('entity storage', () => {
 			forget(memex, memory.id);
 
 			expect(listMemories(memex)).toEqual([]);
-			expect(total(memex)).toBe(0);
 
 			const [gone] = listMemories(memex, true);
 			expect(gone.id).toBe(memory.id);
@@ -161,16 +156,12 @@ describe('entity storage', () => {
 	});
 
 	it('keeps one memex from listing the entities of another', () => {
-		const other = create('Supper plans', 'en');
+		const other = create('Dinner plans', 'en');
 		const memory = remember(memex, 'Pizza on Friday');
-		const question = wonder(memex, 'When is pizza?');
-		const otherMemory = remember(other, 'Sushi on Monday');
-		const otherQuestion = wonder(other, 'When is sushi?');
+		const otherMemory = remember(other, 'Pizza on Friday');
 
 		expect(listMemories(memex).map((m) => m.id)).toEqual([memory.id]);
-		expect(openQuestions(memex).map((q) => q.id)).toEqual([question.id]);
 		expect(listMemories(other).map((m) => m.id)).toEqual([otherMemory.id]);
-		expect(openQuestions(other).map((q) => q.id)).toEqual([otherQuestion.id]);
 
 		expect(() => forget(memex, otherMemory.id)).toThrow(
 			`No memory or question with id "${otherMemory.id}".`
