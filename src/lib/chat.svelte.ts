@@ -57,8 +57,8 @@ async function restart(memexLanguage: string): Promise<void> {
 	}
 	if (token !== openToken) return;
 	instance.reset();
-	useSystemPrompt(memexLanguage, page.data.locale);
-	const greeting = await greetingMessage();
+	useSystemPrompt(memexLanguage);
+	const greeting = await greetingMessage(page.data.locale);
 	if (token !== openToken) return;
 	chat.messages = [];
 	chat.streaming = undefined;

@@ -23,7 +23,7 @@ function question(id: string, text: string): Question {
 
 /** The greeting message, confirmed by its role. */
 async function greeting(): Promise<Extract<AgentMessage, { role: 'greeting' }>> {
-	const message = await greetingMessage();
+	const message = await greetingMessage('sv');
 	if (message.role !== 'greeting') throw new Error('Expected a greeting message.');
 	return message;
 }
@@ -60,7 +60,7 @@ describe('greetingMessage', () => {
 	it('fails when the api rejects the context', async () => {
 		fetchMock.mockResolvedValueOnce(failure(404));
 
-		await expect(greetingMessage()).rejects.toThrow('Failed to load context (404).');
+		await expect(greetingMessage('sv')).rejects.toThrow('Failed to load context (404).');
 	});
 
 	it('grounds the greeting in the store contents', async () => {
@@ -88,10 +88,10 @@ describe('greetingMessage', () => {
 				text:
 					'This memex is titled "Tea Log". Today is 2026-03-04. It holds 12 memories and 3 open questions.\n\n' +
 					'# Topics\n\nMost frequent terms in the store, each with its memory count.\n\n- tea: 3\n- sleep: 1\n\n' +
-					'# Question queue\n\nUnanswered questions recorded earlier, as `id: question`.\n\n' +
-					'- q1: Tea or coffee?\n- q2: Loose leaf or bags?\n\n' +
-					'1 more question are queued but not shown here.\n\n' +
-					'The user has opened this memex and is waiting for you to greet them.'
+					'The user has opened this memex and is waiting for you to greet them. ' +
+					'In one or two short sentences in svenska, say what this memex holds, drawn from the contents above. ' +
+					'End by asking the open question q1: "Tea or coffee?", set in bold. ' +
+					'Call no tools.'
 			}
 		]);
 	});
@@ -107,7 +107,7 @@ describe('greetingMessage', () => {
 		expect(text).not.toContain('Most frequent terms');
 	});
 
-	it('omits the question queue when no question is open', async () => {
+	it('asks nothing when no question is open', async () => {
 		fetchMock.mockResolvedValueOnce(
 			ok({
 				title: 'Notes',
@@ -119,10 +119,10 @@ describe('greetingMessage', () => {
 
 		const text = await greetingText();
 
-		expect(text).not.toContain('# Question queue');
+		expect(text).not.toContain('End by asking');
 	});
 
-	it('previews only the first two questions and counts the rest', async () => {
+	it('shows only the first question', async () => {
 		fetchMock.mockResolvedValueOnce(
 			ok({
 				title: 'Tea Log',
@@ -130,9 +130,7 @@ describe('greetingMessage', () => {
 				questions: [
 					question('q1', 'Tea or coffee?'),
 					question('q2', 'Loose leaf or bags?'),
-					question('q3', 'With milk?'),
-					question('q4', 'Sugar?'),
-					question('q5', 'At what temperature?')
+					question('q3', 'With milk?')
 				],
 				terms: []
 			})
@@ -140,18 +138,16 @@ describe('greetingMessage', () => {
 
 		const text = await greetingText();
 
-		expect(text).toContain('- q1: Tea or coffee?\n- q2: Loose leaf or bags?');
-		expect(text).not.toContain('q3');
-		expect(text).toContain('3 more questions are queued but not shown here.');
+		expect(text).toContain('q1: "Tea or coffee?"');
+		expect(text).not.toContain('q2');
 	});
 });
 
 describe('useSystemPrompt', () => {
-	it('names the memex language and the ui language by their own names', () => {
-		useSystemPrompt('de', 'sv');
+	it('names the memex language by its own name', () => {
+		useSystemPrompt('de');
 
 		const prompt = getAgent().state.systemPrompt;
 		expect(prompt).toContain('Deutsch');
-		expect(prompt).toContain('svenska');
 	});
 });

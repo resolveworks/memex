@@ -81,8 +81,8 @@ const fake = vi.hoisted(() => {
 		state
 	};
 
-	const useSystemPrompt = vi.fn((memexLanguage: string, userLanguage: string) => {
-		state.systemPrompt = `${memexLanguage}/${userLanguage}`;
+	const useSystemPrompt = vi.fn((memexLanguage: string) => {
+		state.systemPrompt = memexLanguage;
 	});
 	const greetingMessage = vi.fn(async () => greeting);
 
@@ -145,13 +145,14 @@ beforeEach(async () => {
 });
 
 describe('open', () => {
-	it('resets the agent, sets the system prompt from both languages, and greets', async () => {
+	it('resets the agent, sets the system prompt, and greets in the ui language', async () => {
 		await store.open('9e107669-c4b1-4380-a20b-1f3e6c8b9c2d', 'de');
 		flushSync();
 
 		expect(fake.agent.reset).toHaveBeenCalledTimes(1);
 		expect(fake.useSystemPrompt).toHaveBeenCalledTimes(1);
-		expect(fake.useSystemPrompt).toHaveBeenCalledWith('de', 'sv');
+		expect(fake.useSystemPrompt).toHaveBeenCalledWith('de');
+		expect(fake.greetingMessage).toHaveBeenCalledWith('sv');
 		expect(fake.agent.prompt).toHaveBeenCalledTimes(1);
 		expect(fake.agent.prompt).toHaveBeenCalledWith(fake.greeting);
 	});
@@ -186,7 +187,7 @@ describe('clear', () => {
 		await store.clear();
 
 		expect(fake.agent.reset).toHaveBeenCalledTimes(1);
-		expect(fake.useSystemPrompt).toHaveBeenCalledWith('de', 'sv');
+		expect(fake.useSystemPrompt).toHaveBeenCalledWith('de');
 		expect(fake.agent.prompt).toHaveBeenCalledTimes(1);
 		expect(fake.agent.prompt).toHaveBeenCalledWith(fake.greeting);
 	});

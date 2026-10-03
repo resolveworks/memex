@@ -20,16 +20,20 @@ declare module '@earendil-works/pi-agent-core' {
 }
 
 /**
- * Elicits the model's opening message, grounded in the store's contents. The
- * snapshot rides in this first user turn so the system prompt stays static and
- * the whole prefix stays cached for the rest of the conversation.
+ * Elicits the model's opening message, grounded in the store's contents.
+ * Everything turn-specific rides in this first user turn so the system prompt
+ * stays static and the whole prefix stays cached. The greeting uses the app
+ * language because it is sent before the user writes.
  */
-export async function greetingMessage(): Promise<AgentMessage> {
+export async function greetingMessage(userLanguage: string): Promise<AgentMessage> {
 	const { title, memories, questions, terms } = await promptContext();
+	const [first] = questions;
+	const ask = first
+		? ` End by asking the open question ${first.id}: "${first.text}", set in bold.`
+		: '';
 	const sections = [
 		`This memex is titled "${title}". Today is ${new Date().toISOString().slice(0, 10)}. It holds ${memories} memories and ${questions.length} open questions.`,
-		termsSection(terms),
-		questionQueueSection(questions)
+		termsSection(terms)
 	];
 	const context = sections.filter((section) => section !== '').join('\n\n');
 	return {
@@ -37,7 +41,7 @@ export async function greetingMessage(): Promise<AgentMessage> {
 		content: [
 			{
 				type: 'text',
-				text: `${context}\n\nThe user has opened this memex and is waiting for you to greet them.`
+				text: `${context}\n\nThe user has opened this memex and is waiting for you to greet them. In one or two short sentences in ${languageName(userLanguage)}, say what this memex holds, drawn from the contents above.${ask} Call no tools.`
 			}
 		],
 		timestamp: Date.now()
@@ -58,12 +62,10 @@ function convertToLlm(messages: AgentMessage[]): Message[] {
 
 /**
  * A memex keeps every memory in one language so retrieval never has to fan out
- * across translations. The greeting uses the app language because it is sent
- * before the user writes.
+ * across translations.
  */
-function systemPrompt(memexLanguage: string, userLanguage: string): string {
+function systemPrompt(memexLanguage: string): string {
 	const memexLanguageName = languageName(memexLanguage);
-	const userLanguageName = languageName(userLanguage);
 	return `# Identity
 
 You are Memex, a persistent memory assistant. You store what the user wants
@@ -78,12 +80,6 @@ when the user answers an open question, settle it with \`answer\`.
 The system timestamps and versions everything you store. State each fact as
 it stands — no dates or edit history unless the date is the fact — and revise
 when it changes.
-
-# Greeting
-
-In one or two short sentences in ${userLanguageName}, say what this memex
-holds, drawn from the contents in the opening message. If it lists open
-questions, end by asking the first one, set in bold. Call no tools.
 
 # Language
 
@@ -143,27 +139,7 @@ Most frequent terms in the store, each with its memory count.
 ${items}`;
 }
 
-/** Show only a couple of questions inline; the rest live behind the `list` tool. */
-const QUESTION_QUEUE_PREVIEW = 2;
-
-/** Renders the open question queue for the greeting snapshot. */
-function questionQueueSection(questions: Question[]): string {
-	if (questions.length === 0) return '';
-	const preview = questions.slice(0, QUESTION_QUEUE_PREVIEW);
-	const items = preview.map((question) => `- ${question.id}: ${question.text}`).join('\n');
-	const remaining = questions.length - preview.length;
-	const more =
-		remaining > 0
-			? `\n\n${remaining} more question${remaining === 1 ? '' : 's'} are queued but not shown here.`
-			: '';
-	return `# Question queue
-
-Unanswered questions recorded earlier, as \`id: question\`.
-
-${items}${more}`;
-}
-
 /** Sets the unchanging system prompt; store state travels in the greeting message. */
-export function useSystemPrompt(memexLanguage: string, userLanguage: string): void {
-	getAgent().state.systemPrompt = systemPrompt(memexLanguage, userLanguage);
+export function useSystemPrompt(memexLanguage: string): void {
+	getAgent().state.systemPrompt = systemPrompt(memexLanguage);
 }
