@@ -36,8 +36,8 @@ describe('memexes', () => {
 	describe('getMany', () => {
 		it('returns memexes in the order the ids were given, dropping unknown ids', () => {
 			const a = create('Dinner plans', 'en');
-			const b = create('Supper plans', 'en');
-			const c = create('Breakfast plans', 'en');
+			const b = create('Dinner plans', 'en');
+			const c = create('Dinner plans', 'en');
 
 			const memexes = getMany([c, randomUUID(), a, b]);
 			expect(memexes.map((memex) => memex.id)).toEqual([c, a, b]);

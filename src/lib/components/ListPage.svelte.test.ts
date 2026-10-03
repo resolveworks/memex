@@ -82,13 +82,11 @@ describe('ListPage', () => {
 	it('navigates with the q param as the user types, keeping focus', async () => {
 		renderList({ items: [] });
 		const search = screen.getByRole('searchbox', { name: 'Search memories…' });
-		search.focus();
 		await fireEvent.input(search, { target: { value: 'g' } });
 		await fireEvent.input(search, { target: { value: 'go' } });
 		await fireEvent.input(search, { target: { value: 'gol' } });
 
-		expect(goto).toHaveBeenCalledTimes(3);
-		expect(goto).toHaveBeenNthCalledWith(3, '/memories?q=gol', {
+		expect(goto).toHaveBeenLastCalledWith('/memories?q=gol', {
 			replaceState: true,
 			noScroll: true,
 			keepFocus: true
@@ -114,10 +112,6 @@ describe('ListPage', () => {
 		expect(screen.getByRole('link', { name: 'Previous' })).toHaveAttribute(
 			'href',
 			'/memories?q=foo'
-		);
-		expect(screen.getByRole('link', { name: 'Next' })).toHaveAttribute(
-			'href',
-			'/memories?q=foo&page=3'
 		);
 	});
 

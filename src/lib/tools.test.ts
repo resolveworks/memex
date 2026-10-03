@@ -204,14 +204,7 @@ describe('search', () => {
 
 describe('list', () => {
 	it('asks for the first page of both kinds', async () => {
-		fetchMock.mockResolvedValueOnce(
-			ok({
-				items: [
-					{ id: 'm1', kind: 'memory', text: 'Prefers tea.', updatedAt: '2026-03-04T10:30:00.000Z' }
-				],
-				hasMore: false
-			})
-		);
+		fetchMock.mockResolvedValueOnce(ok({ items: [], hasMore: false }));
 
 		await list.execute('call', {});
 
