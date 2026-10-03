@@ -87,7 +87,7 @@ function questionsDeleteEvent(id: string, entityId: string): QuestionsActionEven
 
 describe('the app layout load', () => {
 	it('forgets an unknown memex from the cookie and throws 404', () => {
-		const other = create('Supper plans', 'en');
+		const other = randomUUID();
 		const unknown = randomUUID();
 		const cookies = new FakeCookies({ memexes: `${unknown},${other}` });
 
@@ -99,10 +99,10 @@ describe('the app layout load', () => {
 
 	it('records the memex in the cookie and returns its open-question count', () => {
 		const id = create('Dinner plans', 'en');
-		const other = create('Supper plans', 'en');
-		const settled = wonder(id, 'When is sushi day?');
-		answer(id, settled.id, 'Sushi on Fridays');
-		wonder(id, 'What about tacos?');
+		const other = randomUUID();
+		const settled = wonder(id, 'Anything');
+		answer(id, settled.id, 'Anything');
+		wonder(id, 'Anything');
 		const cookies = new FakeCookies({ memexes: other });
 
 		const data = loadLayout(layoutEvent(id, cookies)) as LayoutData;
@@ -292,7 +292,7 @@ describe('the memories page delete action', () => {
 		const id = create('Dinner plans', 'en');
 		const kept = remember(id, 'Sushi on Fridays');
 		tick();
-		const gone = remember(id, 'Tacos on Tuesdays');
+		const gone = remember(id, 'Sushi on Fridays');
 
 		await memoriesActions.delete(memoriesDeleteEvent(id, gone.id));
 
@@ -308,7 +308,7 @@ describe('the questions page delete action', () => {
 		const id = create('Dinner plans', 'en');
 		const kept = wonder(id, 'When is sushi day?');
 		tick();
-		const gone = wonder(id, 'When is taco day?');
+		const gone = wonder(id, 'When is sushi day?');
 
 		await questionsActions.delete(questionsDeleteEvent(id, gone.id));
 
