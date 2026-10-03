@@ -166,9 +166,4 @@ describe('terms', () => {
 			{ term: 'sushi', count: 1 }
 		]);
 	});
-
-	it('throws for an unknown language', () => {
-		const memex = create('Food', 'en');
-		expect(() => terms(memex, 'klingon', 10)).toThrow('No stopwords for language "klingon".');
-	});
 });

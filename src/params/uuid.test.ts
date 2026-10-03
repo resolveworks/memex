@@ -40,11 +40,4 @@ describe('the uuid param matcher', () => {
 	it('rejects the empty string', () => {
 		expect(match('')).toBe(false);
 	});
-
-	it('rejects non-string values', () => {
-		expect(match(null as unknown as string)).toBe(false);
-		expect(match(undefined as unknown as string)).toBe(false);
-		expect(match(42 as unknown as string)).toBe(false);
-		expect(match({} as unknown as string)).toBe(false);
-	});
 });

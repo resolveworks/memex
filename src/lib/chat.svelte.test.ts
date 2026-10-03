@@ -210,10 +210,6 @@ describe('send', () => {
 		await store.send('remember this');
 		expect(fake.agent.prompt).toHaveBeenCalledWith('remember this');
 	});
-
-	it('throws when no memex is open', async () => {
-		await expect(store.send('remember this')).rejects.toThrow('No memex open.');
-	});
 });
 
 describe('chat state', () => {

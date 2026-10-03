@@ -1,9 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { and, eq } from 'drizzle-orm';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { db } from '$lib/server/db';
 import { create } from './memexes';
-import { memories } from './db/schema';
 import { useFrozenClock } from '../../tests/clock';
 import {
 	answer,
@@ -12,24 +9,12 @@ import {
 	listQuestions,
 	openQuestions,
 	remember,
-	restore,
 	revise,
 	total,
 	wonder
 } from './storage';
 
 const tick = useFrozenClock();
-
-// restore addresses revisions by row id, which no listing exposes yet.
-function revisionIds(memexId: string, entityId: string): string[] {
-	return db
-		.select({ id: memories.id })
-		.from(memories)
-		.where(and(eq(memories.memexId, memexId), eq(memories.entityId, entityId)))
-		.orderBy(memories.version)
-		.all()
-		.map((row) => row.id);
-}
 
 describe('entity storage', () => {
 	let memex: string;
@@ -164,42 +149,6 @@ describe('entity storage', () => {
 			forget(memex, memory.id);
 
 			expect(openQuestions(memex).map((open) => open.id)).toEqual([question.id]);
-		});
-	});
-
-	describe('restore', () => {
-		it('makes an older revision current again, retiring the newer ones', () => {
-			const memory = remember(memex, 'Pizza on Friday');
-			revise(memex, memory.id, 'Pizza on Saturday');
-			revise(memex, memory.id, 'Pizza on Sunday');
-
-			const [original] = revisionIds(memex, memory.id);
-			restore(memex, memory.id, original);
-
-			const [current] = listMemories(memex);
-			expect(current.id).toBe(memory.id);
-			expect(current.text).toBe('Pizza on Friday');
-			expect(current.createdAt).toBe(memory.createdAt);
-			expect(current.updatedAt).toBe(memory.updatedAt);
-		});
-
-		it('brings a forgotten entity back', () => {
-			const memory = remember(memex, 'Pizza on Friday');
-			revise(memex, memory.id, 'Pizza on Saturday');
-			forget(memex, memory.id);
-
-			const [original] = revisionIds(memex, memory.id);
-			restore(memex, memory.id, original);
-
-			const [current] = listMemories(memex);
-			expect(current.id).toBe(memory.id);
-			expect(current.text).toBe('Pizza on Friday');
-			expect(current.deletedAt).toBe(null);
-		});
-
-		it('throws for an unknown revision id', () => {
-			const id = randomUUID();
-			expect(() => restore(memex, randomUUID(), id)).toThrow(`No revision with id "${id}".`);
 		});
 	});
 

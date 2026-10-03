@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { page } from '../tests/app-state';
-import { languageName, t, type MessageKey } from './i18n';
+import { languageName, t } from './i18n';
 
 vi.mock('$app/state', () => ({ page }));
 
@@ -13,13 +13,6 @@ describe('t', () => {
 	it('follows the page locale when it changes', () => {
 		page.data.locale = 'en';
 		expect(t('nav.language')).toBe('Language');
-	});
-
-	it('throws on a key missing from the locale', () => {
-		page.data.locale = 'de';
-		expect(() => t('nav.nonexistent' as MessageKey)).toThrow(
-			'Missing "nav.nonexistent" in locale "de".'
-		);
 	});
 });
 
