@@ -54,14 +54,14 @@ describe('greetingMessage', () => {
 
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 		const [url, init] = fetchMock.mock.calls[0];
-		expect(url).toBe('/api/context');
-		expect(init).toEqual({ headers: { authorization: `Bearer ${memex}` } });
+		expect(url).toBe(`/api/${memex}/context`);
+		expect(init).toBeUndefined();
 	});
 
 	it('fails when the api rejects the context', async () => {
-		fetchMock.mockResolvedValueOnce(failure(401));
+		fetchMock.mockResolvedValueOnce(failure(404));
 
-		await expect(greetingMessage()).rejects.toThrow('Failed to load context (401).');
+		await expect(greetingMessage()).rejects.toThrow('Failed to load context (404).');
 	});
 
 	it('grounds the greeting in the store contents', async () => {

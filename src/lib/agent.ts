@@ -1,7 +1,7 @@
 import { Agent, streamProxy, type AgentMessage } from '@earendil-works/pi-agent-core';
 import type { Message } from '@earendil-works/pi-ai';
 import { languageName } from './i18n';
-import { memexId } from './memex';
+import { api } from './memex';
 import { model } from './model';
 import type { Question } from './question';
 import { answer, forget, list, remember, revise, search, wonder } from './tools';
@@ -105,9 +105,9 @@ export function getAgent(): Agent {
 				tools: [remember, wonder, answer, revise, forget, search, list]
 			},
 			convertToLlm,
-			// The memex id travels as the bearer token; empty proxyUrl targets same-origin /api/stream.
-			streamFn: (m, ctx, opts) =>
-				streamProxy(m, ctx, { ...opts, authToken: memexId(), proxyUrl: '' })
+			// Empty proxyUrl targets same-origin /api/stream, which is memex-agnostic; the
+			// client library still requires an authToken.
+			streamFn: (m, ctx, opts) => streamProxy(m, ctx, { ...opts, authToken: '', proxyUrl: '' })
 		});
 	}
 	return agent;
@@ -127,9 +127,7 @@ interface TermCount {
 }
 
 async function promptContext(): Promise<PromptContext> {
-	const response = await fetch('/api/context', {
-		headers: { authorization: `Bearer ${memexId()}` }
-	});
+	const response = await fetch(api('context'));
 	if (!response.ok) throw new Error(`Failed to load context (${response.status}).`);
 	return (await response.json()) as PromptContext;
 }

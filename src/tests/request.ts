@@ -1,26 +1,17 @@
 import type { RequestEvent } from '@sveltejs/kit';
 
-/** The authorization header value that identifies a memex. */
-export function bearer(id: string): string {
-	return `Bearer ${id}`;
-}
-
-/** A JSON POST request; omit `authorization` to send it without credentials. */
-export function post(body: unknown, authorization?: string): Request {
-	const headers: Record<string, string> = { 'content-type': 'application/json' };
-	if (authorization !== undefined) headers.authorization = authorization;
+/** A JSON POST request. */
+export function post(body: unknown): Request {
 	return new Request('http://memex.test/api', {
 		method: 'POST',
-		headers,
+		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify(body)
 	});
 }
 
-/** A GET request to `path`; omit `authorization` to send it without credentials. */
-export function get(path: string, authorization?: string): Request {
-	const headers: Record<string, string> = {};
-	if (authorization !== undefined) headers.authorization = authorization;
-	return new Request(`http://memex.test${path}`, { headers });
+/** A GET request to `path`. */
+export function get(path: string): Request {
+	return new Request(`http://memex.test${path}`);
 }
 
 /** A form-encoded POST, as a submitting `<form>` sends it. */
@@ -32,13 +23,20 @@ export function postForm(fields: Record<string, string>): Request {
 	});
 }
 
-/** The slice of `RequestEvent` the API handlers read: only `request`. */
-export function event(request: Request): RequestEvent {
-	return { request } as RequestEvent;
+/** The request event shape API handler tests build: the memex `id` route param. */
+export type ApiEvent = RequestEvent<{ id: string }, never>;
+
+/** The slice of `RequestEvent` an API handler reads: `request` plus the route `params`. */
+export function event(request: Request, id?: string): ApiEvent {
+	return { request, params: id === undefined ? {} : { id } } as ApiEvent;
 }
 
-/** The slice of `RequestEvent` the search and list handlers read: `request` plus the parsed `url`. */
-export function urlEvent(path: string, authorization?: string): RequestEvent {
-	const request = get(path, authorization);
-	return { request, url: new URL(request.url) } as RequestEvent;
+/** Like `event`, with the parsed `url` that query-reading handlers need. */
+export function urlEvent(path: string, id?: string): ApiEvent {
+	const request = get(path);
+	return {
+		request,
+		params: id === undefined ? {} : { id },
+		url: new URL(request.url)
+	} as ApiEvent;
 }

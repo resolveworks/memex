@@ -1,70 +1,29 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { memexId } from '$lib/server/auth';
 import { create } from '$lib/server/memexes';
 import { listMemories, listQuestions } from '$lib/server/storage';
 import { useFrozenClock } from '../../tests/clock';
-import { bearer, event, post } from '../../tests/request';
-import { thrown } from '../../tests/throws';
-import { POST as answer } from './answer/+server';
-import { POST as forget } from './forget/+server';
-import { POST as remember } from './remember/+server';
-import { POST as revise } from './revise/+server';
-import { POST as wonder } from './wonder/+server';
+import { event, post, type ApiEvent } from '../../tests/request';
+import { POST as answer } from './[id=uuid]/answer/+server';
+import { POST as forget } from './[id=uuid]/forget/+server';
+import { POST as remember } from './[id=uuid]/remember/+server';
+import { POST as revise } from './[id=uuid]/revise/+server';
+import { POST as wonder } from './[id=uuid]/wonder/+server';
 
-describe('memexId', () => {
-	it('returns the id carried by the bearer token', () => {
-		const id = create('Dinner plans', 'en');
-		expect(memexId(post({}, bearer(id)))).toBe(id);
-	});
+const handlers: Record<string, (event: ApiEvent) => unknown> = {
+	remember,
+	wonder,
+	answer,
+	revise,
+	forget
+};
 
-	it('rejects a missing bearer token with 401', () => {
-		expect(thrown(() => memexId(post({})))).toMatchObject({
-			status: 401,
-			body: { message: 'Missing memex id.' }
-		});
-	});
-
-	it('rejects a malformed bearer token with 401', () => {
-		const request = post({}, `Basic ${randomUUID()}`);
-		expect(thrown(() => memexId(request))).toMatchObject({
-			status: 401,
-			body: { message: 'Missing memex id.' }
-		});
-	});
-
-	it('rejects an unknown memex id with 404', () => {
-		const request = post({}, bearer(randomUUID()));
-		expect(thrown(() => memexId(request))).toMatchObject({
-			status: 404,
-			body: { message: 'No such memex.' }
-		});
-	});
-});
-
-const handlers = { remember, wonder, answer, revise, forget };
-
-describe('API auth', () => {
+describe('unknown memex', () => {
 	for (const [route, handler] of Object.entries(handlers)) {
-		describe(`POST /api/${route}`, () => {
-			it('rejects a missing bearer token with 401', async () => {
-				await expect(handler(event(post({})))).rejects.toMatchObject({
-					status: 401,
-					body: { message: 'Missing memex id.' }
-				});
-			});
-
-			it('rejects a malformed bearer token with 401', async () => {
-				const request = post({}, `Basic ${randomUUID()}`);
-				await expect(handler(event(request))).rejects.toMatchObject({
-					status: 401,
-					body: { message: 'Missing memex id.' }
-				});
-			});
-
+		describe(`POST /api/:id/${route}`, () => {
 			it('rejects an unknown memex id with 404', async () => {
-				const request = post({}, bearer(randomUUID()));
-				await expect(handler(event(request))).rejects.toMatchObject({
+				const request = post({});
+				await expect(handler(event(request, randomUUID()))).rejects.toMatchObject({
 					status: 404,
 					body: { message: 'No such memex.' }
 				});
@@ -73,11 +32,11 @@ describe('API auth', () => {
 	}
 });
 
-describe('POST /api/remember', () => {
+describe('POST /api/:id/remember', () => {
 	it('stores the fact and returns it as 201 JSON', async () => {
 		const id = create('Dinner plans', 'en');
 		const before = Date.now();
-		const response = await remember(event(post({ text: 'Sushi on Fridays' }, bearer(id))));
+		const response = await remember(event(post({ text: 'Sushi on Fridays' }), id));
 		const after = Date.now();
 
 		expect(response.status).toBe(201);
@@ -91,11 +50,11 @@ describe('POST /api/remember', () => {
 	});
 });
 
-describe('POST /api/wonder', () => {
+describe('POST /api/:id/wonder', () => {
 	it('records the question and returns it as 201 JSON', async () => {
 		const id = create('Dinner plans', 'en');
 		const before = Date.now();
-		const response = await wonder(event(post({ text: 'When is sushi day?' }, bearer(id))));
+		const response = await wonder(event(post({ text: 'When is sushi day?' }), id));
 		const after = Date.now();
 
 		expect(response.status).toBe(201);
@@ -108,15 +67,13 @@ describe('POST /api/wonder', () => {
 	});
 });
 
-describe('POST /api/answer', () => {
+describe('POST /api/:id/answer', () => {
 	it('stores a memory answering the question and returns it as 201 JSON', async () => {
 		const id = create('Dinner plans', 'en');
-		const asked = await wonder(event(post({ text: 'When is sushi day?' }, bearer(id))));
+		const asked = await wonder(event(post({ text: 'When is sushi day?' }), id));
 		const question = await asked.json();
 
-		const response = await answer(
-			event(post({ question: question.id, text: 'Fridays' }, bearer(id)))
-		);
+		const response = await answer(event(post({ question: question.id, text: 'Fridays' }), id));
 
 		expect(response.status).toBe(201);
 		const memory = await response.json();
@@ -131,25 +88,23 @@ describe('POST /api/answer', () => {
 	it('rejects an unknown question id', async () => {
 		const id = create('Dinner plans', 'en');
 		const unknown = randomUUID();
-		const request = post({ question: unknown, text: 'Fridays' }, bearer(id));
-		await expect(answer(event(request))).rejects.toThrow(`No question with id "${unknown}".`);
+		const request = post({ question: unknown, text: 'Fridays' });
+		await expect(answer(event(request, id))).rejects.toThrow(`No question with id "${unknown}".`);
 	});
 });
 
-describe('POST /api/revise', () => {
+describe('POST /api/:id/revise', () => {
 	// The memory case asserts updatedAt advances, so its two writes take a millisecond.
 	const tick = useFrozenClock();
 
 	it('returns the revised memory as JSON, keeping its identity', async () => {
 		const id = create('Dinner plans', 'en');
-		const stored = await remember(event(post({ text: 'Sushi on Fridays' }, bearer(id))));
+		const stored = await remember(event(post({ text: 'Sushi on Fridays' }), id));
 		const memory = await stored.json();
 
 		tick();
 
-		const response = await revise(
-			event(post({ id: memory.id, text: 'Sushi on Saturdays' }, bearer(id)))
-		);
+		const response = await revise(event(post({ id: memory.id, text: 'Sushi on Saturdays' }), id));
 
 		expect(response.status).toBe(200);
 		const revised = await response.json();
@@ -164,12 +119,10 @@ describe('POST /api/revise', () => {
 
 	it('returns the revised question as JSON, keeping its identity', async () => {
 		const id = create('Dinner plans', 'en');
-		const stored = await wonder(event(post({ text: 'When is sushi day?' }, bearer(id))));
+		const stored = await wonder(event(post({ text: 'When is sushi day?' }), id));
 		const question = await stored.json();
 
-		const response = await revise(
-			event(post({ id: question.id, text: 'When is cake day?' }, bearer(id)))
-		);
+		const response = await revise(event(post({ id: question.id, text: 'When is cake day?' }), id));
 
 		expect(response.status).toBe(200);
 		const revised = await response.json();
@@ -180,13 +133,13 @@ describe('POST /api/revise', () => {
 	});
 });
 
-describe('POST /api/forget', () => {
+describe('POST /api/:id/forget', () => {
 	it('deletes the entity and returns 204 with an empty body', async () => {
 		const id = create('Dinner plans', 'en');
-		const stored = await remember(event(post({ text: 'Sushi on Fridays' }, bearer(id))));
+		const stored = await remember(event(post({ text: 'Sushi on Fridays' }), id));
 		const memory = await stored.json();
 
-		const response = await forget(event(post({ id: memory.id }, bearer(id))));
+		const response = await forget(event(post({ id: memory.id }), id));
 
 		expect(response.status).toBe(204);
 		expect(await response.text()).toBe('');

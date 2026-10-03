@@ -1,17 +1,12 @@
 import type { AgentTool } from '@earendil-works/pi-agent-core';
 import { Type } from 'typebox';
 import type { Memory } from './memory';
-import { memexId } from './memex';
+import { api } from './memex';
 import type { Page } from './page';
 import type { Question } from './question';
 import type { Kind, ListItem } from './server/storage';
 
-function headers(json = false): HeadersInit {
-	return {
-		authorization: `Bearer ${memexId()}`,
-		...(json ? { 'content-type': 'application/json' } : {})
-	};
-}
+const jsonHeaders: HeadersInit = { 'content-type': 'application/json' };
 
 function line(kind: Kind, item: { id: string; updatedAt: string; text: string }): string {
 	return `- ${item.updatedAt.slice(0, 10)} [${kind}] ${item.id}: ${item.text}`;
@@ -27,9 +22,9 @@ export const remember: AgentTool<typeof rememberParameters> = {
 	description: 'Store a fact as a new memory.',
 	parameters: rememberParameters,
 	execute: async (_toolCallId, { text }) => {
-		const response = await fetch('/api/remember', {
+		const response = await fetch(api('remember'), {
 			method: 'POST',
-			headers: headers(true),
+			headers: jsonHeaders,
 			body: JSON.stringify({ text })
 		});
 		if (!response.ok) throw new Error(`Failed to remember (${response.status}).`);
@@ -52,9 +47,9 @@ export const wonder: AgentTool<typeof wonderParameters> = {
 		'Record an open question for the user to fill in later, when searching leaves something unanswered.',
 	parameters: wonderParameters,
 	execute: async (_toolCallId, { text }) => {
-		const response = await fetch('/api/wonder', {
+		const response = await fetch(api('wonder'), {
 			method: 'POST',
-			headers: headers(true),
+			headers: jsonHeaders,
 			body: JSON.stringify({ text })
 		});
 		if (!response.ok) throw new Error(`Failed to record question (${response.status}).`);
@@ -79,9 +74,9 @@ export const answer: AgentTool<typeof answerParameters> = {
 	description: 'Store a fact that settles a recorded open question, linking the memory to it.',
 	parameters: answerParameters,
 	execute: async (_toolCallId, { question, text }) => {
-		const response = await fetch('/api/answer', {
+		const response = await fetch(api('answer'), {
 			method: 'POST',
-			headers: headers(true),
+			headers: jsonHeaders,
 			body: JSON.stringify({ question, text })
 		});
 		if (!response.ok)
@@ -108,9 +103,9 @@ export const revise: AgentTool<typeof reviseParameters> = {
 		"Replace a memory's text, or reword a question, keeping its id and any question it answers.",
 	parameters: reviseParameters,
 	execute: async (_toolCallId, { id, text }) => {
-		const response = await fetch('/api/revise', {
+		const response = await fetch(api('revise'), {
 			method: 'POST',
-			headers: headers(true),
+			headers: jsonHeaders,
 			body: JSON.stringify({ id, text })
 		});
 		if (!response.ok) throw new Error(`Failed to revise ${id} (${response.status}).`);
@@ -134,9 +129,9 @@ export const forget: AgentTool<typeof forgetParameters> = {
 		'Remove a memory, or dismiss a question, by id. Forgetting an answer reopens its question.',
 	parameters: forgetParameters,
 	execute: async (_toolCallId, { id }) => {
-		const response = await fetch('/api/forget', {
+		const response = await fetch(api('forget'), {
 			method: 'POST',
-			headers: headers(true),
+			headers: jsonHeaders,
 			body: JSON.stringify({ id })
 		});
 		if (!response.ok) throw new Error(`Failed to forget ${id} (${response.status}).`);
@@ -161,7 +156,7 @@ export const search: AgentTool<typeof searchParameters> = {
 	execute: async (_toolCallId, { queries }) => {
 		const params = new URLSearchParams();
 		for (const query of queries) params.append('q', query);
-		const response = await fetch(`/api/search?${params}`, { headers: headers() });
+		const response = await fetch(api(`search?${params}`));
 		if (!response.ok) throw new Error(`Search failed (${response.status}).`);
 		const found = (await response.json()) as { memories: Memory[]; questions: Question[] };
 		const lines = [
@@ -202,7 +197,7 @@ export const list: AgentTool<typeof listParameters> = {
 		const from = offset ?? 0;
 		const params = new URLSearchParams({ offset: String(from) });
 		if (kind) params.set('kind', kind);
-		const response = await fetch(`/api/list?${params}`, { headers: headers() });
+		const response = await fetch(api(`list?${params}`));
 		if (!response.ok) throw new Error(`Failed to list (${response.status}).`);
 		const page = (await response.json()) as Page<ListItem>;
 		if (page.items.length === 0) {

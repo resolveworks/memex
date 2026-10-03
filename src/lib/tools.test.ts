@@ -39,21 +39,18 @@ describe('remember', () => {
 		);
 
 		const [url, init] = sentRequest();
-		expect(url).toBe('/api/remember');
+		expect(url).toBe(`/api/${memex}/remember`);
 		expect(init).toEqual({
 			method: 'POST',
-			headers: {
-				authorization: `Bearer ${memex}`,
-				'content-type': 'application/json'
-			},
+			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify({ text: 'Prefers tea.' })
 		});
 	});
 
 	it('fails when the api rejects the fact', async () => {
-		fetchMock.mockResolvedValueOnce(failure(401));
+		fetchMock.mockResolvedValueOnce(failure(404));
 		await expect(remember.execute('call', { text: 'Prefers tea.' })).rejects.toThrow(
-			'Failed to remember (401).'
+			'Failed to remember (404).'
 		);
 	});
 });
@@ -69,21 +66,18 @@ describe('wonder', () => {
 		);
 
 		const [url, init] = sentRequest();
-		expect(url).toBe('/api/wonder');
+		expect(url).toBe(`/api/${memex}/wonder`);
 		expect(init).toEqual({
 			method: 'POST',
-			headers: {
-				authorization: `Bearer ${memex}`,
-				'content-type': 'application/json'
-			},
+			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify({ text: 'Tea or coffee?' })
 		});
 	});
 
 	it('fails when the api rejects the question', async () => {
-		fetchMock.mockResolvedValueOnce(failure(401));
+		fetchMock.mockResolvedValueOnce(failure(404));
 		await expect(wonder.execute('call', { text: 'Tea or coffee?' })).rejects.toThrow(
-			'Failed to record question (401).'
+			'Failed to record question (404).'
 		);
 	});
 });
@@ -99,21 +93,18 @@ describe('answer', () => {
 		);
 
 		const [url, init] = sentRequest();
-		expect(url).toBe('/api/answer');
+		expect(url).toBe(`/api/${memex}/answer`);
 		expect(init).toEqual({
 			method: 'POST',
-			headers: {
-				authorization: `Bearer ${memex}`,
-				'content-type': 'application/json'
-			},
+			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify({ question: 'q1', text: 'Tea, always.' })
 		});
 	});
 
 	it('fails when the api rejects the answer', async () => {
-		fetchMock.mockResolvedValueOnce(failure(401));
+		fetchMock.mockResolvedValueOnce(failure(404));
 		await expect(answer.execute('call', { question: 'q1', text: 'Tea, always.' })).rejects.toThrow(
-			'Failed to answer question q1 (401).'
+			'Failed to answer question q1 (404).'
 		);
 	});
 });
@@ -127,21 +118,18 @@ describe('revise', () => {
 		).toBe('Revised m1.');
 
 		const [url, init] = sentRequest();
-		expect(url).toBe('/api/revise');
+		expect(url).toBe(`/api/${memex}/revise`);
 		expect(init).toEqual({
 			method: 'POST',
-			headers: {
-				authorization: `Bearer ${memex}`,
-				'content-type': 'application/json'
-			},
+			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify({ id: 'm1', text: 'Prefers coffee now.' })
 		});
 	});
 
 	it('fails when the api rejects the revision', async () => {
-		fetchMock.mockResolvedValueOnce(failure(401));
+		fetchMock.mockResolvedValueOnce(failure(404));
 		await expect(revise.execute('call', { id: 'm1', text: 'Prefers coffee now.' })).rejects.toThrow(
-			'Failed to revise m1 (401).'
+			'Failed to revise m1 (404).'
 		);
 	});
 });
@@ -153,21 +141,18 @@ describe('forget', () => {
 		expect(await resultText(forget.execute('call', { id: 'm1' }))).toBe('Forgot m1.');
 
 		const [url, init] = sentRequest();
-		expect(url).toBe('/api/forget');
+		expect(url).toBe(`/api/${memex}/forget`);
 		expect(init).toEqual({
 			method: 'POST',
-			headers: {
-				authorization: `Bearer ${memex}`,
-				'content-type': 'application/json'
-			},
+			headers: { 'content-type': 'application/json' },
 			body: JSON.stringify({ id: 'm1' })
 		});
 	});
 
 	it('fails when the api rejects the removal', async () => {
-		fetchMock.mockResolvedValueOnce(failure(401));
+		fetchMock.mockResolvedValueOnce(failure(404));
 		await expect(forget.execute('call', { id: 'm1' })).rejects.toThrow(
-			'Failed to forget m1 (401).'
+			'Failed to forget m1 (404).'
 		);
 	});
 });
@@ -179,8 +164,8 @@ describe('search', () => {
 		await search.execute('call', { queries: ['tea', 'loose leaf'] });
 
 		const [url, init] = sentRequest();
-		expect(url).toBe('/api/search?q=tea&q=loose+leaf');
-		expect(init).toEqual({ headers: { authorization: `Bearer ${memex}` } });
+		expect(url).toBe(`/api/${memex}/search?q=tea&q=loose+leaf`);
+		expect(init).toBeUndefined();
 	});
 
 	it('renders memories before questions as dated lines', async () => {
@@ -210,9 +195,9 @@ describe('search', () => {
 	});
 
 	it('fails when the api errors', async () => {
-		fetchMock.mockResolvedValueOnce(failure(401));
+		fetchMock.mockResolvedValueOnce(failure(404));
 		await expect(search.execute('call', { queries: ['tea'] })).rejects.toThrow(
-			'Search failed (401).'
+			'Search failed (404).'
 		);
 	});
 });
@@ -231,8 +216,8 @@ describe('list', () => {
 		await list.execute('call', {});
 
 		const [url, init] = sentRequest();
-		expect(url).toBe('/api/list?offset=0');
-		expect(init).toEqual({ headers: { authorization: `Bearer ${memex}` } });
+		expect(url).toBe(`/api/${memex}/list?offset=0`);
+		expect(init).toBeUndefined();
 	});
 
 	it('passes the given offset and kind through', async () => {
@@ -241,7 +226,7 @@ describe('list', () => {
 		await list.execute('call', { kind: 'question', offset: 50 });
 
 		const [url] = sentRequest();
-		expect(url).toBe('/api/list?offset=50&kind=question');
+		expect(url).toBe(`/api/${memex}/list?offset=50&kind=question`);
 	});
 
 	it('renders the page as dated lines', async () => {
@@ -324,7 +309,7 @@ describe('list', () => {
 	});
 
 	it('fails when the api errors', async () => {
-		fetchMock.mockResolvedValueOnce(failure(401));
-		await expect(list.execute('call', {})).rejects.toThrow('Failed to list (401).');
+		fetchMock.mockResolvedValueOnce(failure(404));
+		await expect(list.execute('call', {})).rejects.toThrow('Failed to list (404).');
 	});
 });

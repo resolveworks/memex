@@ -1,38 +1,22 @@
 import { randomUUID } from 'node:crypto';
-import type { RequestEvent } from '@sveltejs/kit';
 import { describe, expect, it } from 'vitest';
 import type { Memory } from '$lib/memory';
 import { create } from '$lib/server/memexes';
 import type { ListItem, TermCount } from '$lib/server/storage';
 import { answer, forget, remember, wonder } from '$lib/server/storage';
 import type { Question } from '$lib/question';
-import { bearer, event, get, urlEvent } from '../../tests/request';
+import { event, get, urlEvent, type ApiEvent } from '../../tests/request';
 import { thrown } from '../../tests/throws';
-import { GET as context } from './context/+server';
-import { GET as list } from './list/+server';
-import { GET as search } from './search/+server';
+import { GET as context } from './[id=uuid]/context/+server';
+import { GET as list } from './[id=uuid]/list/+server';
+import { GET as search } from './[id=uuid]/search/+server';
 
-describe('API auth', () => {
-	for (const [route, handler] of Object.entries({ search, list, context })) {
-		describe(`GET /api/${route}`, () => {
-			it('rejects a missing bearer token with 401', () => {
-				expect(thrown(() => handler(urlEvent(`/api/${route}`)))).toMatchObject({
-					status: 401,
-					body: { message: 'Missing memex id.' }
-				});
-			});
-
-			it('rejects a malformed bearer token with 401', () => {
-				const request = get(`/api/${route}`, `Basic ${randomUUID()}`);
-				expect(thrown(() => handler({ request } as RequestEvent))).toMatchObject({
-					status: 401,
-					body: { message: 'Missing memex id.' }
-				});
-			});
-
+describe('unknown memex', () => {
+	const handlers: Record<string, (event: ApiEvent) => unknown> = { search, list, context };
+	for (const [route, handler] of Object.entries(handlers)) {
+		describe(`GET /api/:id/${route}`, () => {
 			it('rejects an unknown memex id with 404', () => {
-				const request = get(`/api/${route}`, bearer(randomUUID()));
-				expect(thrown(() => handler({ request } as RequestEvent))).toMatchObject({
+				expect(thrown(() => handler(urlEvent(`/api/${route}`, randomUUID())))).toMatchObject({
 					status: 404,
 					body: { message: 'No such memex.' }
 				});
@@ -41,14 +25,14 @@ describe('API auth', () => {
 	}
 });
 
-describe('GET /api/search', () => {
+describe('GET /api/:id/search', () => {
 	it('unions repeated q params across memories and open questions', async () => {
 		const id = create('Dinner plans', 'en');
 		remember(id, 'Sushi on Fridays');
 		remember(id, 'Cake on Saturdays');
 		wonder(id, 'Which cake for dessert?');
 
-		const response = await search(urlEvent('/api/search?q=sushi&q=cake', bearer(id)));
+		const response = await search(urlEvent('/api/search?q=sushi&q=cake', id));
 
 		expect(response.status).toBe(200);
 		const results = await response.json();
@@ -66,7 +50,7 @@ describe('GET /api/search', () => {
 		remember(id, 'Sushi on Fridays');
 		remember(id, 'Cake on Saturdays');
 
-		const response = await search(urlEvent('/api/search?q=sushi', bearer(id)));
+		const response = await search(urlEvent('/api/search?q=sushi', id));
 
 		const results = await response.json();
 		expect(results.memories.map((memory: Memory) => memory.text)).toEqual(['Sushi on Fridays']);
@@ -74,13 +58,13 @@ describe('GET /api/search', () => {
 	});
 });
 
-describe('GET /api/list', () => {
+describe('GET /api/:id/list', () => {
 	it('filters by kind=memory', async () => {
 		const id = create('Dinner plans', 'en');
 		remember(id, 'Sushi on Fridays');
 		wonder(id, 'When is sushi day?');
 
-		const response = await list(urlEvent('/api/list?kind=memory', bearer(id)));
+		const response = await list(urlEvent('/api/list?kind=memory', id));
 
 		expect(response.status).toBe(200);
 		const page = await response.json();
@@ -94,7 +78,7 @@ describe('GET /api/list', () => {
 		remember(id, 'Sushi on Fridays');
 		wonder(id, 'When is sushi day?');
 
-		const response = await list(urlEvent('/api/list?kind=question', bearer(id)));
+		const response = await list(urlEvent('/api/list?kind=question', id));
 
 		const page = await response.json();
 		expect(page.items).toHaveLength(1);
@@ -108,7 +92,7 @@ describe('GET /api/list', () => {
 		wonder(id, 'When is sushi day?');
 
 		for (const value of ['note', '']) {
-			const response = await list(urlEvent(`/api/list?kind=${value}`, bearer(id)));
+			const response = await list(urlEvent(`/api/list?kind=${value}`, id));
 			const page = await response.json();
 			expect(page.items.map((item: ListItem) => item.kind).sort()).toEqual(['memory', 'question']);
 		}
@@ -119,8 +103,8 @@ describe('GET /api/list', () => {
 		const texts = Array.from({ length: 51 }, (_, i) => `item ${String(i + 1).padStart(2, '0')}`);
 		for (const text of texts) remember(id, text);
 
-		const first = await list(urlEvent('/api/list', bearer(id)));
-		const second = await list(urlEvent('/api/list?offset=50', bearer(id)));
+		const first = await list(urlEvent('/api/list', id));
+		const second = await list(urlEvent('/api/list?offset=50', id));
 
 		const pageOne = await first.json();
 		const pageTwo = await second.json();
@@ -134,7 +118,7 @@ describe('GET /api/list', () => {
 	});
 });
 
-describe('GET /api/context', () => {
+describe('GET /api/:id/context', () => {
 	it('returns the title, live-memory total, open questions, and terms', async () => {
 		const id = create('Dinner plans', 'en');
 		remember(id, 'Sushi on Fridays');
@@ -145,7 +129,7 @@ describe('GET /api/context', () => {
 		const forgotten = remember(id, 'Pasta on Sundays');
 		forget(id, forgotten.id);
 
-		const response = await context(event(get('/api/context', bearer(id))));
+		const response = await context(event(get('/api/context'), id));
 
 		expect(response.status).toBe(200);
 		const state = await response.json();
@@ -166,7 +150,7 @@ describe('GET /api/context', () => {
 		const id = create('Essenspläne', 'de');
 		remember(id, 'Der the Hund');
 
-		const response = await context(event(get('/api/context', bearer(id))));
+		const response = await context(event(get('/api/context'), id));
 
 		const state = await response.json();
 		expect(state.terms).toEqual([
@@ -181,7 +165,7 @@ describe('GET /api/context', () => {
 		remember(id, words.join(' '));
 		remember(id, 'w03');
 
-		const response = await context(event(get('/api/context', bearer(id))));
+		const response = await context(event(get('/api/context'), id));
 
 		const state = await response.json();
 		expect(state.terms).toHaveLength(50);

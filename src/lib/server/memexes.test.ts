@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { create, exists, get, getMany, rename } from './memexes';
+import { create, get, getMany, rename } from './memexes';
 
 describe('memexes', () => {
 	describe('create', () => {
@@ -58,14 +58,6 @@ describe('memexes', () => {
 		it('rejects a blank or whitespace-only title', () => {
 			const id = create('Dinner plans', 'en');
 			expect(() => rename(id, '  ')).toThrow('A memex needs a title.');
-		});
-	});
-
-	describe('exists', () => {
-		it('is true only for ids that were created', () => {
-			const id = create('Dinner plans', 'en');
-			expect(exists(id)).toBe(true);
-			expect(exists(randomUUID())).toBe(false);
 		});
 	});
 });

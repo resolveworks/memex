@@ -10,7 +10,6 @@ import type {
 } from '@earendil-works/pi-ai';
 import { contentText } from '@earendil-works/pi-ai';
 import { model } from '$lib/model';
-import { memexId } from '$lib/server/auth';
 import { models } from '$lib/server/llm';
 
 function contentAt(partial: AssistantMessage, index: number) {
@@ -102,7 +101,6 @@ function exceedsLimits(context: Context): Response | undefined {
 }
 
 export const POST: RequestHandler = async ({ request }) => {
-	memexId(request); // Rejects unknown credentials; the stream itself is memex-agnostic.
 	let body: StreamRequest;
 	try {
 		body = (await request.json()) as StreamRequest;

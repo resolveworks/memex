@@ -1,7 +1,5 @@
-import { randomUUID } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
 import type { AssistantMessage, AssistantMessageEvent, Context } from '@earendil-works/pi-ai';
-import { create } from '$lib/server/memexes';
 import { fakeLlm } from '../../../tests/llm';
 import { event } from '../../../tests/request';
 import { POST } from './+server';
@@ -15,9 +13,8 @@ vi.mock('$env/dynamic/private', () => ({
 
 const url = 'http://localhost/api/stream';
 
-async function post(body: BodyInit, token?: string): Promise<Response> {
-	const headers = token ? { authorization: `Bearer ${token}` } : undefined;
-	return POST(event(new Request(url, { method: 'POST', headers, body })));
+async function post(body: BodyInit): Promise<Response> {
+	return POST(event(new Request(url, { method: 'POST', body })));
 }
 
 const assistant: AssistantMessage = {
@@ -67,31 +64,14 @@ const proxyEvents = [
 ];
 
 describe('POST /api/stream', () => {
-	it('rejects a missing bearer token before parsing the body', async () => {
-		await expect(post('not json')).rejects.toMatchObject({
-			status: 401,
-			body: { message: 'Missing memex id.' }
-		});
-	});
-
-	it('rejects an unknown bearer token before parsing the body', async () => {
-		await expect(post('not json', randomUUID())).rejects.toMatchObject({
-			status: 404,
-			body: { message: 'No such memex.' }
-		});
-	});
-
 	it('rejects a non-JSON body', async () => {
-		const id = create('Dinner plans', 'en');
-
-		const response = await post('not json', id);
+		const response = await post('not json');
 
 		expect(response.status).toBe(400);
 		expect(await response.json()).toEqual({ error: 'Request body must be valid JSON' });
 	});
 
 	it('rejects more user messages than MAX_USER_MESSAGES', async () => {
-		const id = create('Dinner plans', 'en');
 		const context: Context = {
 			messages: [
 				{ role: 'user', content: 'one', timestamp: 0 },
@@ -100,32 +80,30 @@ describe('POST /api/stream', () => {
 			]
 		};
 
-		const response = await post(JSON.stringify({ context }), id);
+		const response = await post(JSON.stringify({ context }));
 
 		expect(response.status).toBe(429);
 		expect(await response.json()).toEqual({ error: 'A chat can hold at most 2 messages.' });
 	});
 
 	it('rejects a user message over MAX_MESSAGE_WORDS words', async () => {
-		const id = create('Dinner plans', 'en');
 		const context: Context = {
 			messages: [{ role: 'user', content: 'one two three four five six', timestamp: 0 }]
 		};
 
-		const response = await post(JSON.stringify({ context }), id);
+		const response = await post(JSON.stringify({ context }));
 
 		expect(response.status).toBe(413);
 		expect(await response.json()).toEqual({ error: 'A message can hold at most 5 words.' });
 	});
 
 	it('streams provider events as SSE proxy frames ending with done', async () => {
-		const id = create('Dinner plans', 'en');
 		fakeLlm(providerEvents);
 		const context: Context = {
 			messages: [{ role: 'user', content: 'Hi there', timestamp: 0 }]
 		};
 
-		const response = await post(JSON.stringify({ context }), id);
+		const response = await post(JSON.stringify({ context }));
 
 		expect(response.headers.get('content-type')).toBe('text/event-stream');
 		expect(response.headers.get('cache-control')).toBe('no-cache');
