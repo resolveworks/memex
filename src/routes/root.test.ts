@@ -20,17 +20,17 @@ async function redirectOf(run: () => Promise<unknown>): Promise<Redirect> {
 describe('root layout load', () => {
 	it('returns the cookie-ordered memexes as { id, title } plus the locale', () => {
 		const dinner = create('Dinner plans', 'en');
-		const supper = create('Supper plans', 'de');
-		const breakfast = create('Breakfast plans', 'fr');
-		const cookies: Cookies = new FakeCookies({ memexes: [breakfast, supper, dinner].join(',') });
+		const supper = create('Supper plans', 'en');
+		const breakfast = create('Breakfast plans', 'en');
+		const cookies: Cookies = new FakeCookies({ memexes: [dinner, breakfast, supper].join(',') });
 		const event = { cookies, locals: { locale: 'de' } } as LayoutServerLoadEvent;
 
 		expect(load(event)).toEqual({
 			locale: 'de',
 			memexes: [
+				{ id: dinner, title: 'Dinner plans' },
 				{ id: breakfast, title: 'Breakfast plans' },
-				{ id: supper, title: 'Supper plans' },
-				{ id: dinner, title: 'Dinner plans' }
+				{ id: supper, title: 'Supper plans' }
 			]
 		});
 	});
