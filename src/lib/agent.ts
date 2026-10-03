@@ -78,7 +78,7 @@ questions, end by asking the first one, set in bold. Call no tools.
 # Language
 
 This memex has one language: ${memexLanguageName}. Store, revise, and search
-in ${memexLanguageName}; answer in the language the user wrote in.
+in ${memexLanguageName}; answer in the language of the user's message.
 
 # Behavior
 
