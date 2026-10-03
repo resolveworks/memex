@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { enhance } from "$app/forms";
-	import { goto } from "$app/navigation";
-	import { page } from "$app/state";
-	import mascot from "$lib/assets/mascot1.png";
-	import ChatMessage from "$lib/ChatMessage.svelte";
-	import AppShell from "$lib/components/AppShell.svelte";
-	import Bubble from "$lib/components/Bubble.svelte";
-	import Button from "$lib/components/Button.svelte";
-	import Card from "$lib/components/Card.svelte";
-	import Field from "$lib/components/Field.svelte";
-	import Input from "$lib/components/Input.svelte";
-	import Select from "$lib/components/Select.svelte";
-	import { languages, languageName, t } from "$lib/i18n";
+	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import mascot from '$lib/assets/mascot1.png';
+	import ChatMessage from '$lib/ChatMessage.svelte';
+	import AppShell from '$lib/components/AppShell.svelte';
+	import Bubble from '$lib/components/Bubble.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import Card from '$lib/components/Card.svelte';
+	import Field from '$lib/components/Field.svelte';
+	import Input from '$lib/components/Input.svelte';
+	import Select from '$lib/components/Select.svelte';
+	import { languages, languageName, t } from '$lib/i18n';
 
 	let language = $state(page.data.locale);
 	const languageOptions = $derived(
@@ -22,41 +22,36 @@
 	);
 
 	const steps = $derived([
-		{ title: t("landing.how.remember.title"), body: t("landing.how.remember.body") },
-		{ title: t("landing.how.ask.title"), body: t("landing.how.ask.body") },
-		{ title: t("landing.how.share.title"), body: t("landing.how.share.body") }
+		{ title: t('landing.how.remember.title'), body: t('landing.how.remember.body') },
+		{ title: t('landing.how.ask.title'), body: t('landing.how.ask.body') },
+		{ title: t('landing.how.share.title'), body: t('landing.how.share.body') }
 	]);
 
 	const examples = $derived([
 		{
-			title: t("landing.example.family.title"),
-			body: t("landing.example.family.body"),
-			question: t("landing.example.family.question")
+			title: t('landing.example.family.title'),
+			body: t('landing.example.family.body'),
+			question: t('landing.example.family.question')
 		},
 		{
-			title: t("landing.example.world.title"),
-			body: t("landing.example.world.body"),
-			question: t("landing.example.world.question")
+			title: t('landing.example.world.title'),
+			body: t('landing.example.world.body'),
+			question: t('landing.example.world.question')
 		},
 		{
-			title: t("landing.example.place.title"),
-			body: t("landing.example.place.body"),
-			question: t("landing.example.place.question")
+			title: t('landing.example.place.title'),
+			body: t('landing.example.place.body'),
+			question: t('landing.example.place.question')
 		},
 		{
-			title: t("landing.example.project.title"),
-			body: t("landing.example.project.body"),
-			question: t("landing.example.project.question")
+			title: t('landing.example.project.title'),
+			body: t('landing.example.project.body'),
+			question: t('landing.example.project.question')
 		}
 	]);
 </script>
 
-<AppShell
-	home="/"
-	value=""
-	options={memexOptions}
-	onchange={(id) => goto(`/${id}`)}
->
+<AppShell home="/" value="" options={memexOptions} onchange={(id) => goto(`/${id}`)}>
 	{#snippet toolbar()}
 		<a class="icon center" href="/settings" aria-label={t('settings.appHeading')}>
 			<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -75,33 +70,33 @@
 				<Bubble class="bubble-pop small" size="0.096em" />
 			</div>
 			<Card>
-				<h1>{t("create.heading")}</h1>
+				<h1>{t('create.heading')}</h1>
 				<form class="stack" method="POST" use:enhance>
-					<Field label={t("create.title")}>
+					<Field label={t('create.title')}>
 						<Input name="title" required />
 					</Field>
-					<Field label={t("nav.language")}>
+					<Field label={t('nav.language')}>
 						<Select
 							name="language"
-							label={t("nav.language")}
+							label={t('nav.language')}
 							value={language}
 							options={languageOptions}
 							onchange={(value) => (language = value)}
 						/>
 					</Field>
-					<Button type="submit">{t("create.submit")}</Button>
+					<Button type="submit">{t('create.submit')}</Button>
 				</form>
 			</Card>
 		</div>
 
 		<div class="explain stack">
 			<section class="stack">
-				<h2>{t("landing.what.heading")}</h2>
-				<p>{t("landing.what.body")}</p>
+				<h2>{t('landing.what.heading')}</h2>
+				<p>{t('landing.what.body')}</p>
 			</section>
 
 			<section class="stack">
-				<h2>{t("landing.how.heading")}</h2>
+				<h2>{t('landing.how.heading')}</h2>
 				<ol class="steps">
 					{#each steps as step, i}
 						<li class="step stack">
@@ -116,7 +111,7 @@
 			</section>
 
 			<section class="stack">
-				<h2>{t("landing.examples.heading")}</h2>
+				<h2>{t('landing.examples.heading')}</h2>
 				<ul class="examples">
 					{#each examples as example}
 						<li class="example stack">

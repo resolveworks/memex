@@ -2,8 +2,11 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 
-	let { children, icon = false, ...rest }: HTMLButtonAttributes & { children?: Snippet; icon?: boolean } =
-		$props();
+	let {
+		children,
+		icon = false,
+		...rest
+	}: HTMLButtonAttributes & { children?: Snippet; icon?: boolean } = $props();
 </script>
 
 <button class:icon {...rest}>{@render children?.()}</button>

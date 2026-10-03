@@ -1,10 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	let {
-		width = 'var(--panel-max)',
-		children
-	}: { width?: string; children: Snippet } = $props();
+	let { width = 'var(--panel-max)', children }: { width?: string; children: Snippet } = $props();
 </script>
 
 <div class="page" style="--page-width: {width}">

@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { page } from "$app/state";
-	import Card from "$lib/components/Card.svelte";
-	import Page from "$lib/components/Page.svelte";
-	import { t } from "$lib/i18n";
+	import { page } from '$app/state';
+	import Card from '$lib/components/Card.svelte';
+	import Page from '$lib/components/Page.svelte';
+	import { t } from '$lib/i18n';
 </script>
 
 <Page>
 	<Card>
 		<div class="error stack">
 			<p class="status">{page.status}</p>
-			<p class="message">{t("error.notFound")}</p>
-			<a href="/">{t("error.newMemex")}</a>
+			<p class="message">{t('error.notFound')}</p>
+			<a href="/">{t('error.newMemex')}</a>
 		</div>
 	</Card>
 </Page>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { size = "2rem", class: className = "" }: { size?: string; class?: string } = $props();
+	let { size = '2rem', class: className = '' }: { size?: string; class?: string } = $props();
 </script>
 
 <span class="bubble {className}" style="--bubble-size: {size}" aria-hidden="true"></span>
@@ -16,7 +16,7 @@
 	}
 
 	.bubble::after {
-		content: "";
+		content: '';
 		position: absolute;
 		top: 16%;
 		left: 18%;

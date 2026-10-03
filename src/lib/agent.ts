@@ -1,19 +1,19 @@
-import { Agent, streamProxy, type AgentMessage } from "@earendil-works/pi-agent-core";
-import type { Message } from "@earendil-works/pi-ai";
-import { languageName } from "./i18n";
-import { memexId } from "./memex";
-import { model } from "./model";
-import type { Question } from "./question";
-import { answer, forget, list, remember, revise, search, wonder } from "./tools";
+import { Agent, streamProxy, type AgentMessage } from '@earendil-works/pi-agent-core';
+import type { Message } from '@earendil-works/pi-ai';
+import { languageName } from './i18n';
+import { memexId } from './memex';
+import { model } from './model';
+import type { Question } from './question';
+import { answer, forget, list, remember, revise, search, wonder } from './tools';
 
 /** The opening turn: invisible to the user, a user turn to the model. */
 interface GreetingMessage {
-	role: "greeting";
-	content: [{ type: "text"; text: string }];
+	role: 'greeting';
+	content: [{ type: 'text'; text: string }];
 	timestamp: number;
 }
 
-declare module "@earendil-works/pi-agent-core" {
+declare module '@earendil-works/pi-agent-core' {
 	interface CustomAgentMessages {
 		greeting: GreetingMessage;
 	}
@@ -22,11 +22,11 @@ declare module "@earendil-works/pi-agent-core" {
 /** Elicits the model's opening message, paired with the Greeting prompt section. */
 export function greetingMessage(): AgentMessage {
 	return {
-		role: "greeting",
+		role: 'greeting',
 		content: [
 			{
-				type: "text",
-				text: "The user has opened this memex and is waiting for you to greet them."
+				type: 'text',
+				text: 'The user has opened this memex and is waiting for you to greet them.'
 			}
 		],
 		timestamp: Date.now()
@@ -36,10 +36,10 @@ export function greetingMessage(): AgentMessage {
 /** The model's view of the transcript: the opening trigger is an ordinary user turn. */
 function convertToLlm(messages: AgentMessage[]): Message[] {
 	return messages.flatMap((message) => {
-		if (message.role === "greeting") {
-			return [{ role: "user" as const, content: message.content, timestamp: message.timestamp }];
+		if (message.role === 'greeting') {
+			return [{ role: 'user' as const, content: message.content, timestamp: message.timestamp }];
 		}
-		return message.role === "user" || message.role === "assistant" || message.role === "toolResult"
+		return message.role === 'user' || message.role === 'assistant' || message.role === 'toolResult'
 			? [message]
 			: [];
 	});
@@ -54,13 +54,12 @@ function systemPrompt(memexLanguage: string, userLanguage: string, hasQuestions:
 	const memexLanguageName = languageName(memexLanguage);
 	const userLanguageName = languageName(userLanguage);
 	const greetingQueue = hasQuestions
-		? " End by asking the first question in the question queue below."
-		: "";
+		? ' End by asking the first question in the question queue below.'
+		: '';
 	return `# Identity
 
 You are Memex, a persistent memory assistant. You store what the user wants
-remembered and retrieve it later. Memories are shared with everyone who has
-this memex's link.
+remembered and retrieve it later.
 
 # Greeting
 
@@ -102,7 +101,7 @@ export function getAgent(): Agent {
 			convertToLlm,
 			// The memex id travels as the bearer token; empty proxyUrl targets same-origin /api/stream.
 			streamFn: (m, ctx, opts) =>
-				streamProxy(m, ctx, { ...opts, authToken: memexId(), proxyUrl: "" })
+				streamProxy(m, ctx, { ...opts, authToken: memexId(), proxyUrl: '' })
 		});
 	}
 	return agent;
@@ -122,7 +121,7 @@ interface TermCount {
 }
 
 async function promptContext(): Promise<PromptContext> {
-	const response = await fetch("/api/context", {
+	const response = await fetch('/api/context', {
 		headers: { authorization: `Bearer ${memexId()}` }
 	});
 	if (!response.ok) throw new Error(`Failed to load context (${response.status}).`);
@@ -131,8 +130,8 @@ async function promptContext(): Promise<PromptContext> {
 
 /** Renders the store's most common terms for inclusion in the system prompt. */
 function termsSection(terms: TermCount[]): string {
-	if (terms.length === 0) return "# Topics\n\nThe store is empty.";
-	const items = terms.map(({ term, count }) => `- ${term}: ${count}`).join("\n");
+	if (terms.length === 0) return '# Topics\n\nThe store is empty.';
+	const items = terms.map(({ term, count }) => `- ${term}: ${count}`).join('\n');
 	return `# Topics
 
 Most frequent terms in the store, each with its memory count.
@@ -145,14 +144,14 @@ const QUESTION_QUEUE_PREVIEW = 2;
 
 /** Renders the open question queue for inclusion in the system prompt. */
 function questionQueueSection(questions: Question[]): string {
-	if (questions.length === 0) return "";
+	if (questions.length === 0) return '';
 	const preview = questions.slice(0, QUESTION_QUEUE_PREVIEW);
-	const items = preview.map((question) => `- ${question.id}: ${question.text}`).join("\n");
+	const items = preview.map((question) => `- ${question.id}: ${question.text}`).join('\n');
 	const remaining = questions.length - preview.length;
 	const more =
 		remaining > 0
-			? `\n\n${remaining} more question${remaining === 1 ? "" : "s"} are queued but not shown here.`
-			: "";
+			? `\n\n${remaining} more question${remaining === 1 ? '' : 's'} are queued but not shown here.`
+			: '';
 	return `# Question queue
 
 Unanswered questions recorded earlier, as \`id: question\`.
@@ -172,5 +171,5 @@ export async function refreshSystemPrompt(
 		termsSection(terms),
 		questionQueueSection(questions)
 	];
-	getAgent().state.systemPrompt = sections.filter((section) => section !== "").join("\n\n");
+	getAgent().state.systemPrompt = sections.filter((section) => section !== '').join('\n\n');
 }

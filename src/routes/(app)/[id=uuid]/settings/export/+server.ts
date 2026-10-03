@@ -1,20 +1,20 @@
-import { error } from "@sveltejs/kit";
-import { get } from "$lib/server/memexes";
-import { listMemories, listQuestions } from "$lib/server/storage";
-import type { RequestHandler } from "./$types";
+import { error } from '@sveltejs/kit';
+import { get } from '$lib/server/memexes';
+import { listMemories, listQuestions } from '$lib/server/storage';
+import type { RequestHandler } from './$types';
 
 /** The title with anything a filename can't hold removed; "memex" when nothing is left. */
 function filename(title: string): string {
 	const safe = title
-		.replace(/[^a-zA-Z0-9 _-]+/g, "")
+		.replace(/[^a-zA-Z0-9 _-]+/g, '')
 		.trim()
-		.replace(/\s+/g, "-");
-	return `${safe || "memex"}.json`;
+		.replace(/\s+/g, '-');
+	return `${safe || 'memex'}.json`;
 }
 
 export const GET: RequestHandler = ({ params }) => {
 	const memex = get(params.id);
-	if (!memex) error(404, "No such memex.");
+	if (!memex) error(404, 'No such memex.');
 
 	// An export is a complete copy: forgotten entities included, flagged by deletedAt.
 	const body = JSON.stringify(
@@ -29,8 +29,8 @@ export const GET: RequestHandler = ({ params }) => {
 
 	return new Response(body, {
 		headers: {
-			"content-type": "application/json",
-			"content-disposition": `attachment; filename="${filename(memex.title)}"`
+			'content-type': 'application/json',
+			'content-disposition': `attachment; filename="${filename(memex.title)}"`
 		}
 	});
 };

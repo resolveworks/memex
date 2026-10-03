@@ -1,5 +1,5 @@
-import { forget, listQuestions, search } from "$lib/server/storage";
-import type { Actions, PageServerLoad } from "./$types";
+import { forget, listQuestions, search } from '$lib/server/storage';
+import type { Actions, PageServerLoad } from './$types';
 
 const PAGE_SIZE = 20;
 
@@ -9,10 +9,12 @@ function pageNumber(value: string | null, pages: number): number {
 }
 
 export const load: PageServerLoad = ({ params, url }) => {
-	const query = url.searchParams.get("q") ?? "";
-	const matches = query ? search(params.id, [query], true).questions : listQuestions(params.id, true);
+	const query = url.searchParams.get('q') ?? '';
+	const matches = query
+		? search(params.id, [query], true).questions
+		: listQuestions(params.id, true);
 	const pages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
-	const page = pageNumber(url.searchParams.get("page"), pages);
+	const page = pageNumber(url.searchParams.get('page'), pages);
 	return {
 		questions: matches.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
 		query,
@@ -23,8 +25,8 @@ export const load: PageServerLoad = ({ params, url }) => {
 
 export const actions = {
 	delete: async ({ params, request }) => {
-		const id = (await request.formData()).get("id");
-		if (typeof id !== "string") throw new Error("Missing question id.");
+		const id = (await request.formData()).get('id');
+		if (typeof id !== 'string') throw new Error('Missing question id.');
 		forget(params.id, id);
 	}
 } satisfies Actions;

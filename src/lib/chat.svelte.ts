@@ -1,7 +1,7 @@
-import { invalidateAll } from "$app/navigation";
-import { page } from "$app/state";
-import type { Agent, AgentMessage } from "@earendil-works/pi-agent-core";
-import { getAgent, greetingMessage, refreshSystemPrompt } from "./agent";
+import { invalidateAll } from '$app/navigation';
+import { page } from '$app/state';
+import type { Agent, AgentMessage } from '@earendil-works/pi-agent-core';
+import { getAgent, greetingMessage, refreshSystemPrompt } from './agent';
 
 export const chat = $state<{
 	messages: AgentMessage[];
@@ -25,20 +25,20 @@ function active(): Agent {
 	agent = instance;
 	instance.subscribe((event) => {
 		switch (event.type) {
-			case "agent_start":
+			case 'agent_start':
 				chat.busy = true;
 				break;
-			case "agent_end":
+			case 'agent_end':
 				chat.busy = false;
 				chat.streaming = undefined;
 				// Pick up questions the run recorded or closed.
 				void invalidateAll();
 				break;
-			case "message_start":
-			case "message_update":
+			case 'message_start':
+			case 'message_update':
 				chat.streaming = instance.state.streamingMessage;
 				break;
-			case "message_end":
+			case 'message_end':
 				chat.streaming = undefined;
 				chat.messages = instance.state.messages.slice();
 				break;
@@ -84,7 +84,7 @@ export async function clear(): Promise<void> {
 
 export async function send(text: string): Promise<void> {
 	if (chat.busy) return;
-	if (!currentMemexLanguage) throw new Error("No memex open.");
+	if (!currentMemexLanguage) throw new Error('No memex open.');
 	const instance = active();
 	chat.busy = true;
 	// Rebuild the prompt so the queue reflects questions the previous turn recorded or closed.

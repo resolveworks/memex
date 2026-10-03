@@ -90,7 +90,7 @@
 	aria-expanded={open}
 	aria-label={label}
 	onclick={() => menu?.togglePopover()}
-	onkeydown={onkeydown}
+	{onkeydown}
 >
 	<span class="value">{selected}</span>
 	<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
@@ -114,7 +114,7 @@
 				class="option"
 				aria-selected={option.value === value}
 				onclick={() => choose(option.value)}
-				onkeydown={onkeydown}
+				{onkeydown}
 			>
 				{option.label}
 			</button>
@@ -128,7 +128,7 @@
 					class:disabled
 					href={action.href}
 					onclick={() => menu?.hidePopover()}
-					onkeydown={onkeydown}
+					{onkeydown}
 				>
 					{action.label}
 				</a>

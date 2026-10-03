@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { enhance } from "$app/forms";
-	import { goto } from "$app/navigation";
-	import { t } from "$lib/i18n";
-	import Page from "./Page.svelte";
+	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import { t } from '$lib/i18n';
+	import Page from './Page.svelte';
 
 	interface Item {
 		id: string;
@@ -44,9 +44,9 @@
 	function navigate(value: string): void {
 		term = value;
 		const params = new URLSearchParams();
-		if (term) params.set("q", term);
+		if (term) params.set('q', term);
 		const search = params.toString();
-		goto(search ? `?${search}` : "?", { replaceState: true, noScroll: true, keepFocus: true });
+		goto(search ? `?${search}` : '?', { replaceState: true, noScroll: true, keepFocus: true });
 	}
 
 	function onInput(event: Event): void {
@@ -61,21 +61,21 @@
 	// The current search and page as a query string; page one is left bare.
 	function queryString(target = page): string {
 		const params = new URLSearchParams();
-		if (query) params.set("q", query);
-		if (target > 1) params.set("page", String(target));
+		if (query) params.set('q', query);
+		if (target > 1) params.set('page', String(target));
 		return params.toString();
 	}
 
 	// A link back to the same search on another page.
 	function href(target: number): string {
 		const search = queryString(target);
-		return search ? `?${search}` : "?";
+		return search ? `?${search}` : '?';
 	}
 
 	// Post to the delete action without dropping the current search and page.
 	function deleteAction(): string {
 		const search = queryString();
-		return search ? `?${search}&/delete` : "?/delete";
+		return search ? `?${search}&/delete` : '?/delete';
 	}
 </script>
 
@@ -86,7 +86,7 @@
 				<h1>{heading}</h1>
 				<label class="toggle">
 					<input type="checkbox" bind:checked={includeDeleted} />
-					{t("list.includeDeleted")}
+					{t('list.includeDeleted')}
 				</label>
 			</div>
 			<form class="search" method="GET" onsubmit={onSearch}>
@@ -98,7 +98,7 @@
 					placeholder={searchPlaceholder}
 					aria-label={searchPlaceholder}
 				/>
-				<button class="find center" type="submit" aria-label={t("list.search")}>
+				<button class="find center" type="submit" aria-label={t('list.search')}>
 					<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
 						<circle cx="11" cy="11" r="7" />
 						<line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -117,7 +117,7 @@
 						{#if item.deletedAt === null}
 							<form method="POST" action={deleteAction()} use:enhance>
 								<input type="hidden" name="id" value={item.id} />
-								<button class="delete center" type="submit" aria-label={t("list.delete")}>
+								<button class="delete center" type="submit" aria-label={t('list.delete')}>
 									<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
 										<polyline points="3 6 5 6 21 6" />
 										<path
@@ -137,15 +137,15 @@
 		{#if pages > 1}
 			<nav class="pagination" aria-label={heading}>
 				{#if page > 1}
-					<a class="step" href={href(page - 1)}>{t("list.previous")}</a>
+					<a class="step" href={href(page - 1)}>{t('list.previous')}</a>
 				{:else}
-					<span class="step disabled">{t("list.previous")}</span>
+					<span class="step disabled">{t('list.previous')}</span>
 				{/if}
 				<span class="position">{page} / {pages}</span>
 				{#if page < pages}
-					<a class="step" href={href(page + 1)}>{t("list.next")}</a>
+					<a class="step" href={href(page + 1)}>{t('list.next')}</a>
 				{:else}
-					<span class="step disabled">{t("list.next")}</span>
+					<span class="step disabled">{t('list.next')}</span>
 				{/if}
 			</nav>
 		{/if}

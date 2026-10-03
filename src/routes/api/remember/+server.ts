@@ -1,6 +1,6 @@
-import { json, type RequestHandler } from "@sveltejs/kit";
-import { memexId } from "$lib/server/auth";
-import { remember } from "$lib/server/storage";
+import { json, type RequestHandler } from '@sveltejs/kit';
+import { memexId } from '$lib/server/auth';
+import { remember } from '$lib/server/storage';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const memex = memexId(request);

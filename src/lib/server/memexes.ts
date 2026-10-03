@@ -1,8 +1,8 @@
-import { randomUUID } from "node:crypto";
-import { eq, inArray } from "drizzle-orm";
-import { languages } from "$lib/languages";
-import { db } from "./db";
-import { memexes } from "./db/schema";
+import { randomUUID } from 'node:crypto';
+import { eq, inArray } from 'drizzle-orm';
+import { languages } from '$lib/languages';
+import { db } from './db';
+import { memexes } from './db/schema';
 
 export interface Memex {
 	id: string;
@@ -13,12 +13,10 @@ export interface Memex {
 
 /** Creates a memex and returns its id, which is unguessable and doubles as its only credential. */
 export function create(title: string, language: string): string {
-	if (title.trim() === "") throw new Error("A memex needs a title.");
+	if (title.trim() === '') throw new Error('A memex needs a title.');
 	if (!languages.includes(language)) throw new Error(`Unsupported language "${language}".`);
 	const id = randomUUID();
-	db.insert(memexes)
-		.values({ id, title, language, createdAt: new Date().toISOString() })
-		.run();
+	db.insert(memexes).values({ id, title, language, createdAt: new Date().toISOString() }).run();
 	return id;
 }
 
@@ -39,7 +37,7 @@ export function getMany(ids: string[]): Memex[] {
 
 /** Renames a memex. The language is fixed for the memex's lifetime. */
 export function rename(id: string, title: string): void {
-	if (title.trim() === "") throw new Error("A memex needs a title.");
+	if (title.trim() === '') throw new Error('A memex needs a title.');
 	db.update(memexes).set({ title }).where(eq(memexes.id, id)).run();
 }
 

@@ -1,6 +1,6 @@
 <script module lang="ts">
 	export type Item = {
-		kind: "user" | "assistant" | "error" | "tool";
+		kind: 'user' | 'assistant' | 'error' | 'tool';
 		text?: string;
 		/** Tool name, when kind is "tool". */
 		name?: string;
@@ -9,34 +9,41 @@
 </script>
 
 <script lang="ts">
-	import { marked } from "marked";
+	import { marked } from 'marked';
 
 	let {
 		kind,
-		text = "",
-		name = "",
+		text = '',
+		name = '',
 		args = [],
 		streaming = false
-	}: { kind: Item["kind"]; text?: string; name?: string; args?: Item["args"]; streaming?: boolean } =
-		$props();
+	}: {
+		kind: Item['kind'];
+		text?: string;
+		name?: string;
+		args?: Item['args'];
+		streaming?: boolean;
+	} = $props();
 
 	// Committed rows never change, so each parses exactly once; the streaming row
 	// re-parses only its own text on every chunk.
-	const html = $derived(kind === "assistant" ? marked(text, { async: false }) : "");
+	const html = $derived(kind === 'assistant' ? marked(text, { async: false }) : '');
 </script>
 
-{#if kind === "tool"}
+{#if kind === 'tool'}
 	<div class="tool">
 		<span class="tool-name">{name}</span>
 		{#if args.length}
 			<span class="tool-args">
-				{#each args as arg, j}{#if j}<span class="sep"> · </span>{/if}<span class:clamp={arg.key === "id"}>{arg.value}</span>{/each}
+				{#each args as arg, j}{#if j}<span class="sep"> · </span>{/if}<span
+						class:clamp={arg.key === 'id'}>{arg.value}</span
+					>{/each}
 			</span>
 		{/if}
 	</div>
-{:else if kind === "error"}
+{:else if kind === 'error'}
 	<div class="error" role="alert">{text}</div>
-{:else if kind === "assistant"}
+{:else if kind === 'assistant'}
 	<div class="assistant" class:streaming>{@html html}</div>
 {:else}
 	<div class="bubble user">{text}</div>
@@ -67,7 +74,7 @@
 	}
 
 	.assistant.streaming::after {
-		content: "";
+		content: '';
 		display: inline-block;
 		width: 0.5ch;
 		height: 1em;

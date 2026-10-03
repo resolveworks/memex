@@ -1,5 +1,5 @@
-import { page } from "$app/state";
-import { languages, messages, type MessageKey } from "./languages";
+import { page } from '$app/state';
+import { languages, messages, type MessageKey } from './languages';
 
 export { languages };
 export type { MessageKey };
@@ -14,5 +14,5 @@ export function t(key: MessageKey): string {
 
 /** The language's own name, e.g. "Deutsch", so speakers can find it in the list. */
 export function languageName(code: string): string {
-	return new Intl.DisplayNames([code], { type: "language" }).of(code) ?? code;
+	return new Intl.DisplayNames([code], { type: 'language' }).of(code) ?? code;
 }

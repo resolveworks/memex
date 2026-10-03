@@ -1,4 +1,4 @@
-import en from "./i18n/en.json";
+import en from './i18n/en.json';
 
 export type MessageKey = keyof typeof en.messages;
 
@@ -9,12 +9,12 @@ interface Language {
 }
 
 // Every JSON file in i18n/ is a language; the filename is its BCP-47 tag.
-const files = import.meta.glob<{ default: Language }>("./i18n/*.json", {
+const files = import.meta.glob<{ default: Language }>('./i18n/*.json', {
 	eager: true
 });
 
 function tag(path: string): string {
-	return path.slice(path.lastIndexOf("/") + 1, -".json".length);
+	return path.slice(path.lastIndexOf('/') + 1, -'.json'.length);
 }
 
 const entries = Object.entries(files).map(([path, module]) => {

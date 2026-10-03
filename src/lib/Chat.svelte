@@ -1,15 +1,15 @@
 <script lang="ts">
-	import type { AgentMessage } from "@earendil-works/pi-agent-core";
-	import { contentText } from "@earendil-works/pi-ai";
-	import { chat, clear, open, send } from "$lib/chat.svelte";
-	import ChatMessage, { type Item } from "$lib/ChatMessage.svelte";
-	import Button from "$lib/components/Button.svelte";
-	import Footer from "$lib/components/Footer.svelte";
-	import { t } from "$lib/i18n";
+	import type { AgentMessage } from '@earendil-works/pi-agent-core';
+	import { contentText } from '@earendil-works/pi-ai';
+	import { chat, clear, open, send } from '$lib/chat.svelte';
+	import ChatMessage, { type Item } from '$lib/ChatMessage.svelte';
+	import Button from '$lib/components/Button.svelte';
+	import Footer from '$lib/components/Footer.svelte';
+	import { t } from '$lib/i18n';
 
 	let { id, language }: { id: string; language: string } = $props();
 
-	let input = $state("");
+	let input = $state('');
 
 	$effect(() => {
 		void open(id, language);
@@ -20,22 +20,22 @@
 	function toItems(messages: AgentMessage[]): Item[] {
 		const items: Item[] = [];
 		for (const message of messages) {
-			if (message.role === "user") {
-				items.push({ kind: "user", text: contentText(message.content) });
-			} else if (message.role === "assistant") {
+			if (message.role === 'user') {
+				items.push({ kind: 'user', text: contentText(message.content) });
+			} else if (message.role === 'assistant') {
 				const text = contentText(message.content);
-				if (text) items.push({ kind: "assistant", text });
-				if (message.stopReason === "error" && message.errorMessage) {
-					items.push({ kind: "error", text: message.errorMessage });
+				if (text) items.push({ kind: 'assistant', text });
+				if (message.stopReason === 'error' && message.errorMessage) {
+					items.push({ kind: 'error', text: message.errorMessage });
 				}
 				for (const part of message.content) {
-					if (part.type === "toolCall") {
+					if (part.type === 'toolCall') {
 						items.push({
-							kind: "tool",
+							kind: 'tool',
 							name: part.name,
 							args: Object.entries(part.arguments).map(([key, value]) => ({
 								key,
-								value: Array.isArray(value) ? value.join(" · ") : String(value)
+								value: Array.isArray(value) ? value.join(' · ') : String(value)
 							}))
 						});
 					}
@@ -48,11 +48,11 @@
 	let items = $derived(toItems(chat.messages));
 	// The greeting is a user-shaped trigger to the model, so only a real user turn
 	// means the person has actually written something worth clearing.
-	let hasConversation = $derived(chat.messages.some((message) => message.role === "user"));
+	let hasConversation = $derived(chat.messages.some((message) => message.role === 'user'));
 
 	const streamText = $derived.by(() => {
 		const message = chat.streaming;
-		if (!message || message.role !== "assistant") return "";
+		if (!message || message.role !== 'assistant') return '';
 		return contentText(message.content);
 	});
 	const thinking = $derived(chat.busy && !streamText);
@@ -77,13 +77,13 @@
 	function submit() {
 		const text = input.trim();
 		if (!text || chat.busy) return;
-		input = "";
+		input = '';
 		pinned = true;
 		send(text);
 	}
 
 	function onKeydown(event: KeyboardEvent) {
-		if (event.key === "Enter" && !event.shiftKey) {
+		if (event.key === 'Enter' && !event.shiftKey) {
 			event.preventDefault();
 			submit();
 		}
@@ -93,30 +93,30 @@
 <div class="chat stack">
 	<div class="messages" bind:this={viewport} onscroll={onScroll}>
 		<div class="thread stack">
-		{#each items as item}
-			<ChatMessage kind={item.kind} text={item.text} name={item.name} args={item.args} />
-		{/each}
-		{#if streamText}
-			<ChatMessage kind="assistant" text={streamText} streaming />
-		{/if}
-		{#if thinking}
-			<div class="thinking" role="status" aria-label={t("chat.thinking")}>
-				<span class="dot"></span>
-				<span class="dot"></span>
-				<span class="dot"></span>
-			</div>
-		{/if}
-		{#if hasConversation}
-			<div class="clear">
-				<Button type="button" onclick={clear}>
-					<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-						<polyline points="1 4 1 10 7 10" />
-						<path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-					</svg>
-					{t("chat.clear")}
-				</Button>
-			</div>
-		{/if}
+			{#each items as item}
+				<ChatMessage kind={item.kind} text={item.text} name={item.name} args={item.args} />
+			{/each}
+			{#if streamText}
+				<ChatMessage kind="assistant" text={streamText} streaming />
+			{/if}
+			{#if thinking}
+				<div class="thinking" role="status" aria-label={t('chat.thinking')}>
+					<span class="dot"></span>
+					<span class="dot"></span>
+					<span class="dot"></span>
+				</div>
+			{/if}
+			{#if hasConversation}
+				<div class="clear">
+					<Button type="button" onclick={clear}>
+						<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+							<polyline points="1 4 1 10 7 10" />
+							<path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+						</svg>
+						{t('chat.clear')}
+					</Button>
+				</div>
+			{/if}
 		</div>
 	</div>
 
@@ -128,12 +128,9 @@
 				submit();
 			}}
 		>
-			<textarea
-				bind:value={input}
-				onkeydown={onKeydown}
-				placeholder={t("chat.placeholder")}
+			<textarea bind:value={input} onkeydown={onKeydown} placeholder={t('chat.placeholder')}
 			></textarea>
-			<Button icon type="submit" disabled={chat.busy} aria-label={t("chat.send")}>
+			<Button icon type="submit" disabled={chat.busy} aria-label={t('chat.send')}>
 				<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
 					<line x1="12" y1="19" x2="12" y2="5" />
 					<polyline points="6 11 12 5 18 11" />
