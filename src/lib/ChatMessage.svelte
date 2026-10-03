@@ -1,5 +1,6 @@
 <script module lang="ts">
 	export type Item = {
+		key: string;
 		kind: 'user' | 'assistant' | 'error' | 'tool';
 		text?: string;
 		/** Tool name, when kind is "tool". */
@@ -9,7 +10,7 @@
 </script>
 
 <script lang="ts">
-	import { marked } from 'marked';
+	import Markdown from '$lib/components/Markdown.svelte';
 
 	let {
 		kind,
@@ -24,10 +25,6 @@
 		args?: Item['args'];
 		streaming?: boolean;
 	} = $props();
-
-	// Committed rows never change, so each parses exactly once; the streaming row
-	// re-parses only its own text on every chunk.
-	const html = $derived(kind === 'assistant' ? marked(text, { async: false }) : '');
 </script>
 
 {#if kind === 'tool'}
@@ -35,7 +32,7 @@
 		<span class="tool-name">{name}</span>
 		{#if args.length}
 			<span class="tool-args">
-				{#each args as arg, j}{#if j}<span class="sep"> · </span>{/if}<span
+				{#each args as arg, j (arg.key)}{#if j}<span class="sep"> · </span>{/if}<span
 						class:clamp={arg.key === 'id'}>{arg.value}</span
 					>{/each}
 			</span>
@@ -44,7 +41,7 @@
 {:else if kind === 'error'}
 	<div class="error" role="alert">{text}</div>
 {:else if kind === 'assistant'}
-	<div class="assistant" class:streaming>{@html html}</div>
+	<div class="assistant" class:streaming><Markdown {text} /></div>
 {:else}
 	<div class="bubble user">{text}</div>
 {/if}

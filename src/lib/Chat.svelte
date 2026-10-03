@@ -21,16 +21,25 @@
 		const items: Item[] = [];
 		for (const message of messages) {
 			if (message.role === 'user') {
-				items.push({ kind: 'user', text: contentText(message.content) });
+				items.push({
+					key: `user-${message.timestamp}`,
+					kind: 'user',
+					text: contentText(message.content)
+				});
 			} else if (message.role === 'assistant') {
 				const text = contentText(message.content);
-				if (text) items.push({ kind: 'assistant', text });
+				if (text) items.push({ key: `assistant-${message.timestamp}`, kind: 'assistant', text });
 				if (message.stopReason === 'error' && message.errorMessage) {
-					items.push({ kind: 'error', text: message.errorMessage });
+					items.push({
+						key: `error-${message.timestamp}`,
+						kind: 'error',
+						text: message.errorMessage
+					});
 				}
 				for (const part of message.content) {
 					if (part.type === 'toolCall') {
 						items.push({
+							key: `tool-${part.id}`,
 							kind: 'tool',
 							name: part.name,
 							args: Object.entries(part.arguments).map(([key, value]) => ({
@@ -93,7 +102,7 @@
 <div class="chat stack">
 	<div class="messages" bind:this={viewport} onscroll={onScroll}>
 		<div class="thread stack">
-			{#each items as item}
+			{#each items as item (item.key)}
 				<ChatMessage kind={item.kind} text={item.text} name={item.name} args={item.args} />
 			{/each}
 			{#if streamText}

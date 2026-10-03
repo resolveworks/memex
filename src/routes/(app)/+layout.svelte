@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { chat } from '$lib/chat.svelte';
 	import { t } from '$lib/i18n';
@@ -18,11 +19,11 @@
 	});
 
 	const memexOptions = $derived(memexes.map((memex) => ({ value: memex.id, label: memex.title })));
-	const memexActions = $derived([{ href: '/', label: t('nav.new') }]);
+	const memexActions = $derived([{ href: resolve('/'), label: t('nav.new') }]);
 
 	function switchMemex(id: string) {
 		if (id === page.params.id) return;
-		goto(`/${id}`);
+		goto(resolve(`/${id}`));
 	}
 
 	function follow(event: MouseEvent) {
@@ -31,7 +32,7 @@
 </script>
 
 <AppShell
-	home={page.data.memex ? `/${page.data.memex.id}` : '/'}
+	home={page.data.memex ? resolve(`/${page.data.memex.id}`) : resolve('/')}
 	value={page.params.id ?? ''}
 	options={memexOptions}
 	actions={memexActions}
@@ -42,7 +43,7 @@
 	{#snippet toolbar()}
 		<a
 			class="icon center"
-			href={`/${page.params.id}/memories`}
+			href={resolve(`/${page.params.id}/memories`)}
 			aria-label={t('memories.heading')}
 			onclick={follow}
 		>
@@ -54,7 +55,7 @@
 		</a>
 		<a
 			class="icon center"
-			href={`/${page.params.id}/questions`}
+			href={resolve(`/${page.params.id}/questions`)}
 			aria-label={t('questions.heading')}
 			onclick={follow}
 		>
@@ -72,7 +73,7 @@
 		</a>
 		<a
 			class="icon center"
-			href={`/${page.params.id}/settings`}
+			href={resolve(`/${page.params.id}/settings`)}
 			aria-label={t('settings.memexHeading')}
 			onclick={follow}
 		>

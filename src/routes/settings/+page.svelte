@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import AppShell from '$lib/components/AppShell.svelte';
 	import Card from '$lib/components/Card.svelte';
@@ -12,7 +13,12 @@
 	);
 </script>
 
-<AppShell home="/" value="" options={memexOptions} onchange={(id) => goto(`/${id}`)}>
+<AppShell
+	home={resolve('/')}
+	value=""
+	options={memexOptions}
+	onchange={(id) => goto(resolve(`/${id}`))}
+>
 	<Page>
 		<Card>
 			<h2>{t('settings.appHeading')}</h2>

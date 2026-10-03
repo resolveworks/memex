@@ -1,4 +1,6 @@
 <script module lang="ts">
+	import type { ResolvedPathname } from '$app/types';
+
 	export interface SelectOption {
 		value: string;
 		label: string;
@@ -6,7 +8,7 @@
 
 	/** A link below the options, e.g. "Create new"; it navigates instead of selecting. */
 	export interface SelectAction {
-		href: string;
+		href: ResolvedPathname;
 		label: string;
 	}
 </script>

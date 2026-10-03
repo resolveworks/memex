@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import Card from '$lib/components/Card.svelte';
 	import Page from '$lib/components/Page.svelte';
@@ -10,7 +11,7 @@
 		<div class="error stack">
 			<p class="status">{page.status}</p>
 			<p class="message">{t('error.notFound')}</p>
-			<a href="/">{t('error.newMemex')}</a>
+			<a href={resolve('/')}>{t('error.newMemex')}</a>
 		</div>
 	</Card>
 </Page>

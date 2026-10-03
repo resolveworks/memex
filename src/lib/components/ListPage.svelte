@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import { page as currentPage } from '$app/state';
+	import type { ResolvedPathname } from '$app/types';
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { t } from '$lib/i18n';
 	import Page from './Page.svelte';
 
@@ -43,10 +47,14 @@
 	// Search is driven by the URL: navigating re-runs the page's load function.
 	function navigate(value: string): void {
 		term = value;
-		const params = new URLSearchParams();
+		const params = new SvelteURLSearchParams();
 		if (term) params.set('q', term);
 		const search = params.toString();
-		goto(search ? `?${search}` : '?', { replaceState: true, noScroll: true, keepFocus: true });
+		goto(resolve(`${currentPage.url.pathname}?${search}`), {
+			replaceState: true,
+			noScroll: true,
+			keepFocus: true
+		});
 	}
 
 	function onInput(event: Event): void {
@@ -60,16 +68,16 @@
 
 	// The current search and page as a query string; page one is left bare.
 	function queryString(target = page): string {
-		const params = new URLSearchParams();
+		const params = new SvelteURLSearchParams();
 		if (query) params.set('q', query);
 		if (target > 1) params.set('page', String(target));
 		return params.toString();
 	}
 
 	// A link back to the same search on another page.
-	function href(target: number): string {
+	function href(target: number): ResolvedPathname {
 		const search = queryString(target);
-		return search ? `?${search}` : '?';
+		return resolve(`${currentPage.url.pathname}?${search}`);
 	}
 
 	// Post to the delete action without dropping the current search and page.

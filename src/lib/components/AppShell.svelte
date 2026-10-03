@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ResolvedPathname } from '$app/types';
 	import type { Snippet } from 'svelte';
 	import { t } from '$lib/i18n';
 	import Header from './Header.svelte';
@@ -15,7 +16,7 @@
 		toolbar,
 		children
 	}: {
-		home: string;
+		home: ResolvedPathname;
 		value: string;
 		options: SelectOption[];
 		actions?: SelectAction[];
