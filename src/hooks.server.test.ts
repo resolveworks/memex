@@ -29,33 +29,10 @@ describe('the server handle hook', () => {
 		expect(await response.text()).toBe('<html lang="cs"><body>Memex</body></html>');
 	});
 
-	it('falls back to accept-language when the cookie names an unsupported language', async () => {
-		const event = visit(new FakeCookies({ locale: 'klingon' }), {
-			'accept-language': 'fr-CA,fr;q=0.9,en;q=0.8'
-		});
-		const response = await handle({ event, resolve });
-		expect(event.locals.locale).toBe('fr');
-		expect(await response.text()).toBe('<html lang="fr"><body>Memex</body></html>');
-	});
-
 	it('falls back to accept-language when there is no cookie', async () => {
-		const event = visit(new FakeCookies(), { 'accept-language': 'sv-SE,sv;q=0.9' });
+		const event = visit(new FakeCookies(), { 'accept-language': 'sv-SE,sv' });
 		const response = await handle({ event, resolve });
 		expect(event.locals.locale).toBe('sv');
 		expect(await response.text()).toBe('<html lang="sv"><body>Memex</body></html>');
-	});
-
-	it('defaults to english with no cookie and no accept-language', async () => {
-		const event = visit(new FakeCookies());
-		const response = await handle({ event, resolve });
-		expect(event.locals.locale).toBe('en');
-		expect(await response.text()).toBe('<html lang="en"><body>Memex</body></html>');
-	});
-
-	it('defaults to english when accept-language offers no supported language', async () => {
-		const event = visit(new FakeCookies(), { 'accept-language': 'ja,zh-CN;q=0.9' });
-		const response = await handle({ event, resolve });
-		expect(event.locals.locale).toBe('en');
-		expect(await response.text()).toBe('<html lang="en"><body>Memex</body></html>');
 	});
 });

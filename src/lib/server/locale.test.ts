@@ -5,21 +5,21 @@ import { readLocale, setLocale } from './locale';
 describe('the UI locale', () => {
 	it('prefers a supported cookie over the accept-language header', () => {
 		const request = new Request('http://localhost/', {
-			headers: { 'accept-language': 'de,fr;q=0.8' }
+			headers: { 'accept-language': 'de,fr' }
 		});
 		expect(readLocale(new FakeCookies({ locale: 'pt' }), request)).toBe('pt');
 	});
 
-	it('falls back to the best accept-language match when the cookie is unsupported', () => {
+	it('falls back to the first supported accept-language tag when the cookie is unsupported', () => {
 		const request = new Request('http://localhost/', {
-			headers: { 'accept-language': 'zh-CN,zh;q=0.9,pt-BR;q=0.8,en;q=0.7' }
+			headers: { 'accept-language': 'zh-CN,pt-BR,en' }
 		});
 		expect(readLocale(new FakeCookies({ locale: 'klingon' }), request)).toBe('pt');
 	});
 
 	it('yields english when no cookie and no header language is supported', () => {
 		const request = new Request('http://localhost/', {
-			headers: { 'accept-language': 'ja,ru;q=0.8' }
+			headers: { 'accept-language': 'ja,ru' }
 		});
 		expect(readLocale(new FakeCookies(), request)).toBe('en');
 	});

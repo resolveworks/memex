@@ -4,7 +4,7 @@ import { languages } from '$lib/languages';
 const COOKIE = 'locale';
 const YEAR = 60 * 60 * 24 * 365;
 
-/** The chosen UI language, else the best supported `Accept-Language` match, else English. */
+/** The chosen UI language, else the first supported `Accept-Language` tag, else English. */
 export function readLocale(cookies: Cookies, request: Request): string {
 	const chosen = cookies.get(COOKIE);
 	if (chosen && languages.includes(chosen)) return chosen;
