@@ -1,7 +1,7 @@
 import { invalidateAll } from '$app/navigation';
 import { page } from '$app/state';
 import type { Agent, AgentMessage } from '@earendil-works/pi-agent-core';
-import { getAgent, greetingMessage, refreshSystemPrompt } from './agent';
+import { getAgent, greetingMessage, useSystemPrompt } from './agent';
 
 export const chat = $state<{
 	messages: AgentMessage[];
@@ -57,12 +57,13 @@ async function restart(memexLanguage: string): Promise<void> {
 	}
 	if (token !== openToken) return;
 	instance.reset();
-	await refreshSystemPrompt(memexLanguage, page.data.locale);
+	useSystemPrompt(memexLanguage, page.data.locale);
+	const greeting = await greetingMessage();
 	if (token !== openToken) return;
 	chat.messages = [];
 	chat.streaming = undefined;
 	chat.busy = false;
-	void instance.prompt(greetingMessage());
+	void instance.prompt(greeting);
 }
 
 /** Switches to a memex, discarding the previous conversation and any stream in flight. */
@@ -87,7 +88,5 @@ export async function send(text: string): Promise<void> {
 	if (!currentMemexLanguage) throw new Error('No memex open.');
 	const instance = active();
 	chat.busy = true;
-	// Rebuild the prompt so the queue reflects questions the previous turn recorded or closed.
-	await refreshSystemPrompt(currentMemexLanguage, page.data.locale);
 	void instance.prompt(text);
 }
