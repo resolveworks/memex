@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { memexId } from '$lib/server/auth';
 import { create } from '$lib/server/memexes';
 import { listMemories, listQuestions } from '$lib/server/storage';
@@ -151,10 +151,21 @@ describe('POST /api/answer', () => {
 });
 
 describe('POST /api/revise', () => {
+	// Revisions written in the same millisecond are unordered, so the revise
+	// would be unobservable; fake time keeps the two writes apart.
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
 	it('returns the revised memory as JSON, keeping its identity', async () => {
 		const id = create('Dinner plans', 'en');
 		const stored = await remember(event(post({ text: 'Sushi on Fridays' }, bearer(id))));
 		const memory = await stored.json();
+
+		vi.advanceTimersByTime(1);
 
 		const response = await revise(
 			event(post({ id: memory.id, text: 'Sushi on Saturdays' }, bearer(id)))
@@ -164,7 +175,7 @@ describe('POST /api/revise', () => {
 		const revised = await response.json();
 		expect(revised.id).toBe(memory.id);
 		expect(revised.text).toBe('Sushi on Saturdays');
-		expect(new Date(revised.updatedAt).getTime()).toBeGreaterThanOrEqual(
+		expect(new Date(revised.updatedAt).getTime()).toBeGreaterThan(
 			new Date(memory.updatedAt).getTime()
 		);
 		expect(listMemories(id)).toHaveLength(1);
@@ -175,6 +186,8 @@ describe('POST /api/revise', () => {
 		const id = create('Dinner plans', 'en');
 		const stored = await wonder(event(post({ text: 'When is sushi day?' }, bearer(id))));
 		const question = await stored.json();
+
+		vi.advanceTimersByTime(1);
 
 		const response = await revise(
 			event(post({ id: question.id, text: 'When is cake day?' }, bearer(id)))
