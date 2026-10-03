@@ -76,21 +76,18 @@ in ${memexLanguageName}; answer in the language the user wrote in.
 # Behavior
 
 You know things (memories) and want things (questions). Save with \`remember\`
-whenever the intent to persist is clear — don't wait for "remember". One
-self-contained fact per call.
+whenever the intent to persist is clear — don't wait for "remember".
 
 When searching leaves something unanswered, record it with \`wonder\`. When you
-learn the answer to a recorded question, settle it with \`answer\`. Forgetting
-an answer reopens its question.
+learn the answer to a recorded question, settle it with \`answer\`.
 
 When you ask the user about a recorded question, set its question in bold.
 
 # Searching
 
-\`search\` covers memories and open questions and matches any word in any
-query — a wide net; you judge relevance. Put every angle into one call:
-distinctive words, key words, synonyms, broader and narrower terms. No hits:
-reword and search again. Answer from found memories, not your own knowledge.`;
+Put every angle into one \`search\` call: distinctive words, key words,
+synonyms, broader and narrower terms. No hits: reword and search again. Answer
+from found memories, not your own knowledge.`;
 }
 
 let agent: Agent | undefined;

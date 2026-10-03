@@ -18,13 +18,13 @@ function line(kind: Kind, item: { id: string; updatedAt: string; text: string })
 }
 
 const rememberParameters = Type.Object({
-	text: Type.String()
+	text: Type.String({ description: "One self-contained fact." })
 });
 
 export const remember: AgentTool<typeof rememberParameters> = {
 	name: "remember",
 	label: "Remember",
-	description: "Store a fact.",
+	description: "Store a fact as a new memory.",
 	parameters: rememberParameters,
 	execute: async (_toolCallId, { text }) => {
 		const response = await fetch("/api/remember", {
@@ -48,7 +48,7 @@ const wonderParameters = Type.Object({
 export const wonder: AgentTool<typeof wonderParameters> = {
 	name: "wonder",
 	label: "Wonder",
-	description: "Record an open question, for the user to fill in later.",
+	description: "Record an open question for the user to fill in later, when searching leaves something unanswered.",
 	parameters: wonderParameters,
 	execute: async (_toolCallId, { text }) => {
 		const response = await fetch("/api/wonder", {
@@ -66,14 +66,14 @@ export const wonder: AgentTool<typeof wonderParameters> = {
 };
 
 const answerParameters = Type.Object({
-	question: Type.String({ description: "Entity id of the question this answers." }),
+	question: Type.String({ description: "Id of the question this answers, from search or list results." }),
 	text: Type.String()
 });
 
 export const answer: AgentTool<typeof answerParameters> = {
 	name: "answer",
 	label: "Answer",
-	description: "Store a fact that settles a recorded question.",
+	description: "Store a fact that settles a recorded open question, linking the memory to it.",
 	parameters: answerParameters,
 	execute: async (_toolCallId, { question, text }) => {
 		const response = await fetch("/api/answer", {
@@ -93,14 +93,14 @@ export const answer: AgentTool<typeof answerParameters> = {
 };
 
 const reviseParameters = Type.Object({
-	id: Type.String({ description: "Entity id of the memory or question to revise." }),
-	text: Type.String()
+	id: Type.String({ description: "Id of the memory or question to revise, from search or list results." }),
+	text: Type.String({ description: "The new text in full; it replaces the old." })
 });
 
 export const revise: AgentTool<typeof reviseParameters> = {
 	name: "revise",
 	label: "Revise",
-	description: "Replace a memory's text, or reword a question, by id.",
+	description: "Replace a memory's text, or reword a question, keeping its id and any question it answers.",
 	parameters: reviseParameters,
 	execute: async (_toolCallId, { id, text }) => {
 		const response = await fetch("/api/revise", {
@@ -117,13 +117,13 @@ export const revise: AgentTool<typeof reviseParameters> = {
 };
 
 const forgetParameters = Type.Object({
-	id: Type.String({ description: "Entity id of the memory or question to remove." })
+	id: Type.String({ description: "Id of the memory or question to remove, from search or list results." })
 });
 
 export const forget: AgentTool<typeof forgetParameters> = {
 	name: "forget",
 	label: "Forget",
-	description: "Remove a memory, or dismiss a question, by id.",
+	description: "Remove a memory, or dismiss a question, by id. Forgetting an answer reopens its question.",
 	parameters: forgetParameters,
 	execute: async (_toolCallId, { id }) => {
 		const response = await fetch("/api/forget", {
@@ -140,7 +140,9 @@ export const forget: AgentTool<typeof forgetParameters> = {
 };
 
 const searchParameters = Type.Object({
-	queries: Type.Array(Type.String())
+	queries: Type.Array(Type.String(), {
+		description: "Each is split into words; an entry containing any word of any query matches."
+	})
 });
 
 export const search: AgentTool<typeof searchParameters> = {
@@ -184,7 +186,7 @@ const listParameters = Type.Object({
 export const list: AgentTool<typeof listParameters> = {
 	name: "list",
 	label: "List",
-	description: "List memories and questions interleaved, newest first.",
+	description: "List memories and questions interleaved, newest first — including answered questions, which search omits.",
 	parameters: listParameters,
 	execute: async (_toolCallId, { kind, offset }) => {
 		const from = offset ?? 0;
