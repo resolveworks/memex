@@ -102,7 +102,7 @@ describe('GET /api/:id/list', () => {
 		const response = await list(urlEvent('/api/list?offset=1', id));
 
 		const page = await response.json();
-		expect(page.items.map((item: ListItem) => item.text)).toEqual(['item 2', 'item 3']);
+		expect(page.items.map((item: ListItem) => item.text)).toEqual(['item 2', 'item 1']);
 	});
 });
 

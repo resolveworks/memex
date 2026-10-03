@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { and, eq, gt, isNull, sql } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 import { stopwords } from '$lib/languages';
 import type { Memory } from '$lib/memory';
 import { PAGE_SIZE, type Page } from '$lib/page';
@@ -42,7 +42,7 @@ function now(): string {
 function ranked(memexId: string) {
 	return sql`
 		select
-			r.id,
+			r.seq,
 			r.entity_id,
 			r.memex_id,
 			r.kind,
@@ -53,7 +53,7 @@ function ranked(memexId: string) {
 			min(r.created_at) over (partition by r.entity_id) as made,
 			row_number() over (
 				partition by r.entity_id
-				order by (r.deleted_at is null) desc, r.created_at desc
+				order by (r.deleted_at is null) desc, r.seq desc
 			) as rn
 		from revisions r
 		where r.memex_id = ${memexId}
@@ -77,7 +77,7 @@ function resolve(memexId: string, choice: Choice = {}): Resolved[] {
 	const rows = db.all<Revision & { made: string }>(sql`
 		with ranked as (${ranked(memexId)})
 		select
-			w.id,
+			w.seq,
 			w.entity_id as entityId,
 			w.memex_id as memexId,
 			w.kind,
@@ -101,7 +101,7 @@ function resolve(memexId: string, choice: Choice = {}): Resolved[] {
 						)`
 					: sql``
 			}
-		order by w.created_at desc
+		order by w.seq desc
 		${limit === undefined ? sql`` : sql`limit ${limit}`}
 		${offset === undefined ? sql`` : sql`offset ${offset}`}
 	`);
@@ -133,7 +133,7 @@ function toQuestion({ row, made }: Resolved): Question {
 function resolveById(memexId: string, entityId: string): Resolved | undefined {
 	const row = db.get<(Revision & { made: string }) | undefined>(sql`
 		select
-			r.id,
+			r.seq,
 			r.entity_id as entityId,
 			r.memex_id as memexId,
 			r.kind,
@@ -148,7 +148,7 @@ function resolveById(memexId: string, entityId: string): Resolved | undefined {
 			) as made
 		from revisions r
 		where r.memex_id = ${memexId} and r.entity_id = ${entityId} and r.deleted_at is null
-		order by r.created_at desc
+		order by r.seq desc
 		limit 1
 	`);
 	return row ? { row, made: row.made } : undefined;
@@ -182,38 +182,40 @@ export function openQuestions(memexId: string): Question[] {
 
 /** Stores a new fact. */
 export function remember(memexId: string, text: string): Memory {
-	const entityId = randomUUID();
 	const createdAt = now();
-	const revision: Revision = {
-		id: randomUUID(),
-		entityId,
-		memexId,
-		kind: 'memory',
-		text,
-		answers: null,
-		createdAt,
-		deletedAt: null
-	};
-	db.insert(revisions).values(revision).run();
-	return toMemory({ row: revision, made: createdAt });
+	const row = db
+		.insert(revisions)
+		.values({
+			entityId: randomUUID(),
+			memexId,
+			kind: 'memory',
+			text,
+			answers: null,
+			createdAt,
+			deletedAt: null
+		})
+		.returning()
+		.get();
+	return toMemory({ row, made: createdAt });
 }
 
 /** Records a new open question. */
 export function wonder(memexId: string, text: string): Question {
-	const entityId = randomUUID();
 	const createdAt = now();
-	const revision: Revision = {
-		id: randomUUID(),
-		entityId,
-		memexId,
-		kind: 'question',
-		text,
-		answers: null,
-		createdAt,
-		deletedAt: null
-	};
-	db.insert(revisions).values(revision).run();
-	return toQuestion({ row: revision, made: createdAt });
+	const row = db
+		.insert(revisions)
+		.values({
+			entityId: randomUUID(),
+			memexId,
+			kind: 'question',
+			text,
+			answers: null,
+			createdAt,
+			deletedAt: null
+		})
+		.returning()
+		.get();
+	return toQuestion({ row, made: createdAt });
 }
 
 /** Stores a fact that settles a recorded question. */
@@ -221,39 +223,42 @@ export function answer(memexId: string, question: string, text: string): Memory 
 	if (resolveById(memexId, question)?.row.kind !== 'question') {
 		throw new Error(`No question with id "${question}".`);
 	}
-	const entityId = randomUUID();
 	const createdAt = now();
-	const revision: Revision = {
-		id: randomUUID(),
-		entityId,
-		memexId,
-		kind: 'memory',
-		text,
-		answers: question,
-		createdAt,
-		deletedAt: null
-	};
-	db.insert(revisions).values(revision).run();
-	return toMemory({ row: revision, made: createdAt });
+	const row = db
+		.insert(revisions)
+		.values({
+			entityId: randomUUID(),
+			memexId,
+			kind: 'memory',
+			text,
+			answers: question,
+			createdAt,
+			deletedAt: null
+		})
+		.returning()
+		.get();
+	return toMemory({ row, made: createdAt });
 }
 
 /** Replaces an entity's text with a new revision, keeping its identity. */
 export function revise(memexId: string, id: string, text: string): Memory | Question {
 	const current = resolveById(memexId, id);
 	if (!current) throw new Error(`No memory or question with id "${id}".`);
-	const revision: Revision = {
-		id: randomUUID(),
-		entityId: id,
-		memexId,
-		kind: current.row.kind,
-		text,
-		answers: current.row.answers,
-		createdAt: now(),
-		deletedAt: null
-	};
-	db.insert(revisions).values(revision).run();
-	const resolved = { row: revision, made: current.made };
-	return revision.kind === 'memory' ? toMemory(resolved) : toQuestion(resolved);
+	const row = db
+		.insert(revisions)
+		.values({
+			entityId: id,
+			memexId,
+			kind: current.row.kind,
+			text,
+			answers: current.row.answers,
+			createdAt: now(),
+			deletedAt: null
+		})
+		.returning()
+		.get();
+	const resolved = { row, made: current.made };
+	return row.kind === 'memory' ? toMemory(resolved) : toQuestion(resolved);
 }
 
 /** Soft-deletes every live revision of a memory or question, so the entity disappears. */
@@ -268,37 +273,6 @@ export function forget(memexId: string, id: string): void {
 	if (changes === 0) {
 		throw new Error(`No memory or question with id "${id}".`);
 	}
-}
-
-/**
- * Brings a revision back and soft-deletes the newer ones, so that revision
- * speaks for the entity again. Human-only until the history UI exists.
- */
-export function restore(memexId: string, entityId: string, revisionId: string): void {
-	const revision = db
-		.select()
-		.from(revisions)
-		.where(
-			and(
-				eq(revisions.memexId, memexId),
-				eq(revisions.entityId, entityId),
-				eq(revisions.id, revisionId)
-			)
-		)
-		.get();
-	if (!revision) throw new Error(`No revision with id "${revisionId}".`);
-	db.update(revisions).set({ deletedAt: null }).where(eq(revisions.id, revisionId)).run();
-	db.update(revisions)
-		.set({ deletedAt: now() })
-		.where(
-			and(
-				eq(revisions.memexId, memexId),
-				eq(revisions.entityId, entityId),
-				gt(revisions.createdAt, revision.createdAt),
-				isNull(revisions.deletedAt)
-			)
-		)
-		.run();
 }
 
 function matches<T extends { text: string }>(items: T[], terms: string[]): T[] {

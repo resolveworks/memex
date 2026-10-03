@@ -1,0 +1,212 @@
+{
+	"version": "7",
+	"dialect": "sqlite",
+	"id": "9639aa7b-07e3-44c6-9fb4-67e107a35cd7",
+	"prevIds": ["a7a3d38b-ea85-4057-858d-c6ca050b2aaf"],
+	"ddl": [
+		{
+			"name": "memexes",
+			"entityType": "tables"
+		},
+		{
+			"name": "revisions",
+			"entityType": "tables"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "id",
+			"entityType": "columns",
+			"table": "memexes"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "title",
+			"entityType": "columns",
+			"table": "memexes"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "language",
+			"entityType": "columns",
+			"table": "memexes"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "created_at",
+			"entityType": "columns",
+			"table": "memexes"
+		},
+		{
+			"type": "integer",
+			"notNull": false,
+			"autoincrement": true,
+			"default": null,
+			"generated": null,
+			"name": "seq",
+			"entityType": "columns",
+			"table": "revisions"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "entity_id",
+			"entityType": "columns",
+			"table": "revisions"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "memex_id",
+			"entityType": "columns",
+			"table": "revisions"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "kind",
+			"entityType": "columns",
+			"table": "revisions"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "text",
+			"entityType": "columns",
+			"table": "revisions"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "answers",
+			"entityType": "columns",
+			"table": "revisions"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "created_at",
+			"entityType": "columns",
+			"table": "revisions"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "deleted_at",
+			"entityType": "columns",
+			"table": "revisions"
+		},
+		{
+			"columns": ["memex_id"],
+			"tableTo": "memexes",
+			"columnsTo": ["id"],
+			"onUpdate": "NO ACTION",
+			"onDelete": "CASCADE",
+			"nameExplicit": false,
+			"name": "fk_revisions_memex_id_memexes_id_fk",
+			"entityType": "fks",
+			"table": "revisions"
+		},
+		{
+			"columns": ["id"],
+			"nameExplicit": false,
+			"name": "memexes_pk",
+			"table": "memexes",
+			"entityType": "pks"
+		},
+		{
+			"columns": ["seq"],
+			"nameExplicit": false,
+			"name": "revisions_pk",
+			"table": "revisions",
+			"entityType": "pks"
+		},
+		{
+			"columns": [
+				{
+					"value": "entity_id",
+					"isExpression": false
+				},
+				{
+					"value": "seq",
+					"isExpression": false
+				}
+			],
+			"isUnique": false,
+			"where": null,
+			"origin": "manual",
+			"name": "revisions_entity",
+			"entityType": "indexes",
+			"table": "revisions"
+		},
+		{
+			"columns": [
+				{
+					"value": "memex_id",
+					"isExpression": false
+				},
+				{
+					"value": "kind",
+					"isExpression": false
+				}
+			],
+			"isUnique": false,
+			"where": null,
+			"origin": "manual",
+			"name": "revisions_memex",
+			"entityType": "indexes",
+			"table": "revisions"
+		},
+		{
+			"columns": [
+				{
+					"value": "answers",
+					"isExpression": false
+				}
+			],
+			"isUnique": false,
+			"where": null,
+			"origin": "manual",
+			"name": "revisions_answers",
+			"entityType": "indexes",
+			"table": "revisions"
+		}
+	],
+	"renames": []
+}

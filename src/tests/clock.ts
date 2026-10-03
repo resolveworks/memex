@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, vi } from 'vitest';
 
-// Ordering and revision resolution read `created_at`, so tests that assert them
-// pin the clock and advance it between writes.
+// Pins the clock so tests can assert exact timestamps; `tick` advances it 1ms
+// between writes. Ordering itself comes from `seq`, not the clock.
 const EPOCH = Date.parse('2025-06-01T12:00:00.000Z');
 
 let clock = EPOCH;

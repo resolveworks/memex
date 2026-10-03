@@ -33,9 +33,8 @@ describe('entity storage', () => {
 			expect(listMemories(memex)).toEqual([memory]);
 		});
 
-		it('yields two distinct entities for the same text, newest first', () => {
+		it('yields two distinct entities for the same text, newest first, in the same millisecond', () => {
 			const first = remember(memex, 'Pizza on Friday');
-			tick();
 			const second = remember(memex, 'Pizza on Friday');
 
 			expect(second.id).not.toBe(first.id);
@@ -97,6 +96,14 @@ describe('entity storage', () => {
 			expect(revised.createdAt).toBe(question.createdAt);
 			expect(revised.updatedAt).toBe(revisedAt);
 			expect(listQuestions(memex)).toEqual([revised]);
+		});
+
+		it('keeps the latest revision when two arrive in the same millisecond', () => {
+			const memory = remember(memex, 'Old text');
+			revise(memex, memory.id, 'Middle text');
+			revise(memex, memory.id, 'New text');
+
+			expect(listMemories(memex).map((listed) => listed.text)).toEqual(['New text']);
 		});
 	});
 

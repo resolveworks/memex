@@ -1,4 +1,4 @@
-import { index, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const memexes = sqliteTable('memexes', {
 	id: text('id').primaryKey(),
@@ -10,12 +10,12 @@ export const memexes = sqliteTable('memexes', {
 
 // Append-only revisions shared by memories and questions. `kind` tells them apart;
 // `entity_id` names the logical entity all revisions share, and the live row with
-// the latest `created_at` is the one that speaks for it.
+// the highest `seq` is the one that speaks for it.
 export const revisions = sqliteTable(
 	'revisions',
 	{
-		// This revision row's own id.
-		id: text('id').primaryKey(),
+		// Monotonic insertion order; the ordering key, independent of clock resolution.
+		seq: integer('seq').primaryKey({ autoIncrement: true }),
 		entityId: text('entity_id').notNull(),
 		memexId: text('memex_id')
 			.notNull()
@@ -29,7 +29,7 @@ export const revisions = sqliteTable(
 		deletedAt: text('deleted_at')
 	},
 	(t) => [
-		index('revisions_entity').on(t.entityId, t.createdAt),
+		index('revisions_entity').on(t.entityId, t.seq),
 		index('revisions_memex').on(t.memexId, t.kind),
 		index('revisions_answers').on(t.answers)
 	]
