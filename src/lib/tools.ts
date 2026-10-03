@@ -1,15 +1,15 @@
-import type { AgentTool } from "@earendil-works/pi-agent-core";
-import { Type } from "typebox";
-import type { Memory } from "./memory";
-import { memexId } from "./memex";
-import type { Page } from "./page";
-import type { Question } from "./question";
-import type { Kind, ListItem } from "./server/storage";
+import type { AgentTool } from '@earendil-works/pi-agent-core';
+import { Type } from 'typebox';
+import type { Memory } from './memory';
+import { memexId } from './memex';
+import type { Page } from './page';
+import type { Question } from './question';
+import type { Kind, ListItem } from './server/storage';
 
 function headers(json = false): HeadersInit {
 	return {
 		authorization: `Bearer ${memexId()}`,
-		...(json ? { "content-type": "application/json" } : {})
+		...(json ? { 'content-type': 'application/json' } : {})
 	};
 }
 
@@ -18,24 +18,24 @@ function line(kind: Kind, item: { id: string; updatedAt: string; text: string })
 }
 
 const rememberParameters = Type.Object({
-	text: Type.String({ description: "One self-contained fact." })
+	text: Type.String({ description: 'One self-contained fact.' })
 });
 
 export const remember: AgentTool<typeof rememberParameters> = {
-	name: "remember",
-	label: "Remember",
-	description: "Store a fact as a new memory.",
+	name: 'remember',
+	label: 'Remember',
+	description: 'Store a fact as a new memory.',
 	parameters: rememberParameters,
 	execute: async (_toolCallId, { text }) => {
-		const response = await fetch("/api/remember", {
-			method: "POST",
+		const response = await fetch('/api/remember', {
+			method: 'POST',
 			headers: headers(true),
 			body: JSON.stringify({ text })
 		});
 		if (!response.ok) throw new Error(`Failed to remember (${response.status}).`);
 		const memory = (await response.json()) as Memory;
 		return {
-			content: [{ type: "text", text: `Remembered ${memory.id}.` }],
+			content: [{ type: 'text', text: `Remembered ${memory.id}.` }],
 			details: undefined
 		};
 	}
@@ -46,94 +46,102 @@ const wonderParameters = Type.Object({
 });
 
 export const wonder: AgentTool<typeof wonderParameters> = {
-	name: "wonder",
-	label: "Wonder",
-	description: "Record an open question for the user to fill in later, when searching leaves something unanswered.",
+	name: 'wonder',
+	label: 'Wonder',
+	description:
+		'Record an open question for the user to fill in later, when searching leaves something unanswered.',
 	parameters: wonderParameters,
 	execute: async (_toolCallId, { text }) => {
-		const response = await fetch("/api/wonder", {
-			method: "POST",
+		const response = await fetch('/api/wonder', {
+			method: 'POST',
 			headers: headers(true),
 			body: JSON.stringify({ text })
 		});
 		if (!response.ok) throw new Error(`Failed to record question (${response.status}).`);
 		const question = (await response.json()) as Question;
 		return {
-			content: [{ type: "text", text: `Recorded question ${question.id}.` }],
+			content: [{ type: 'text', text: `Recorded question ${question.id}.` }],
 			details: undefined
 		};
 	}
 };
 
 const answerParameters = Type.Object({
-	question: Type.String({ description: "Id of the question this answers, from search or list results." }),
+	question: Type.String({
+		description: 'Id of the question this answers, from search or list results.'
+	}),
 	text: Type.String()
 });
 
 export const answer: AgentTool<typeof answerParameters> = {
-	name: "answer",
-	label: "Answer",
-	description: "Store a fact that settles a recorded open question, linking the memory to it.",
+	name: 'answer',
+	label: 'Answer',
+	description: 'Store a fact that settles a recorded open question, linking the memory to it.',
 	parameters: answerParameters,
 	execute: async (_toolCallId, { question, text }) => {
-		const response = await fetch("/api/answer", {
-			method: "POST",
+		const response = await fetch('/api/answer', {
+			method: 'POST',
 			headers: headers(true),
 			body: JSON.stringify({ question, text })
 		});
-		if (!response.ok) throw new Error(`Failed to answer question ${question} (${response.status}).`);
+		if (!response.ok)
+			throw new Error(`Failed to answer question ${question} (${response.status}).`);
 		const memory = (await response.json()) as Memory;
 		return {
-			content: [
-				{ type: "text", text: `Answered question ${question}: remembered ${memory.id}.` }
-			],
+			content: [{ type: 'text', text: `Answered question ${question}: remembered ${memory.id}.` }],
 			details: undefined
 		};
 	}
 };
 
 const reviseParameters = Type.Object({
-	id: Type.String({ description: "Id of the memory or question to revise, from search or list results." }),
-	text: Type.String({ description: "The new text in full; it replaces the old." })
+	id: Type.String({
+		description: 'Id of the memory or question to revise, from search or list results.'
+	}),
+	text: Type.String({ description: 'The new text in full; it replaces the old.' })
 });
 
 export const revise: AgentTool<typeof reviseParameters> = {
-	name: "revise",
-	label: "Revise",
-	description: "Replace a memory's text, or reword a question, keeping its id and any question it answers.",
+	name: 'revise',
+	label: 'Revise',
+	description:
+		"Replace a memory's text, or reword a question, keeping its id and any question it answers.",
 	parameters: reviseParameters,
 	execute: async (_toolCallId, { id, text }) => {
-		const response = await fetch("/api/revise", {
-			method: "POST",
+		const response = await fetch('/api/revise', {
+			method: 'POST',
 			headers: headers(true),
 			body: JSON.stringify({ id, text })
 		});
 		if (!response.ok) throw new Error(`Failed to revise ${id} (${response.status}).`);
 		return {
-			content: [{ type: "text", text: `Revised ${id}.` }],
+			content: [{ type: 'text', text: `Revised ${id}.` }],
 			details: undefined
 		};
 	}
 };
 
 const forgetParameters = Type.Object({
-	id: Type.String({ description: "Id of the memory or question to remove, from search or list results." })
+	id: Type.String({
+		description: 'Id of the memory or question to remove, from search or list results.'
+	})
 });
 
 export const forget: AgentTool<typeof forgetParameters> = {
-	name: "forget",
-	label: "Forget",
-	description: "Remove a memory, or dismiss a question, by id. Forgetting an answer reopens its question.",
+	name: 'forget',
+	label: 'Forget',
+	description:
+		'Remove a memory, or dismiss a question, by id. Forgetting an answer reopens its question.',
 	parameters: forgetParameters,
 	execute: async (_toolCallId, { id }) => {
-		const response = await fetch("/api/forget", {
-			method: "POST",
+		const response = await fetch('/api/forget', {
+			method: 'POST',
 			headers: headers(true),
 			body: JSON.stringify({ id })
 		});
 		if (!response.ok) throw new Error(`Failed to forget ${id} (${response.status}).`);
 		return {
-			content: [{ type: "text", text: `Forgot ${id}.` }],
+			content: [{ type: 'text', text: `Forgot ${id}.` }],
 			details: undefined
 		};
 	}
@@ -141,29 +149,31 @@ export const forget: AgentTool<typeof forgetParameters> = {
 
 const searchParameters = Type.Object({
 	queries: Type.Array(Type.String(), {
-		description: "Each is split into words; an entry containing any word of any query matches."
+		description: 'Each is split into words; an entry containing any word of any query matches.'
 	})
 });
 
 export const search: AgentTool<typeof searchParameters> = {
-	name: "search",
-	label: "Search",
-	description:
-		"Return every memory and open question containing any word in any of the queries.",
+	name: 'search',
+	label: 'Search',
+	description: 'Return every memory and open question containing any word in any of the queries.',
 	parameters: searchParameters,
 	execute: async (_toolCallId, { queries }) => {
 		const params = new URLSearchParams();
-		for (const query of queries) params.append("q", query);
+		for (const query of queries) params.append('q', query);
 		const response = await fetch(`/api/search?${params}`, { headers: headers() });
 		if (!response.ok) throw new Error(`Search failed (${response.status}).`);
 		const found = (await response.json()) as { memories: Memory[]; questions: Question[] };
 		const lines = [
-			...found.memories.map((memory) => line("memory", memory)),
-			...found.questions.map((question) => line("question", question))
+			...found.memories.map((memory) => line('memory', memory)),
+			...found.questions.map((question) => line('question', question))
 		];
 		return {
 			content: [
-				{ type: "text", text: lines.length === 0 ? "Nothing matches that search." : lines.join("\n") }
+				{
+					type: 'text',
+					text: lines.length === 0 ? 'Nothing matches that search.' : lines.join('\n')
+				}
 			],
 			details: undefined
 		};
@@ -172,41 +182,41 @@ export const search: AgentTool<typeof searchParameters> = {
 
 const listParameters = Type.Object({
 	kind: Type.Optional(
-		Type.Union([Type.Literal("memory"), Type.Literal("question")], {
-			description: "Restrict to memories or questions; omit for both."
+		Type.Union([Type.Literal('memory'), Type.Literal('question')], {
+			description: 'Restrict to memories or questions; omit for both.'
 		})
 	),
 	offset: Type.Optional(
 		Type.Number({
-			description: "Entries to skip; omit for the first page."
+			description: 'Entries to skip; omit for the first page.'
 		})
 	)
 });
 
 export const list: AgentTool<typeof listParameters> = {
-	name: "list",
-	label: "List",
-	description: "List memories and questions interleaved, newest first — including answered questions, which search omits.",
+	name: 'list',
+	label: 'List',
+	description: 'List memories and open questions interleaved, newest first.',
 	parameters: listParameters,
 	execute: async (_toolCallId, { kind, offset }) => {
 		const from = offset ?? 0;
 		const params = new URLSearchParams({ offset: String(from) });
-		if (kind) params.set("kind", kind);
+		if (kind) params.set('kind', kind);
 		const response = await fetch(`/api/list?${params}`, { headers: headers() });
 		if (!response.ok) throw new Error(`Failed to list (${response.status}).`);
 		const page = (await response.json()) as Page<ListItem>;
 		if (page.items.length === 0) {
 			return {
-				content: [{ type: "text", text: "Nothing recorded." }],
+				content: [{ type: 'text', text: 'Nothing recorded.' }],
 				details: undefined
 			};
 		}
-		const lines = page.items.map((item) => line(item.kind, item)).join("\n");
+		const lines = page.items.map((item) => line(item.kind, item)).join('\n');
 		const more = page.hasMore
-			? `\n\nMore remain. Call list again with offset=${from + page.items.length}${kind ? ` and kind="${kind}"` : ""}.`
-			: "";
+			? `\n\nMore remain. Call list again with offset=${from + page.items.length}${kind ? ` and kind="${kind}"` : ''}.`
+			: '';
 		return {
-			content: [{ type: "text", text: `${lines}${more}` }],
+			content: [{ type: 'text', text: `${lines}${more}` }],
 			details: undefined
 		};
 	}

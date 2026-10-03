@@ -1,17 +1,17 @@
-import { randomUUID } from "node:crypto";
-import { and, desc, eq, gt, isNull } from "drizzle-orm";
-import { stopwords } from "$lib/languages";
-import type { Memory } from "$lib/memory";
-import { PAGE_SIZE, type Page } from "$lib/page";
-import type { Question } from "$lib/question";
-import { db } from "./db";
-import { memories, questions } from "./db/schema";
-import { tokenize } from "./tokenize";
+import { randomUUID } from 'node:crypto';
+import { and, desc, eq, gt, isNull } from 'drizzle-orm';
+import { stopwords } from '$lib/languages';
+import type { Memory } from '$lib/memory';
+import { PAGE_SIZE, type Page } from '$lib/page';
+import type { Question } from '$lib/question';
+import { db } from './db';
+import { memories, questions } from './db/schema';
+import { tokenize } from './tokenize';
 
 type MemoryRow = typeof memories.$inferSelect;
 type QuestionRow = typeof questions.$inferSelect;
 
-export type Kind = "memory" | "question";
+export type Kind = 'memory' | 'question';
 
 export interface ListItem {
 	id: string;
@@ -51,11 +51,16 @@ function resolveEntity<R extends RevisionRow>(
 	includeDeleted: boolean
 ): Resolved<R> | undefined {
 	if (rows.length === 0) return undefined;
-	const made = rows.reduce((min, row) => (row.createdAt < min ? row.createdAt : min), rows[0].createdAt);
+	const made = rows.reduce(
+		(min, row) => (row.createdAt < min ? row.createdAt : min),
+		rows[0].createdAt
+	);
 	const live = rows.filter((row) => row.deletedAt === null);
 	const pool = live.length > 0 ? live : includeDeleted ? rows : [];
 	if (pool.length === 0) return undefined;
-	const row = pool.reduce((latest, current) => (current.createdAt > latest.createdAt ? current : latest));
+	const row = pool.reduce((latest, current) =>
+		current.createdAt > latest.createdAt ? current : latest
+	);
 	return { row, made };
 }
 
@@ -116,7 +121,11 @@ function memoryById(memexId: string, entityId: string, includeDeleted = false): 
 	return resolved ? toMemory(resolved) : undefined;
 }
 
-function questionById(memexId: string, entityId: string, includeDeleted = false): Question | undefined {
+function questionById(
+	memexId: string,
+	entityId: string,
+	includeDeleted = false
+): Question | undefined {
 	const rows = db.select().from(questions).where(eq(questions.memexId, memexId)).all();
 	const resolved = resolveEntity(revisionRows(rows, entityId), includeDeleted);
 	return resolved ? toQuestion(resolved) : undefined;
@@ -139,7 +148,15 @@ export function openQuestions(memexId: string): Question[] {
 export function remember(memexId: string, text: string): Memory {
 	const entityId = randomUUID();
 	db.insert(memories)
-		.values({ id: randomUUID(), entityId, memexId, text, answers: null, createdAt: now(), deletedAt: null })
+		.values({
+			id: randomUUID(),
+			entityId,
+			memexId,
+			text,
+			answers: null,
+			createdAt: now(),
+			deletedAt: null
+		})
 		.run();
 	return memoryById(memexId, entityId)!;
 }
@@ -160,7 +177,15 @@ export function answer(memexId: string, question: string, text: string): Memory 
 	}
 	const entityId = randomUUID();
 	db.insert(memories)
-		.values({ id: randomUUID(), entityId, memexId, text, answers: question, createdAt: now(), deletedAt: null })
+		.values({
+			id: randomUUID(),
+			entityId,
+			memexId,
+			text,
+			answers: question,
+			createdAt: now(),
+			deletedAt: null
+		})
 		.run();
 	return memoryById(memexId, entityId)!;
 }
@@ -169,7 +194,13 @@ function latestLiveMemory(memexId: string, entityId: string): MemoryRow | undefi
 	return db
 		.select()
 		.from(memories)
-		.where(and(eq(memories.memexId, memexId), eq(memories.entityId, entityId), isNull(memories.deletedAt)))
+		.where(
+			and(
+				eq(memories.memexId, memexId),
+				eq(memories.entityId, entityId),
+				isNull(memories.deletedAt)
+			)
+		)
 		.orderBy(desc(memories.createdAt))
 		.limit(1)
 		.get();
@@ -179,7 +210,13 @@ function latestLiveQuestion(memexId: string, entityId: string): QuestionRow | un
 	return db
 		.select()
 		.from(questions)
-		.where(and(eq(questions.memexId, memexId), eq(questions.entityId, entityId), isNull(questions.deletedAt)))
+		.where(
+			and(
+				eq(questions.memexId, memexId),
+				eq(questions.entityId, entityId),
+				isNull(questions.deletedAt)
+			)
+		)
 		.orderBy(desc(questions.createdAt))
 		.limit(1)
 		.get();
@@ -218,12 +255,16 @@ export function forget(memexId: string, id: string): void {
 	const memory = db
 		.update(memories)
 		.set({ deletedAt })
-		.where(and(eq(memories.memexId, memexId), eq(memories.entityId, id), isNull(memories.deletedAt)))
+		.where(
+			and(eq(memories.memexId, memexId), eq(memories.entityId, id), isNull(memories.deletedAt))
+		)
 		.run();
 	const question = db
 		.update(questions)
 		.set({ deletedAt })
-		.where(and(eq(questions.memexId, memexId), eq(questions.entityId, id), isNull(questions.deletedAt)))
+		.where(
+			and(eq(questions.memexId, memexId), eq(questions.entityId, id), isNull(questions.deletedAt))
+		)
 		.run();
 	if (memory.changes === 0 && question.changes === 0) {
 		throw new Error(`No memory or question with id "${id}".`);
@@ -238,7 +279,13 @@ export function restore(memexId: string, entityId: string, revisionId: string): 
 	const revision = db
 		.select()
 		.from(memories)
-		.where(and(eq(memories.memexId, memexId), eq(memories.entityId, entityId), eq(memories.id, revisionId)))
+		.where(
+			and(
+				eq(memories.memexId, memexId),
+				eq(memories.entityId, entityId),
+				eq(memories.id, revisionId)
+			)
+		)
 		.get();
 	if (revision) {
 		db.update(memories).set({ deletedAt: null }).where(eq(memories.id, revisionId)).run();
@@ -258,7 +305,13 @@ export function restore(memexId: string, entityId: string, revisionId: string): 
 	const question = db
 		.select()
 		.from(questions)
-		.where(and(eq(questions.memexId, memexId), eq(questions.entityId, entityId), eq(questions.id, revisionId)))
+		.where(
+			and(
+				eq(questions.memexId, memexId),
+				eq(questions.entityId, entityId),
+				eq(questions.id, revisionId)
+			)
+		)
 		.get();
 	if (question) {
 		db.update(questions).set({ deletedAt: null }).where(eq(questions.id, revisionId)).run();
@@ -298,28 +351,31 @@ export function search(
 	const terms = queries.flatMap(tokenize);
 	return {
 		memories: matches(listMemories(memexId, includeDeleted), terms),
-		questions: matches(includeDeleted ? listQuestions(memexId, true) : openQuestions(memexId), terms)
+		questions: matches(
+			includeDeleted ? listQuestions(memexId, true) : openQuestions(memexId),
+			terms
+		)
 	};
 }
 
 export function list(memexId: string, kind: Kind | undefined, offset: number): Page<ListItem> {
 	const items: ListItem[] = [];
-	if (kind !== "question") {
+	if (kind !== 'question') {
 		items.push(
 			...listMemories(memexId).map((memory) => ({
 				id: memory.id,
-				kind: "memory" as const,
+				kind: 'memory' as const,
 				text: memory.text,
 				createdAt: memory.createdAt,
 				updatedAt: memory.updatedAt
 			}))
 		);
 	}
-	if (kind !== "memory") {
+	if (kind !== 'memory') {
 		items.push(
-			...listQuestions(memexId).map((question) => ({
+			...openQuestions(memexId).map((question) => ({
 				id: question.id,
-				kind: "question" as const,
+				kind: 'question' as const,
 				text: question.text,
 				createdAt: question.createdAt,
 				updatedAt: question.updatedAt
@@ -327,7 +383,10 @@ export function list(memexId: string, kind: Kind | undefined, offset: number): P
 		);
 	}
 	items.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-	return { items: items.slice(offset, offset + PAGE_SIZE), hasMore: items.length > offset + PAGE_SIZE };
+	return {
+		items: items.slice(offset, offset + PAGE_SIZE),
+		hasMore: items.length > offset + PAGE_SIZE
+	};
 }
 
 /** Most common terms across a memex's live memories, by number of memories containing each. */
