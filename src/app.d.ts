@@ -16,8 +16,8 @@ declare global {
 			memexes: { id: string; title: string }[];
 			/** The memex of the current route, set by the `[id=uuid]` layout. */
 			memex?: Memex;
-			/** Open (non-deleted) request count, set by the `[id=uuid]` layout. */
-			requestCount?: number;
+			/** Open (non-deleted) question count, set by the `[id=uuid]` layout. */
+			questionCount?: number;
 		}
 		// interface PageState {}
 		// interface Platform {}

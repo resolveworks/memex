@@ -31,7 +31,7 @@ function active(): Agent {
 			case "agent_end":
 				chat.busy = false;
 				chat.streaming = undefined;
-				// Pick up requests the run recorded or closed.
+				// Pick up questions the run recorded or closed.
 				void invalidateAll();
 				break;
 			case "message_start":
@@ -87,7 +87,7 @@ export async function send(text: string): Promise<void> {
 	if (!currentMemexLanguage) throw new Error("No memex open.");
 	const instance = active();
 	chat.busy = true;
-	// Rebuild the prompt so the queue reflects requests the previous turn recorded or closed.
+	// Rebuild the prompt so the queue reflects questions the previous turn recorded or closed.
 	await refreshSystemPrompt(currentMemexLanguage, page.data.locale);
 	void instance.prompt(text);
 }

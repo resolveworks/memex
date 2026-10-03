@@ -1,4 +1,4 @@
-export interface Request {
+export interface Question {
 	id: string;
 	text: string;
 	createdAt: string;

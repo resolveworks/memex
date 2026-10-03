@@ -16,10 +16,10 @@ Memex gives you one place that remembers. Add what's worth keeping, in ordinary 
 
 - **Add what matters:** dates, places, preferences, plans — the everyday facts a group relies on.
 - **Ask in everyday language:** get it back without knowing a file name, folder, or exact wording.
-- **Ask even when no one has added it yet:** Memex records the open question as a request and brings it back into chat so you — or anyone you've shared with — can fill it in.
+- **Ask even when no one has added it yet:** Memex records the open question and brings it back into chat so you — or anyone you've shared with — can fill it in.
 - **Continue across conversations:** memories stay available in the next chat.
 - **Work across languages:** ask in your own language and get the answer in that language.
-- **Stay in control:** browse, search, and delete memories and unanswered requests from their own pages.
+- **Stay in control:** browse, search, and delete memories and unanswered questions from their own pages.
 - **Share if you want:** anyone with the link uses the same memory. Keep it to yourself if you'd rather.
 
 ## Who it's for

@@ -1,6 +1,6 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { memexId } from "$lib/server/auth";
-import { create, page, remove, search, update } from "$lib/server/requests";
+import { create, page, remove, search, update } from "$lib/server/questions";
 
 export const GET: RequestHandler = ({ request, url }) => {
 	const memex = memexId(request);
@@ -25,7 +25,7 @@ export const PATCH: RequestHandler = async ({ request }) => {
 export const DELETE: RequestHandler = ({ request, url }) => {
 	const memex = memexId(request);
 	const id = url.searchParams.get("id");
-	if (id === null) throw new Error("Missing request id.");
+	if (id === null) throw new Error("Missing question id.");
 	remove(memex, id);
 	return new Response(null, { status: 204 });
 };

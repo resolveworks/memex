@@ -1,6 +1,6 @@
 import { error } from "@sveltejs/kit";
 import { get } from "$lib/server/memexes";
-import { list as listRequests } from "$lib/server/requests";
+import { list as listQuestions } from "$lib/server/questions";
 import { list as listMemories } from "$lib/server/storage";
 import type { RequestHandler } from "./$types";
 
@@ -22,7 +22,7 @@ export const GET: RequestHandler = ({ params }) => {
 		{
 			memex,
 			memories: listMemories(memex.id, true),
-			requests: listRequests(memex.id, true)
+			questions: listQuestions(memex.id, true)
 		},
 		null,
 		2

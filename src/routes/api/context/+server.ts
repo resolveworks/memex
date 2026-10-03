@@ -1,7 +1,7 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { memexId } from "$lib/server/auth";
 import { get } from "$lib/server/memexes";
-import { list } from "$lib/server/requests";
+import { list } from "$lib/server/questions";
 import { terms, total } from "$lib/server/storage";
 
 /** How many topic terms the system prompt shows. */
@@ -14,7 +14,7 @@ export const GET: RequestHandler = ({ request }) => {
 	return json({
 		title,
 		memories: total(memex),
-		requests: list(memex),
+		questions: list(memex),
 		terms: terms(memex, language, TERM_LIMIT)
 	});
 };

@@ -3,7 +3,7 @@ import { Type } from "typebox";
 import type { Memory } from "./memory";
 import { memexId } from "./memex";
 import type { Page } from "./page";
-import type { Request } from "./request";
+import type { Question } from "./question";
 
 function headers(json = false): HeadersInit {
 	return {
@@ -145,51 +145,51 @@ export const deleteMemory: AgentTool<typeof deleteMemoryParameters> = {
 	}
 };
 
-const createRequestParameters = Type.Object({
+const createQuestionParameters = Type.Object({
 	text: Type.String()
 });
 
-export const createRequest: AgentTool<typeof createRequestParameters> = {
-	name: "create-request",
-	label: "Create request",
+export const createQuestion: AgentTool<typeof createQuestionParameters> = {
+	name: "create-question",
+	label: "Create question",
 	description:
 		"Record a question memory cannot answer, for the user to fill in later.",
-	parameters: createRequestParameters,
+	parameters: createQuestionParameters,
 	execute: async (_toolCallId, { text }) => {
-		const response = await fetch("/api/requests", {
+		const response = await fetch("/api/questions", {
 			method: "POST",
 			headers: headers(true),
 			body: JSON.stringify({ text })
 		});
-		if (!response.ok) throw new Error(`Failed to create request (${response.status}).`);
-		const request = (await response.json()) as { id: string };
+		if (!response.ok) throw new Error(`Failed to create question (${response.status}).`);
+		const question = (await response.json()) as { id: string };
 		return {
-			content: [{ type: "text", text: `Created request ${request.id}.` }],
+			content: [{ type: "text", text: `Created question ${question.id}.` }],
 			details: undefined
 		};
 	}
 };
 
-const searchRequestsParameters = Type.Object({
+const searchQuestionsParameters = Type.Object({
 	queries: Type.Array(Type.String())
 });
 
-export const searchRequests: AgentTool<typeof searchRequestsParameters> = {
-	name: "search-requests",
-	label: "Search requests",
+export const searchQuestions: AgentTool<typeof searchQuestionsParameters> = {
+	name: "search-questions",
+	label: "Search questions",
 	description:
-		"Return every recorded request containing any word in any of the queries.",
-	parameters: searchRequestsParameters,
+		"Return every recorded question containing any word in any of the queries.",
+	parameters: searchQuestionsParameters,
 	execute: async (_toolCallId, { queries }) => {
 		const params = new URLSearchParams();
 		for (const query of queries) params.append("q", query);
-		const response = await fetch(`/api/requests?${params}`, { headers: headers() });
+		const response = await fetch(`/api/questions?${params}`, { headers: headers() });
 		if (!response.ok) throw new Error(`Search failed (${response.status}).`);
-		const matches = (await response.json()) as Request[];
+		const matches = (await response.json()) as Question[];
 		const text =
 			matches.length === 0
-				? "No requests match that search."
-				: matches.map((request) => `- ${request.id}: ${request.text}`).join("\n");
+				? "No questions match that search."
+				: matches.map((question) => `- ${question.id}: ${question.text}`).join("\n");
 		return {
 			content: [{ type: "text", text }],
 			details: undefined
@@ -197,33 +197,33 @@ export const searchRequests: AgentTool<typeof searchRequestsParameters> = {
 	}
 };
 
-const listRequestsParameters = Type.Object({
+const listQuestionsParameters = Type.Object({
 	offset: Type.Optional(
 		Type.Number({
-			description: "Requests to skip; omit for the first page."
+			description: "Questions to skip; omit for the first page."
 		})
 	)
 });
 
-export const listRequests: AgentTool<typeof listRequestsParameters> = {
-	name: "list-requests",
-	label: "List requests",
-	description: "List recorded requests, one page at a time.",
-	parameters: listRequestsParameters,
+export const listQuestions: AgentTool<typeof listQuestionsParameters> = {
+	name: "list-questions",
+	label: "List questions",
+	description: "List recorded questions, one page at a time.",
+	parameters: listQuestionsParameters,
 	execute: async (_toolCallId, { offset }) => {
 		const from = offset ?? 0;
-		const response = await fetch(`/api/requests?offset=${from}`, { headers: headers() });
-		if (!response.ok) throw new Error(`Failed to list requests (${response.status}).`);
+		const response = await fetch(`/api/questions?offset=${from}`, { headers: headers() });
+		if (!response.ok) throw new Error(`Failed to list questions (${response.status}).`);
 		const { items, hasMore } = (await response.json()) as Page<{ id: string; text: string }>;
 		if (items.length === 0) {
 			return {
-				content: [{ type: "text", text: "No requests." }],
+				content: [{ type: "text", text: "No questions." }],
 				details: undefined
 			};
 		}
-		const lines = items.map((request) => `- ${request.id}: ${request.text}`).join("\n");
+		const lines = items.map((question) => `- ${question.id}: ${question.text}`).join("\n");
 		const more = hasMore
-			? `\n\nMore requests remain. Call list-requests again with offset=${from + items.length}.`
+			? `\n\nMore questions remain. Call list-questions again with offset=${from + items.length}.`
 			: "";
 		return {
 			content: [{ type: "text", text: `${lines}${more}` }],
@@ -232,47 +232,47 @@ export const listRequests: AgentTool<typeof listRequestsParameters> = {
 	}
 };
 
-const updateRequestParameters = Type.Object({
+const updateQuestionParameters = Type.Object({
 	id: Type.String(),
 	text: Type.String()
 });
 
-export const updateRequest: AgentTool<typeof updateRequestParameters> = {
-	name: "update-request",
-	label: "Update request",
-	description: "Reword an open request by id.",
-	parameters: updateRequestParameters,
+export const updateQuestion: AgentTool<typeof updateQuestionParameters> = {
+	name: "update-question",
+	label: "Update question",
+	description: "Reword an open question by id.",
+	parameters: updateQuestionParameters,
 	execute: async (_toolCallId, { id, text }) => {
-		const response = await fetch("/api/requests", {
+		const response = await fetch("/api/questions", {
 			method: "PATCH",
 			headers: headers(true),
 			body: JSON.stringify({ id, text })
 		});
-		if (!response.ok) throw new Error(`Failed to update request ${id} (${response.status}).`);
+		if (!response.ok) throw new Error(`Failed to update question ${id} (${response.status}).`);
 		return {
-			content: [{ type: "text", text: `Updated request ${id}.` }],
+			content: [{ type: "text", text: `Updated question ${id}.` }],
 			details: undefined
 		};
 	}
 };
 
-const deleteRequestParameters = Type.Object({
+const deleteQuestionParameters = Type.Object({
 	id: Type.String()
 });
 
-export const deleteRequest: AgentTool<typeof deleteRequestParameters> = {
-	name: "delete-request",
-	label: "Delete request",
-	description: "Remove a request by id.",
-	parameters: deleteRequestParameters,
+export const deleteQuestion: AgentTool<typeof deleteQuestionParameters> = {
+	name: "delete-question",
+	label: "Delete question",
+	description: "Remove a question by id.",
+	parameters: deleteQuestionParameters,
 	execute: async (_toolCallId, { id }) => {
-		const response = await fetch(`/api/requests?id=${encodeURIComponent(id)}`, {
+		const response = await fetch(`/api/questions?id=${encodeURIComponent(id)}`, {
 			method: "DELETE",
 			headers: headers()
 		});
-		if (!response.ok) throw new Error(`Failed to delete request ${id} (${response.status}).`);
+		if (!response.ok) throw new Error(`Failed to delete question ${id} (${response.status}).`);
 		return {
-			content: [{ type: "text", text: `Deleted request ${id}.` }],
+			content: [{ type: "text", text: `Deleted question ${id}.` }],
 			details: undefined
 		};
 	}

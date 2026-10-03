@@ -20,7 +20,7 @@ export const memories = sqliteTable("memories", {
 	deletedAt: text("deleted_at")
 });
 
-export const requests = sqliteTable("requests", {
+export const questions = sqliteTable("questions", {
 	id: text("id").primaryKey(),
 	memexId: text("memex_id")
 		.notNull()
@@ -28,6 +28,6 @@ export const requests = sqliteTable("requests", {
 	text: text("text").notNull(),
 	createdAt: text("created_at").notNull(),
 	updatedAt: text("updated_at").notNull(),
-	// Soft delete: null while the request is live, an ISO timestamp once removed.
+	// Soft delete: null while the question is live, an ISO timestamp once removed.
 	deletedAt: text("deleted_at")
 });

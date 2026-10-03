@@ -3,18 +3,18 @@ import type { Message } from "@earendil-works/pi-ai";
 import { languageName } from "./i18n";
 import { memexId } from "./memex";
 import { model } from "./model";
-import type { Request } from "./request";
+import type { Question } from "./question";
 import {
 	createMemory,
-	createRequest,
+	createQuestion,
 	deleteMemory,
-	deleteRequest,
+	deleteQuestion,
 	listMemories,
-	listRequests,
+	listQuestions,
 	searchMemories,
-	searchRequests,
+	searchQuestions,
 	updateMemory,
-	updateRequest
+	updateQuestion
 } from "./tools";
 
 /** The opening turn: invisible to the user, a user turn to the model. */
@@ -61,11 +61,11 @@ function convertToLlm(messages: AgentMessage[]): Message[] {
  * across translations. The greeting uses the app language because it is sent
  * before the user writes.
  */
-function systemPrompt(memexLanguage: string, userLanguage: string, hasRequests: boolean): string {
+function systemPrompt(memexLanguage: string, userLanguage: string, hasQuestions: boolean): string {
 	const memexLanguageName = languageName(memexLanguage);
 	const userLanguageName = languageName(userLanguage);
-	const greetingQueue = hasRequests
-		? " End by asking the first question in the request queue below."
+	const greetingQueue = hasQuestions
+		? " End by asking the first question in the question queue below."
 		: "";
 	return `# Identity
 
@@ -88,11 +88,11 @@ in ${memexLanguageName}; answer in the language the user wrote in.
 
 - Save with \`create-memory\` whenever the intent to persist is clear — don't
   wait for "remember". One self-contained fact per call.
-- If thorough searching answers nothing, check \`search-requests\` for a
-  duplicate, then record the question with \`create-request\` and say plainly
+- If thorough searching answers nothing, check \`search-questions\` for a
+  duplicate, then record the question with \`create-question\` and say plainly
   it isn't in memory.
-- Delete a request once the information it asked for is in hand.
-- When you ask the user about a recorded request, set its question in bold.
+- Delete a question once the information it asked for is in hand.
+- When you ask the user about a recorded question, set its question in bold.
 
 # Searching
 
@@ -115,11 +115,11 @@ export function getAgent(): Agent {
 					listMemories,
 					updateMemory,
 					deleteMemory,
-					createRequest,
-					searchRequests,
-					listRequests,
-					updateRequest,
-					deleteRequest
+					createQuestion,
+					searchQuestions,
+					listQuestions,
+					updateQuestion,
+					deleteQuestion
 				]
 			},
 			convertToLlm,
@@ -135,7 +135,7 @@ export function getAgent(): Agent {
 interface PromptContext {
 	title: string;
 	memories: number;
-	requests: Request[];
+	questions: Question[];
 	terms: TermCount[];
 }
 
@@ -163,20 +163,20 @@ Most frequent terms in the store, each with its memory count.
 ${items}`;
 }
 
-/** Show only a couple of requests inline; the rest live behind `list-requests`. */
-const REQUEST_QUEUE_PREVIEW = 2;
+/** Show only a couple of questions inline; the rest live behind `list-questions`. */
+const QUESTION_QUEUE_PREVIEW = 2;
 
-/** Renders the open request queue for inclusion in the system prompt. */
-function requestQueueSection(requests: Request[]): string {
-	if (requests.length === 0) return "";
-	const preview = requests.slice(0, REQUEST_QUEUE_PREVIEW);
-	const items = preview.map((request) => `- ${request.id}: ${request.text}`).join("\n");
-	const remaining = requests.length - preview.length;
+/** Renders the open question queue for inclusion in the system prompt. */
+function questionQueueSection(questions: Question[]): string {
+	if (questions.length === 0) return "";
+	const preview = questions.slice(0, QUESTION_QUEUE_PREVIEW);
+	const items = preview.map((question) => `- ${question.id}: ${question.text}`).join("\n");
+	const remaining = questions.length - preview.length;
 	const more =
 		remaining > 0
-			? `\n\n${remaining} more request${remaining === 1 ? "" : "s"} are queued but not shown here.`
+			? `\n\n${remaining} more question${remaining === 1 ? "" : "s"} are queued but not shown here.`
 			: "";
-	return `# Request queue
+	return `# Question queue
 
 Unanswered questions recorded earlier, as \`id: question\`.
 
@@ -188,12 +188,12 @@ export async function refreshSystemPrompt(
 	memexLanguage: string,
 	userLanguage: string
 ): Promise<void> {
-	const { title, memories, requests, terms } = await promptContext();
+	const { title, memories, questions, terms } = await promptContext();
 	const sections = [
-		systemPrompt(memexLanguage, userLanguage, requests.length > 0),
-		`This memex is titled "${title}". It holds ${memories} memories and ${requests.length} open requests.`,
+		systemPrompt(memexLanguage, userLanguage, questions.length > 0),
+		`This memex is titled "${title}". It holds ${memories} memories and ${questions.length} open questions.`,
 		termsSection(terms),
-		requestQueueSection(requests)
+		questionQueueSection(questions)
 	];
 	getAgent().state.systemPrompt = sections.filter((section) => section !== "").join("\n\n");
 }

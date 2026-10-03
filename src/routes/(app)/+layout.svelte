@@ -54,8 +54,8 @@
 		</a>
 		<a
 			class="icon center"
-			href={`/${page.params.id}/requests`}
-			aria-label={t('requests.heading')}
+			href={`/${page.params.id}/questions`}
+			aria-label={t('questions.heading')}
 			onclick={follow}
 		>
 			<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -66,7 +66,7 @@
 				<line x1="3" y1="12" x2="3.01" y2="12" />
 				<line x1="3" y1="18" x2="3.01" y2="18" />
 			</svg>
-			{#if page.data.requestCount}
+			{#if page.data.questionCount}
 				<span class="badge" aria-hidden="true"></span>
 			{/if}
 		</a>

@@ -6,11 +6,11 @@
 </script>
 
 <ListPage
-	heading={t("requests.heading")}
-	searchPlaceholder={t("requests.search")}
-	empty={t("requests.empty")}
-	noResults={t("requests.noResults")}
-	items={data.requests}
+	heading={t("questions.heading")}
+	searchPlaceholder={t("questions.search")}
+	empty={t("questions.empty")}
+	noResults={t("questions.noResults")}
+	items={data.questions}
 	query={data.query}
 	page={data.page}
 	pages={data.pages}
