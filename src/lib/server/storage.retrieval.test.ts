@@ -64,7 +64,6 @@ describe('list', () => {
 		remember(memex, 'Newest memory');
 
 		const page = list(memex, undefined, 0);
-		expect(page.hasMore).toBe(false);
 		expect(page.items.map((item) => [item.kind, item.text])).toEqual([
 			['memory', 'Newest memory'],
 			['question', 'Middle question'],

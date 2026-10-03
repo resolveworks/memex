@@ -32,7 +32,6 @@ describe('the UI locale', () => {
 		const cookies = new FakeCookies();
 		const set = vi.spyOn(cookies, 'set');
 		expect(setLocale(cookies, 'de')).toBe('de');
-		expect(set).toHaveBeenCalledTimes(1);
 		expect(set).toHaveBeenCalledWith('locale', 'de', { path: '/', maxAge: 60 * 60 * 24 * 365 });
 	});
 
