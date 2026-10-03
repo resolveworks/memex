@@ -8,10 +8,11 @@ export const memexes = sqliteTable('memexes', {
 	createdAt: text('created_at').notNull()
 });
 
-// Append-only revisions. `entity_id` names the logical memory all revisions share;
-// the live row with the latest `created_at` is the one that speaks for it.
-export const memories = sqliteTable(
-	'memories',
+// Append-only revisions shared by memories and questions. `kind` tells them apart;
+// `entity_id` names the logical entity all revisions share, and the live row with
+// the latest `created_at` is the one that speaks for it.
+export const revisions = sqliteTable(
+	'revisions',
 	{
 		// This revision row's own id.
 		id: text('id').primaryKey(),
@@ -19,35 +20,17 @@ export const memories = sqliteTable(
 		memexId: text('memex_id')
 			.notNull()
 			.references(() => memexes.id, { onDelete: 'cascade' }),
+		kind: text('kind', { enum: ['memory', 'question'] }).notNull(),
 		text: text('text').notNull(),
-		// Entity id of the question this memory answers.
+		// Entity id of the question this memory answers; null for questions.
 		answers: text('answers'),
 		createdAt: text('created_at').notNull(),
 		// Soft delete: null while this revision is live.
 		deletedAt: text('deleted_at')
 	},
 	(t) => [
-		index('memories_entity').on(t.entityId, t.createdAt),
-		index('memories_memex').on(t.memexId),
-		index('memories_answers').on(t.answers)
-	]
-);
-
-// Same shape as memories, minus `answers`: a question is settled by a memory, not the reverse.
-export const questions = sqliteTable(
-	'questions',
-	{
-		id: text('id').primaryKey(),
-		entityId: text('entity_id').notNull(),
-		memexId: text('memex_id')
-			.notNull()
-			.references(() => memexes.id, { onDelete: 'cascade' }),
-		text: text('text').notNull(),
-		createdAt: text('created_at').notNull(),
-		deletedAt: text('deleted_at')
-	},
-	(t) => [
-		index('questions_entity').on(t.entityId, t.createdAt),
-		index('questions_memex').on(t.memexId)
+		index('revisions_entity').on(t.entityId, t.createdAt),
+		index('revisions_memex').on(t.memexId, t.kind),
+		index('revisions_answers').on(t.answers)
 	]
 );
