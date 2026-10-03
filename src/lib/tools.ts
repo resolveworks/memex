@@ -13,13 +13,16 @@ function line(kind: Kind, item: { id: string; updatedAt: string; text: string })
 }
 
 const rememberParameters = Type.Object({
-	text: Type.String({ description: 'One self-contained fact.' })
+	text: Type.String({
+		description: 'One self-contained fact in plain prose, e.g. "Prefers loose-leaf tea."'
+	})
 });
 
 export const remember: AgentTool<typeof rememberParameters> = {
 	name: 'remember',
 	label: 'Remember',
-	description: 'Store a fact as a new memory.',
+	description:
+		'Store a fact as a new memory. Call it whenever the intent to persist is clear — don\'t wait for the word "remember".',
 	parameters: rememberParameters,
 	execute: async (_toolCallId, { text }) => {
 		const response = await fetch(api('remember'), {
@@ -37,14 +40,13 @@ export const remember: AgentTool<typeof rememberParameters> = {
 };
 
 const wonderParameters = Type.Object({
-	text: Type.String()
+	text: Type.String({ description: 'The open question, self-contained.' })
 });
 
 export const wonder: AgentTool<typeof wonderParameters> = {
 	name: 'wonder',
 	label: 'Wonder',
-	description:
-		'Record an open question for the user to fill in later, when searching leaves something unanswered.',
+	description: 'Record an open question for the user to fill in later.',
 	parameters: wonderParameters,
 	execute: async (_toolCallId, { text }) => {
 		const response = await fetch(api('wonder'), {
@@ -65,7 +67,7 @@ const answerParameters = Type.Object({
 	question: Type.String({
 		description: 'Id of the question this answers, from search or list results.'
 	}),
-	text: Type.String()
+	text: Type.String({ description: 'One self-contained fact in plain prose.' })
 });
 
 export const answer: AgentTool<typeof answerParameters> = {
@@ -93,14 +95,16 @@ const reviseParameters = Type.Object({
 	id: Type.String({
 		description: 'Id of the memory or question to revise, from search or list results.'
 	}),
-	text: Type.String({ description: 'The new text in full; it replaces the old.' })
+	text: Type.String({
+		description: 'The new text in full — the current fact or question.'
+	})
 });
 
 export const revise: AgentTool<typeof reviseParameters> = {
 	name: 'revise',
 	label: 'Revise',
 	description:
-		"Replace a memory's text, or reword a question, keeping its id and any question it answers.",
+		"Replace a memory's text, or reword a question, keeping its id and any question it answers. To update a fact, prefer this over remembering a near-copy.",
 	parameters: reviseParameters,
 	execute: async (_toolCallId, { id, text }) => {
 		const response = await fetch(api('revise'), {
@@ -151,7 +155,8 @@ const searchParameters = Type.Object({
 export const search: AgentTool<typeof searchParameters> = {
 	name: 'search',
 	label: 'Search',
-	description: 'Return every memory and open question containing any word in any of the queries.',
+	description:
+		'Return every memory and open question containing any word in any of the queries. Put every angle into one call: distinctive words, key words, synonyms, broader and narrower terms. No hits: reword and search again.',
 	parameters: searchParameters,
 	execute: async (_toolCallId, { queries }) => {
 		const params = new URLSearchParams();
