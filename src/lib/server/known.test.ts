@@ -7,6 +7,11 @@ describe('the known-memexes roster', () => {
 		expect(read(new FakeCookies())).toEqual([]);
 	});
 
+	it('drops empty segments when reading', () => {
+		const cookies = new FakeCookies({ memexes: 'a,,b' });
+		expect(read(cookies)).toEqual(['a', 'b']);
+	});
+
 	it('seeds the roster on first visit', () => {
 		const cookies = new FakeCookies();
 		remember(cookies, 'a');
