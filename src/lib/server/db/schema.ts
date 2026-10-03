@@ -1,4 +1,4 @@
-import { sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const memexes = sqliteTable("memexes", {
 	id: text("id").primaryKey(),
@@ -8,26 +8,46 @@ export const memexes = sqliteTable("memexes", {
 	createdAt: text("created_at").notNull()
 });
 
-export const memories = sqliteTable("memories", {
-	id: text("id").primaryKey(),
-	memexId: text("memex_id")
-		.notNull()
-		.references(() => memexes.id, { onDelete: "cascade" }),
-	text: text("text").notNull(),
-	createdAt: text("created_at").notNull(),
-	updatedAt: text("updated_at").notNull(),
-	// Soft delete: null while the memory is live, an ISO timestamp once removed.
-	deletedAt: text("deleted_at")
-});
+// Append-only revisions. `entity_id` names the logical memory all revisions share;
+// the live row with the latest `created_at` is the one that speaks for it.
+export const memories = sqliteTable(
+	"memories",
+	{
+		// This revision row's own id.
+		id: text("id").primaryKey(),
+		entityId: text("entity_id").notNull(),
+		memexId: text("memex_id")
+			.notNull()
+			.references(() => memexes.id, { onDelete: "cascade" }),
+		text: text("text").notNull(),
+		// Entity id of the question this memory answers.
+		answers: text("answers"),
+		createdAt: text("created_at").notNull(),
+		// Soft delete: null while this revision is live.
+		deletedAt: text("deleted_at")
+	},
+	(t) => [
+		index("memories_entity").on(t.entityId, t.createdAt),
+		index("memories_memex").on(t.memexId),
+		index("memories_answers").on(t.answers)
+	]
+);
 
-export const questions = sqliteTable("questions", {
-	id: text("id").primaryKey(),
-	memexId: text("memex_id")
-		.notNull()
-		.references(() => memexes.id, { onDelete: "cascade" }),
-	text: text("text").notNull(),
-	createdAt: text("created_at").notNull(),
-	updatedAt: text("updated_at").notNull(),
-	// Soft delete: null while the question is live, an ISO timestamp once removed.
-	deletedAt: text("deleted_at")
-});
+// Same shape as memories, minus `answers`: a question is settled by a memory, not the reverse.
+export const questions = sqliteTable(
+	"questions",
+	{
+		id: text("id").primaryKey(),
+		entityId: text("entity_id").notNull(),
+		memexId: text("memex_id")
+			.notNull()
+			.references(() => memexes.id, { onDelete: "cascade" }),
+		text: text("text").notNull(),
+		createdAt: text("created_at").notNull(),
+		deletedAt: text("deleted_at")
+	},
+	(t) => [
+		index("questions_entity").on(t.entityId, t.createdAt),
+		index("questions_memex").on(t.memexId)
+	]
+);

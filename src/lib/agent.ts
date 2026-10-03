@@ -4,18 +4,7 @@ import { languageName } from "./i18n";
 import { memexId } from "./memex";
 import { model } from "./model";
 import type { Question } from "./question";
-import {
-	createMemory,
-	createQuestion,
-	deleteMemory,
-	deleteQuestion,
-	listMemories,
-	listQuestions,
-	searchMemories,
-	searchQuestions,
-	updateMemory,
-	updateQuestion
-} from "./tools";
+import { answer, forget, list, remember, revise, search, wonder } from "./tools";
 
 /** The opening turn: invisible to the user, a user turn to the model. */
 interface GreetingMessage {
@@ -81,25 +70,27 @@ the topics below.${greetingQueue} Call no tools.
 
 # Language
 
-This memex has one language: ${memexLanguageName}. Store, update, and search
+This memex has one language: ${memexLanguageName}. Store, revise, and search
 in ${memexLanguageName}; answer in the language the user wrote in.
 
 # Behavior
 
-- Save with \`create-memory\` whenever the intent to persist is clear — don't
-  wait for "remember". One self-contained fact per call.
-- If thorough searching answers nothing, check \`search-questions\` for a
-  duplicate, then record the question with \`create-question\` and say plainly
-  it isn't in memory.
-- Delete a question once the information it asked for is in hand.
-- When you ask the user about a recorded question, set its question in bold.
+You know things (memories) and want things (questions). Save with \`remember\`
+whenever the intent to persist is clear — don't wait for "remember". One
+self-contained fact per call.
+
+When searching leaves something unanswered, record it with \`wonder\`. When you
+learn the answer to a recorded question, settle it with \`answer\`. Forgetting
+an answer reopens its question.
+
+When you ask the user about a recorded question, set its question in bold.
 
 # Searching
 
-Searches match any word in any query — a wide net; you judge relevance. Put
-every angle into one call: distinctive words, key words, synonyms, broader and
-narrower terms. No hits: reword and search again. Answer from found memories,
-not your own knowledge.`;
+\`search\` covers memories and open questions and matches any word in any
+query — a wide net; you judge relevance. Put every angle into one call:
+distinctive words, key words, synonyms, broader and narrower terms. No hits:
+reword and search again. Answer from found memories, not your own knowledge.`;
 }
 
 let agent: Agent | undefined;
@@ -109,18 +100,7 @@ export function getAgent(): Agent {
 		agent = new Agent({
 			initialState: {
 				model,
-				tools: [
-					createMemory,
-					searchMemories,
-					listMemories,
-					updateMemory,
-					deleteMemory,
-					createQuestion,
-					searchQuestions,
-					listQuestions,
-					updateQuestion,
-					deleteQuestion
-				]
+				tools: [remember, wonder, answer, revise, forget, search, list]
 			},
 			convertToLlm,
 			// The memex id travels as the bearer token; empty proxyUrl targets same-origin /api/stream.
@@ -163,7 +143,7 @@ Most frequent terms in the store, each with its memory count.
 ${items}`;
 }
 
-/** Show only a couple of questions inline; the rest live behind `list-questions`. */
+/** Show only a couple of questions inline; the rest live behind the `list` tool. */
 const QUESTION_QUEUE_PREVIEW = 2;
 
 /** Renders the open question queue for inclusion in the system prompt. */
@@ -191,7 +171,7 @@ export async function refreshSystemPrompt(
 	const { title, memories, questions, terms } = await promptContext();
 	const sections = [
 		systemPrompt(memexLanguage, userLanguage, questions.length > 0),
-		`This memex is titled "${title}". It holds ${memories} memories and ${questions.length} open questions.`,
+		`This memex is titled "${title}". Today is ${new Date().toISOString().slice(0, 10)}. It holds ${memories} memories and ${questions.length} open questions.`,
 		termsSection(terms),
 		questionQueueSection(questions)
 	];

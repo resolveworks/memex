@@ -1,4 +1,4 @@
-import { list, remove, search } from "$lib/server/questions";
+import { forget, listQuestions, search } from "$lib/server/storage";
 import type { Actions, PageServerLoad } from "./$types";
 
 const PAGE_SIZE = 20;
@@ -10,7 +10,7 @@ function pageNumber(value: string | null, pages: number): number {
 
 export const load: PageServerLoad = ({ params, url }) => {
 	const query = url.searchParams.get("q") ?? "";
-	const matches = query ? search(params.id, [query], true) : list(params.id, true);
+	const matches = query ? search(params.id, [query], true).questions : listQuestions(params.id, true);
 	const pages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
 	const page = pageNumber(url.searchParams.get("page"), pages);
 	return {
@@ -25,6 +25,6 @@ export const actions = {
 	delete: async ({ params, request }) => {
 		const id = (await request.formData()).get("id");
 		if (typeof id !== "string") throw new Error("Missing question id.");
-		remove(params.id, id);
+		forget(params.id, id);
 	}
 } satisfies Actions;

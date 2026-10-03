@@ -4,6 +4,7 @@ import type { Memory } from "./memory";
 import { memexId } from "./memex";
 import type { Page } from "./page";
 import type { Question } from "./question";
+import type { Kind, ListItem } from "./server/storage";
 
 function headers(json = false): HeadersInit {
 	return {
@@ -12,267 +13,199 @@ function headers(json = false): HeadersInit {
 	};
 }
 
-const createMemoryParameters = Type.Object({
+/** A diary line: date, kind, id, text. */
+function line(kind: Kind, item: { id: string; updatedAt: string; text: string }): string {
+	return `- ${item.updatedAt.slice(0, 10)} [${kind}] ${item.id}: ${item.text}`;
+}
+
+const rememberParameters = Type.Object({
 	text: Type.String()
 });
 
-export const createMemory: AgentTool<typeof createMemoryParameters> = {
-	name: "create-memory",
-	label: "Create memory",
-	description: "Save a new memory with the given text.",
-	parameters: createMemoryParameters,
+export const remember: AgentTool<typeof rememberParameters> = {
+	name: "remember",
+	label: "Remember",
+	description: "Store a fact.",
+	parameters: rememberParameters,
 	execute: async (_toolCallId, { text }) => {
-		const response = await fetch("/api/memories", {
+		const response = await fetch("/api/remember", {
 			method: "POST",
 			headers: headers(true),
 			body: JSON.stringify({ text })
 		});
-		if (!response.ok) throw new Error(`Failed to create memory (${response.status}).`);
+		if (!response.ok) throw new Error(`Failed to remember (${response.status}).`);
 		const memory = (await response.json()) as Memory;
 		return {
-			content: [{ type: "text", text: `Created memory ${memory.id}.` }],
+			content: [{ type: "text", text: `Remembered ${memory.id}.` }],
 			details: undefined
 		};
 	}
 };
 
-const searchMemoriesParameters = Type.Object({
-	queries: Type.Array(Type.String())
-});
-
-export const searchMemories: AgentTool<typeof searchMemoriesParameters> = {
-	name: "search-memories",
-	label: "Search memories",
-	description:
-		"Return every memory containing any word in any of the queries.",
-	parameters: searchMemoriesParameters,
-	execute: async (_toolCallId, { queries }) => {
-		const params = new URLSearchParams();
-		for (const query of queries) params.append("q", query);
-		const response = await fetch(`/api/memories?${params}`, { headers: headers() });
-		if (!response.ok) throw new Error(`Search failed (${response.status}).`);
-		const matches = (await response.json()) as Memory[];
-		const text =
-			matches.length === 0
-				? "No memories match that search."
-				: matches.map((memory) => `- ${memory.id}: ${memory.text}`).join("\n");
-		return {
-			content: [{ type: "text", text }],
-			details: undefined
-		};
-	}
-};
-
-const listMemoriesParameters = Type.Object({
-	offset: Type.Optional(
-		Type.Number({
-			description: "Memories to skip; omit for the first page."
-		})
-	)
-});
-
-export const listMemories: AgentTool<typeof listMemoriesParameters> = {
-	name: "list-memories",
-	label: "List memories",
-	description:
-		"List memories, most recently updated first, one page at a time.",
-	parameters: listMemoriesParameters,
-	execute: async (_toolCallId, { offset }) => {
-		const from = offset ?? 0;
-		const response = await fetch(`/api/memories?offset=${from}`, { headers: headers() });
-		if (!response.ok) throw new Error(`Failed to list memories (${response.status}).`);
-		const { items, hasMore } = (await response.json()) as Page<Memory>;
-		if (items.length === 0) {
-			return {
-				content: [{ type: "text", text: "No memories." }],
-				details: undefined
-			};
-		}
-		const lines = items.map((memory) => `- ${memory.id}: ${memory.text}`).join("\n");
-		const more = hasMore
-			? `\n\nMore memories remain. Call list-memories again with offset=${from + items.length}.`
-			: "";
-		return {
-			content: [{ type: "text", text: `${lines}${more}` }],
-			details: undefined
-		};
-	}
-};
-
-const updateMemoryParameters = Type.Object({
-	id: Type.String(),
+const wonderParameters = Type.Object({
 	text: Type.String()
 });
 
-export const updateMemory: AgentTool<typeof updateMemoryParameters> = {
-	name: "update-memory",
-	label: "Update memory",
-	description: "Replace a memory's text by id.",
-	parameters: updateMemoryParameters,
-	execute: async (_toolCallId, { id, text }) => {
-		const response = await fetch("/api/memories", {
-			method: "PATCH",
-			headers: headers(true),
-			body: JSON.stringify({ id, text })
-		});
-		if (!response.ok) throw new Error(`Failed to update memory ${id} (${response.status}).`);
-		return {
-			content: [{ type: "text", text: `Updated memory ${id}.` }],
-			details: undefined
-		};
-	}
-};
-
-const deleteMemoryParameters = Type.Object({
-	id: Type.String()
-});
-
-export const deleteMemory: AgentTool<typeof deleteMemoryParameters> = {
-	name: "delete-memory",
-	label: "Delete memory",
-	description: "Delete a memory by id.",
-	parameters: deleteMemoryParameters,
-	execute: async (_toolCallId, { id }) => {
-		const response = await fetch(`/api/memories?id=${encodeURIComponent(id)}`, {
-			method: "DELETE",
-			headers: headers()
-		});
-		if (!response.ok) throw new Error(`Failed to delete memory ${id} (${response.status}).`);
-		return {
-			content: [{ type: "text", text: `Deleted memory ${id}.` }],
-			details: undefined
-		};
-	}
-};
-
-const createQuestionParameters = Type.Object({
-	text: Type.String()
-});
-
-export const createQuestion: AgentTool<typeof createQuestionParameters> = {
-	name: "create-question",
-	label: "Create question",
-	description:
-		"Record a question memory cannot answer, for the user to fill in later.",
-	parameters: createQuestionParameters,
+export const wonder: AgentTool<typeof wonderParameters> = {
+	name: "wonder",
+	label: "Wonder",
+	description: "Record an open question, for the user to fill in later.",
+	parameters: wonderParameters,
 	execute: async (_toolCallId, { text }) => {
-		const response = await fetch("/api/questions", {
+		const response = await fetch("/api/wonder", {
 			method: "POST",
 			headers: headers(true),
 			body: JSON.stringify({ text })
 		});
-		if (!response.ok) throw new Error(`Failed to create question (${response.status}).`);
-		const question = (await response.json()) as { id: string };
+		if (!response.ok) throw new Error(`Failed to record question (${response.status}).`);
+		const question = (await response.json()) as Question;
 		return {
-			content: [{ type: "text", text: `Created question ${question.id}.` }],
+			content: [{ type: "text", text: `Recorded question ${question.id}.` }],
 			details: undefined
 		};
 	}
 };
 
-const searchQuestionsParameters = Type.Object({
+const answerParameters = Type.Object({
+	question: Type.String({ description: "Entity id of the question this answers." }),
+	text: Type.String()
+});
+
+export const answer: AgentTool<typeof answerParameters> = {
+	name: "answer",
+	label: "Answer",
+	description: "Store a fact that settles a recorded question.",
+	parameters: answerParameters,
+	execute: async (_toolCallId, { question, text }) => {
+		const response = await fetch("/api/answer", {
+			method: "POST",
+			headers: headers(true),
+			body: JSON.stringify({ question, text })
+		});
+		if (!response.ok) throw new Error(`Failed to answer question ${question} (${response.status}).`);
+		const memory = (await response.json()) as Memory;
+		return {
+			content: [
+				{ type: "text", text: `Answered question ${question}: remembered ${memory.id}.` }
+			],
+			details: undefined
+		};
+	}
+};
+
+const reviseParameters = Type.Object({
+	id: Type.String({ description: "Entity id of the memory or question to revise." }),
+	text: Type.String()
+});
+
+export const revise: AgentTool<typeof reviseParameters> = {
+	name: "revise",
+	label: "Revise",
+	description: "Replace a memory's text, or reword a question, by id.",
+	parameters: reviseParameters,
+	execute: async (_toolCallId, { id, text }) => {
+		const response = await fetch("/api/revise", {
+			method: "POST",
+			headers: headers(true),
+			body: JSON.stringify({ id, text })
+		});
+		if (!response.ok) throw new Error(`Failed to revise ${id} (${response.status}).`);
+		return {
+			content: [{ type: "text", text: `Revised ${id}.` }],
+			details: undefined
+		};
+	}
+};
+
+const forgetParameters = Type.Object({
+	id: Type.String({ description: "Entity id of the memory or question to remove." })
+});
+
+export const forget: AgentTool<typeof forgetParameters> = {
+	name: "forget",
+	label: "Forget",
+	description: "Remove a memory, or dismiss a question, by id.",
+	parameters: forgetParameters,
+	execute: async (_toolCallId, { id }) => {
+		const response = await fetch("/api/forget", {
+			method: "POST",
+			headers: headers(true),
+			body: JSON.stringify({ id })
+		});
+		if (!response.ok) throw new Error(`Failed to forget ${id} (${response.status}).`);
+		return {
+			content: [{ type: "text", text: `Forgot ${id}.` }],
+			details: undefined
+		};
+	}
+};
+
+const searchParameters = Type.Object({
 	queries: Type.Array(Type.String())
 });
 
-export const searchQuestions: AgentTool<typeof searchQuestionsParameters> = {
-	name: "search-questions",
-	label: "Search questions",
+export const search: AgentTool<typeof searchParameters> = {
+	name: "search",
+	label: "Search",
 	description:
-		"Return every recorded question containing any word in any of the queries.",
-	parameters: searchQuestionsParameters,
+		"Return every memory and open question containing any word in any of the queries.",
+	parameters: searchParameters,
 	execute: async (_toolCallId, { queries }) => {
 		const params = new URLSearchParams();
 		for (const query of queries) params.append("q", query);
-		const response = await fetch(`/api/questions?${params}`, { headers: headers() });
+		const response = await fetch(`/api/search?${params}`, { headers: headers() });
 		if (!response.ok) throw new Error(`Search failed (${response.status}).`);
-		const matches = (await response.json()) as Question[];
-		const text =
-			matches.length === 0
-				? "No questions match that search."
-				: matches.map((question) => `- ${question.id}: ${question.text}`).join("\n");
+		const found = (await response.json()) as { memories: Memory[]; questions: Question[] };
+		const lines = [
+			...found.memories.map((memory) => line("memory", memory)),
+			...found.questions.map((question) => line("question", question))
+		];
 		return {
-			content: [{ type: "text", text }],
+			content: [
+				{ type: "text", text: lines.length === 0 ? "Nothing matches that search." : lines.join("\n") }
+			],
 			details: undefined
 		};
 	}
 };
 
-const listQuestionsParameters = Type.Object({
+const listParameters = Type.Object({
+	kind: Type.Optional(
+		Type.Union([Type.Literal("memory"), Type.Literal("question")], {
+			description: "Restrict to memories or questions; omit for both."
+		})
+	),
 	offset: Type.Optional(
 		Type.Number({
-			description: "Questions to skip; omit for the first page."
+			description: "Entries to skip; omit for the first page."
 		})
 	)
 });
 
-export const listQuestions: AgentTool<typeof listQuestionsParameters> = {
-	name: "list-questions",
-	label: "List questions",
-	description: "List recorded questions, one page at a time.",
-	parameters: listQuestionsParameters,
-	execute: async (_toolCallId, { offset }) => {
+export const list: AgentTool<typeof listParameters> = {
+	name: "list",
+	label: "List",
+	description: "List the diary, memories and questions interleaved, newest first.",
+	parameters: listParameters,
+	execute: async (_toolCallId, { kind, offset }) => {
 		const from = offset ?? 0;
-		const response = await fetch(`/api/questions?offset=${from}`, { headers: headers() });
-		if (!response.ok) throw new Error(`Failed to list questions (${response.status}).`);
-		const { items, hasMore } = (await response.json()) as Page<{ id: string; text: string }>;
-		if (items.length === 0) {
+		const params = new URLSearchParams({ offset: String(from) });
+		if (kind) params.set("kind", kind);
+		const response = await fetch(`/api/list?${params}`, { headers: headers() });
+		if (!response.ok) throw new Error(`Failed to list (${response.status}).`);
+		const page = (await response.json()) as Page<ListItem>;
+		if (page.items.length === 0) {
 			return {
-				content: [{ type: "text", text: "No questions." }],
+				content: [{ type: "text", text: "Nothing recorded." }],
 				details: undefined
 			};
 		}
-		const lines = items.map((question) => `- ${question.id}: ${question.text}`).join("\n");
-		const more = hasMore
-			? `\n\nMore questions remain. Call list-questions again with offset=${from + items.length}.`
+		const lines = page.items.map((item) => line(item.kind, item)).join("\n");
+		const more = page.hasMore
+			? `\n\nMore remain. Call list again with offset=${from + page.items.length}${kind ? ` and kind="${kind}"` : ""}.`
 			: "";
 		return {
 			content: [{ type: "text", text: `${lines}${more}` }],
-			details: undefined
-		};
-	}
-};
-
-const updateQuestionParameters = Type.Object({
-	id: Type.String(),
-	text: Type.String()
-});
-
-export const updateQuestion: AgentTool<typeof updateQuestionParameters> = {
-	name: "update-question",
-	label: "Update question",
-	description: "Reword an open question by id.",
-	parameters: updateQuestionParameters,
-	execute: async (_toolCallId, { id, text }) => {
-		const response = await fetch("/api/questions", {
-			method: "PATCH",
-			headers: headers(true),
-			body: JSON.stringify({ id, text })
-		});
-		if (!response.ok) throw new Error(`Failed to update question ${id} (${response.status}).`);
-		return {
-			content: [{ type: "text", text: `Updated question ${id}.` }],
-			details: undefined
-		};
-	}
-};
-
-const deleteQuestionParameters = Type.Object({
-	id: Type.String()
-});
-
-export const deleteQuestion: AgentTool<typeof deleteQuestionParameters> = {
-	name: "delete-question",
-	label: "Delete question",
-	description: "Remove a question by id.",
-	parameters: deleteQuestionParameters,
-	execute: async (_toolCallId, { id }) => {
-		const response = await fetch(`/api/questions?id=${encodeURIComponent(id)}`, {
-			method: "DELETE",
-			headers: headers()
-		});
-		if (!response.ok) throw new Error(`Failed to delete question ${id} (${response.status}).`);
-		return {
-			content: [{ type: "text", text: `Deleted question ${id}.` }],
 			details: undefined
 		};
 	}

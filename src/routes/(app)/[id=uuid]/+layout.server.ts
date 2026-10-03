@@ -1,7 +1,7 @@
 import { error } from "@sveltejs/kit";
 import { forget, remember } from "$lib/server/known";
 import { get } from "$lib/server/memexes";
-import { list } from "$lib/server/questions";
+import { openQuestions } from "$lib/server/storage";
 import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = ({ params, cookies }) => {
@@ -11,5 +11,5 @@ export const load: LayoutServerLoad = ({ params, cookies }) => {
 		error(404, "No such memex.");
 	}
 	remember(cookies, memex.id);
-	return { memex, questionCount: list(params.id).length };
+	return { memex, questionCount: openQuestions(params.id).length };
 };
