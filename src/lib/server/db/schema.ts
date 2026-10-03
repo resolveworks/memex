@@ -1,4 +1,4 @@
-import { index, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 export const memexes = sqliteTable('memexes', {
 	id: text('id').primaryKey(),
@@ -9,13 +9,15 @@ export const memexes = sqliteTable('memexes', {
 });
 
 // Append-only revisions. `entity_id` names the logical memory all revisions share;
-// the live row with the latest `created_at` is the one that speaks for it.
+// the live row with the highest `version` is the one that speaks for it.
 export const memories = sqliteTable(
 	'memories',
 	{
 		// This revision row's own id.
 		id: text('id').primaryKey(),
 		entityId: text('entity_id').notNull(),
+		// Monotonic per entity; the ordering key, independent of clock resolution.
+		version: integer('version').notNull(),
 		memexId: text('memex_id')
 			.notNull()
 			.references(() => memexes.id, { onDelete: 'cascade' }),
@@ -27,7 +29,7 @@ export const memories = sqliteTable(
 		deletedAt: text('deleted_at')
 	},
 	(t) => [
-		index('memories_entity').on(t.entityId, t.createdAt),
+		uniqueIndex('memories_entity_version').on(t.entityId, t.version),
 		index('memories_memex').on(t.memexId),
 		index('memories_answers').on(t.answers)
 	]
@@ -39,6 +41,7 @@ export const questions = sqliteTable(
 	{
 		id: text('id').primaryKey(),
 		entityId: text('entity_id').notNull(),
+		version: integer('version').notNull(),
 		memexId: text('memex_id')
 			.notNull()
 			.references(() => memexes.id, { onDelete: 'cascade' }),
@@ -47,7 +50,7 @@ export const questions = sqliteTable(
 		deletedAt: text('deleted_at')
 	},
 	(t) => [
-		index('questions_entity').on(t.entityId, t.createdAt),
+		uniqueIndex('questions_entity_version').on(t.entityId, t.version),
 		index('questions_memex').on(t.memexId)
 	]
 );

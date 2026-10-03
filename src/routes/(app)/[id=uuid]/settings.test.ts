@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
 import { create, get } from '$lib/server/memexes';
 import {
@@ -84,25 +84,12 @@ describe('root settings actions', () => {
 });
 
 describe('GET /(app)/[id=uuid]/settings/export', () => {
-	// Revisions written in the same millisecond are unordered, so the export
-	// could not show which revision speaks for a revised entity.
-	beforeEach(() => {
-		vi.useFakeTimers();
-	});
-	afterEach(() => {
-		vi.useRealTimers();
-	});
-
 	it('returns the complete record, forgotten entities included, as pretty-printed JSON', async () => {
 		const id = create('Dinner plans', 'en');
 		const sushi = remember(id, 'Sushi on Fridays');
-		vi.advanceTimersByTime(1);
 		const question = wonder(id, 'When is sushi day?');
-		vi.advanceTimersByTime(1);
 		answer(id, question.id, 'Fridays');
-		vi.advanceTimersByTime(1);
 		revise(id, sushi.id, 'Sushi on Saturdays');
-		vi.advanceTimersByTime(1);
 		forget(id, sushi.id);
 
 		const response = await GET({ params: { id } } as ExportEvent);

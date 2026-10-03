@@ -1,10 +1,11 @@
 import { randomUUID } from 'node:crypto';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
 import type { Memory } from '$lib/memory';
 import type { Question } from '$lib/question';
 import { create, type Memex } from '$lib/server/memexes';
 import { answer, forget, listMemories, listQuestions, remember, wonder } from '$lib/server/storage';
+import { useFrozenClock } from '../../../tests/clock';
 import { FakeCookies } from '../../../tests/cookies';
 import { load as loadLayout } from './+layout.server';
 import type { LayoutServerLoadEvent } from './$types';
@@ -40,18 +41,7 @@ interface QuestionsPage {
 	pages: number;
 }
 
-// now() has millisecond resolution, so consecutive writes can tie and make
-// ordering flaky. Fake time and advance it between writes instead.
-beforeEach(() => {
-	vi.useFakeTimers();
-	vi.setSystemTime(new Date('2025-06-01T12:00:00Z'));
-});
-
-afterEach(() => {
-	vi.useRealTimers();
-});
-
-const tick = () => vi.advanceTimersByTime(1);
+const tick = useFrozenClock();
 
 /** Runs a sync function and returns what it threw, asserting it threw. */
 function thrown(run: () => unknown): unknown {
@@ -265,7 +255,6 @@ describe('the questions page load', () => {
 		const id = create('Dinner plans', 'en');
 		const gone = wonder(id, 'Which sushi place?');
 		forget(id, gone.id);
-		tick();
 		wonder(id, 'Tacos or burritos?');
 
 		const data = loadQuestionsPage(id, new URL('http://memex.test/questions?q=sushi'));

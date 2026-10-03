@@ -1,9 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '$lib/server/db';
 import { create } from './memexes';
 import { memories } from './db/schema';
+import { useFrozenClock } from '../../tests/clock';
 import {
 	answer,
 	forget,
@@ -17,17 +18,7 @@ import {
 	wonder
 } from './storage';
 
-// Revision resolution orders rows by createdAt, so consecutive writes must
-// never share a millisecond: the clock advances at least 1ms per write.
-const EPOCH = Date.parse('2025-06-01T12:00:00.000Z');
-let clock = EPOCH;
-
-/** Advances the clock past the previous write, returning the new timestamp. */
-function tick(): string {
-	clock += 1;
-	vi.setSystemTime(clock);
-	return new Date(clock).toISOString();
-}
+const tick = useFrozenClock();
 
 // restore addresses revisions by row id, which no listing exposes yet.
 function revisionIds(memexId: string, entityId: string): string[] {
@@ -35,7 +26,7 @@ function revisionIds(memexId: string, entityId: string): string[] {
 		.select({ id: memories.id })
 		.from(memories)
 		.where(and(eq(memories.memexId, memexId), eq(memories.entityId, entityId)))
-		.orderBy(memories.createdAt)
+		.orderBy(memories.version)
 		.all()
 		.map((row) => row.id);
 }
@@ -44,14 +35,7 @@ describe('entity storage', () => {
 	let memex: string;
 
 	beforeEach(() => {
-		vi.useFakeTimers();
-		clock = EPOCH;
-		vi.setSystemTime(clock);
 		memex = create('Dinner plans', 'en');
-	});
-
-	afterEach(() => {
-		vi.useRealTimers();
 	});
 
 	describe('remember', () => {
@@ -91,7 +75,6 @@ describe('entity storage', () => {
 	describe('answer', () => {
 		it('stores a memory linked to the question, settling it', () => {
 			const question = wonder(memex, 'When is pizza?');
-			tick();
 
 			const memory = answer(memex, question.id, 'Pizza on Friday');
 
@@ -134,12 +117,19 @@ describe('entity storage', () => {
 			expect(revised.updatedAt).toBe(revisedAt);
 			expect(listQuestions(memex)).toEqual([revised]);
 		});
+
+		it('supersedes an earlier revision written in the same millisecond', () => {
+			const memory = remember(memex, 'Pizza on Friday');
+			revise(memex, memory.id, 'Pizza on Saturday');
+
+			const [current] = listMemories(memex);
+			expect(current.text).toBe('Pizza on Saturday');
+		});
 	});
 
 	describe('forget', () => {
 		it('hides a memory until deleted revisions are included', () => {
 			const memory = remember(memex, 'Pizza on Friday');
-			tick();
 			const deletedAt = tick();
 
 			forget(memex, memory.id);
@@ -155,7 +145,6 @@ describe('entity storage', () => {
 
 		it('hides a question until deleted revisions are included', () => {
 			const question = wonder(memex, 'When is pizza?');
-			tick();
 			const deletedAt = tick();
 
 			forget(memex, question.id);
@@ -169,10 +158,8 @@ describe('entity storage', () => {
 
 		it('reopens a question when its answering memory is forgotten', () => {
 			const question = wonder(memex, 'When is pizza?');
-			tick();
 			const memory = answer(memex, question.id, 'Pizza on Friday');
 			expect(openQuestions(memex)).toEqual([]);
-			tick();
 
 			forget(memex, memory.id);
 
@@ -183,11 +170,8 @@ describe('entity storage', () => {
 	describe('restore', () => {
 		it('makes an older revision current again, retiring the newer ones', () => {
 			const memory = remember(memex, 'Pizza on Friday');
-			tick();
 			revise(memex, memory.id, 'Pizza on Saturday');
-			tick();
 			revise(memex, memory.id, 'Pizza on Sunday');
-			tick();
 
 			const [original] = revisionIds(memex, memory.id);
 			restore(memex, memory.id, original);
@@ -201,11 +185,8 @@ describe('entity storage', () => {
 
 		it('brings a forgotten entity back', () => {
 			const memory = remember(memex, 'Pizza on Friday');
-			tick();
 			revise(memex, memory.id, 'Pizza on Saturday');
-			tick();
 			forget(memex, memory.id);
-			tick();
 
 			const [original] = revisionIds(memex, memory.id);
 			restore(memex, memory.id, original);
@@ -233,11 +214,8 @@ describe('entity storage', () => {
 	it('keeps one memex from listing the entities of another', () => {
 		const other = create('Supper plans', 'en');
 		const memory = remember(memex, 'Pizza on Friday');
-		tick();
 		const question = wonder(memex, 'When is pizza?');
-		tick();
 		const otherMemory = remember(other, 'Sushi on Monday');
-		tick();
 		const otherQuestion = wonder(other, 'When is sushi?');
 
 		expect(listMemories(memex).map((m) => m.id)).toEqual([memory.id]);

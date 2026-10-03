@@ -1,0 +1,332 @@
+{
+	"version": "7",
+	"dialect": "sqlite",
+	"id": "60582cc3-e025-4a93-84d2-877e0ebd4892",
+	"prevIds": ["17739c39-1360-4430-8f88-77d4acdf33d9"],
+	"ddl": [
+		{
+			"name": "memexes",
+			"entityType": "tables"
+		},
+		{
+			"name": "memories",
+			"entityType": "tables"
+		},
+		{
+			"name": "questions",
+			"entityType": "tables"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "id",
+			"entityType": "columns",
+			"table": "memexes"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "title",
+			"entityType": "columns",
+			"table": "memexes"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "language",
+			"entityType": "columns",
+			"table": "memexes"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "created_at",
+			"entityType": "columns",
+			"table": "memexes"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "id",
+			"entityType": "columns",
+			"table": "memories"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "entity_id",
+			"entityType": "columns",
+			"table": "memories"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "version",
+			"entityType": "columns",
+			"table": "memories"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "memex_id",
+			"entityType": "columns",
+			"table": "memories"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "text",
+			"entityType": "columns",
+			"table": "memories"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "answers",
+			"entityType": "columns",
+			"table": "memories"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "created_at",
+			"entityType": "columns",
+			"table": "memories"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "deleted_at",
+			"entityType": "columns",
+			"table": "memories"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "id",
+			"entityType": "columns",
+			"table": "questions"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "entity_id",
+			"entityType": "columns",
+			"table": "questions"
+		},
+		{
+			"type": "integer",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "version",
+			"entityType": "columns",
+			"table": "questions"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "memex_id",
+			"entityType": "columns",
+			"table": "questions"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "text",
+			"entityType": "columns",
+			"table": "questions"
+		},
+		{
+			"type": "text",
+			"notNull": true,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "created_at",
+			"entityType": "columns",
+			"table": "questions"
+		},
+		{
+			"type": "text",
+			"notNull": false,
+			"autoincrement": false,
+			"default": null,
+			"generated": null,
+			"name": "deleted_at",
+			"entityType": "columns",
+			"table": "questions"
+		},
+		{
+			"columns": ["memex_id"],
+			"tableTo": "memexes",
+			"columnsTo": ["id"],
+			"onUpdate": "NO ACTION",
+			"onDelete": "CASCADE",
+			"nameExplicit": false,
+			"name": "fk_memories_memex_id_memexes_id_fk",
+			"entityType": "fks",
+			"table": "memories"
+		},
+		{
+			"columns": ["memex_id"],
+			"tableTo": "memexes",
+			"columnsTo": ["id"],
+			"onUpdate": "NO ACTION",
+			"onDelete": "CASCADE",
+			"nameExplicit": false,
+			"name": "fk_requests_memex_id_memexes_id_fk",
+			"entityType": "fks",
+			"table": "questions"
+		},
+		{
+			"columns": ["id"],
+			"nameExplicit": false,
+			"name": "memexes_pk",
+			"table": "memexes",
+			"entityType": "pks"
+		},
+		{
+			"columns": ["id"],
+			"nameExplicit": false,
+			"name": "memories_pk",
+			"table": "memories",
+			"entityType": "pks"
+		},
+		{
+			"columns": ["id"],
+			"nameExplicit": false,
+			"name": "requests_pk",
+			"table": "questions",
+			"entityType": "pks"
+		},
+		{
+			"columns": [
+				{
+					"value": "entity_id",
+					"isExpression": false
+				},
+				{
+					"value": "version",
+					"isExpression": false
+				}
+			],
+			"isUnique": true,
+			"where": null,
+			"origin": "manual",
+			"name": "memories_entity_version",
+			"entityType": "indexes",
+			"table": "memories"
+		},
+		{
+			"columns": [
+				{
+					"value": "memex_id",
+					"isExpression": false
+				}
+			],
+			"isUnique": false,
+			"where": null,
+			"origin": "manual",
+			"name": "memories_memex",
+			"entityType": "indexes",
+			"table": "memories"
+		},
+		{
+			"columns": [
+				{
+					"value": "answers",
+					"isExpression": false
+				}
+			],
+			"isUnique": false,
+			"where": null,
+			"origin": "manual",
+			"name": "memories_answers",
+			"entityType": "indexes",
+			"table": "memories"
+		},
+		{
+			"columns": [
+				{
+					"value": "entity_id",
+					"isExpression": false
+				},
+				{
+					"value": "version",
+					"isExpression": false
+				}
+			],
+			"isUnique": true,
+			"where": null,
+			"origin": "manual",
+			"name": "questions_entity_version",
+			"entityType": "indexes",
+			"table": "questions"
+		},
+		{
+			"columns": [
+				{
+					"value": "memex_id",
+					"isExpression": false
+				}
+			],
+			"isUnique": false,
+			"where": null,
+			"origin": "manual",
+			"name": "questions_memex",
+			"entityType": "indexes",
+			"table": "questions"
+		}
+	],
+	"renames": []
+}

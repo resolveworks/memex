@@ -29,6 +29,7 @@ export interface TermCount {
 /** The fields shared by every revision row. */
 interface RevisionRow {
 	entityId: string;
+	version: number;
 	createdAt: string;
 	deletedAt: string | null;
 }
@@ -43,8 +44,8 @@ function now(): string {
 }
 
 /**
- * Picks the revision that speaks for an entity: the live row with the latest
- * `created_at`. An entity with no live row is gone unless deleted rows count.
+ * Picks the revision that speaks for an entity: the live row with the highest
+ * `version`. An entity with no live row is gone unless deleted rows count.
  */
 function resolveEntity<R extends RevisionRow>(
 	rows: R[],
@@ -59,7 +60,7 @@ function resolveEntity<R extends RevisionRow>(
 	const pool = live.length > 0 ? live : includeDeleted ? rows : [];
 	if (pool.length === 0) return undefined;
 	const row = pool.reduce((latest, current) =>
-		current.createdAt > latest.createdAt ? current : latest
+		current.version > latest.version ? current : latest
 	);
 	return { row, made };
 }
@@ -151,6 +152,7 @@ export function remember(memexId: string, text: string): Memory {
 		.values({
 			id: randomUUID(),
 			entityId,
+			version: 1,
 			memexId,
 			text,
 			answers: null,
@@ -165,7 +167,15 @@ export function remember(memexId: string, text: string): Memory {
 export function wonder(memexId: string, text: string): Question {
 	const entityId = randomUUID();
 	db.insert(questions)
-		.values({ id: randomUUID(), entityId, memexId, text, createdAt: now(), deletedAt: null })
+		.values({
+			id: randomUUID(),
+			entityId,
+			version: 1,
+			memexId,
+			text,
+			createdAt: now(),
+			deletedAt: null
+		})
 		.run();
 	return questionById(memexId, entityId)!;
 }
@@ -180,6 +190,7 @@ export function answer(memexId: string, question: string, text: string): Memory 
 		.values({
 			id: randomUUID(),
 			entityId,
+			version: 1,
 			memexId,
 			text,
 			answers: question,
@@ -201,7 +212,7 @@ function latestLiveMemory(memexId: string, entityId: string): MemoryRow | undefi
 				isNull(memories.deletedAt)
 			)
 		)
-		.orderBy(desc(memories.createdAt))
+		.orderBy(desc(memories.version))
 		.limit(1)
 		.get();
 }
@@ -217,7 +228,7 @@ function latestLiveQuestion(memexId: string, entityId: string): QuestionRow | un
 				isNull(questions.deletedAt)
 			)
 		)
-		.orderBy(desc(questions.createdAt))
+		.orderBy(desc(questions.version))
 		.limit(1)
 		.get();
 }
@@ -230,6 +241,7 @@ export function revise(memexId: string, id: string, text: string): Memory | Ques
 			.values({
 				id: randomUUID(),
 				entityId: id,
+				version: memory.version + 1,
 				memexId,
 				text,
 				answers: memory.answers,
@@ -242,7 +254,15 @@ export function revise(memexId: string, id: string, text: string): Memory | Ques
 	const question = latestLiveQuestion(memexId, id);
 	if (question) {
 		db.insert(questions)
-			.values({ id: randomUUID(), entityId: id, memexId, text, createdAt: now(), deletedAt: null })
+			.values({
+				id: randomUUID(),
+				entityId: id,
+				version: question.version + 1,
+				memexId,
+				text,
+				createdAt: now(),
+				deletedAt: null
+			})
 			.run();
 		return questionById(memexId, id)!;
 	}
@@ -295,7 +315,7 @@ export function restore(memexId: string, entityId: string, revisionId: string): 
 				and(
 					eq(memories.memexId, memexId),
 					eq(memories.entityId, entityId),
-					gt(memories.createdAt, revision.createdAt),
+					gt(memories.version, revision.version),
 					isNull(memories.deletedAt)
 				)
 			)
@@ -321,7 +341,7 @@ export function restore(memexId: string, entityId: string, revisionId: string): 
 				and(
 					eq(questions.memexId, memexId),
 					eq(questions.entityId, entityId),
-					gt(questions.createdAt, question.createdAt),
+					gt(questions.version, question.version),
 					isNull(questions.deletedAt)
 				)
 			)

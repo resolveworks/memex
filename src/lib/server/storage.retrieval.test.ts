@@ -1,20 +1,10 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { PAGE_SIZE } from '$lib/page';
+import { useFrozenClock } from '../../tests/clock';
 import { create } from './memexes';
 import { answer, forget, list, remember, revise, search, terms, wonder } from './storage';
 
-// now() has millisecond resolution, so consecutive writes can tie and make
-// updatedAt ordering flaky. Fake time and advance it between writes instead.
-beforeEach(() => {
-	vi.useFakeTimers();
-	vi.setSystemTime(new Date('2025-06-01T12:00:00Z'));
-});
-
-afterEach(() => {
-	vi.useRealTimers();
-});
-
-const tick = () => vi.advanceTimersByTime(1);
+const tick = useFrozenClock();
 
 describe('search', () => {
 	it('matches any token of any query, case-insensitively, across memories and open questions', () => {
@@ -40,7 +30,6 @@ describe('search', () => {
 		const memex = create('Food', 'en');
 		const forgotten = remember(memex, 'Ancient pizza');
 		forget(memex, forgotten.id);
-		tick();
 		const answered = wonder(memex, 'Which pizza place?');
 		answer(memex, answered.id, 'The place on the corner');
 
@@ -98,7 +87,6 @@ describe('list', () => {
 	it('omits questions that a live memory answers', () => {
 		const memex = create('Food', 'en');
 		const question = wonder(memex, 'Where to eat?');
-		tick();
 		answer(memex, question.id, 'The pizzeria');
 
 		const page = list(memex, undefined, 0);
@@ -108,7 +96,6 @@ describe('list', () => {
 	it('returns only memories for kind "memory" and only open questions for kind "question"', () => {
 		const memex = create('Food', 'en');
 		remember(memex, 'A memory');
-		tick();
 		wonder(memex, 'A question');
 
 		expect(list(memex, 'memory', 0).items.map((item) => item.kind)).toEqual(['memory']);
@@ -145,9 +132,7 @@ describe('terms', () => {
 	it('counts the live memories containing each non-stopword term, ties broken alphabetically', () => {
 		const memex = create('Food', 'en');
 		remember(memex, 'Pizza on Friday');
-		tick();
 		remember(memex, 'Pizza pizza');
-		tick();
 		remember(memex, 'Sushi breakfast');
 
 		expect(terms(memex, 'en', 10)).toEqual([
@@ -161,9 +146,7 @@ describe('terms', () => {
 	it('caps the result at the limit', () => {
 		const memex = create('Food', 'en');
 		remember(memex, 'Pizza on Friday');
-		tick();
 		remember(memex, 'Pizza pizza');
-		tick();
 		remember(memex, 'Sushi breakfast');
 
 		expect(terms(memex, 'en', 2)).toEqual([
@@ -175,7 +158,6 @@ describe('terms', () => {
 	it('counts only live memories', () => {
 		const memex = create('Food', 'en');
 		const forgotten = remember(memex, 'Sushi breakfast');
-		tick();
 		remember(memex, 'Sushi dinner');
 		forget(memex, forgotten.id);
 
