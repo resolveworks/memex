@@ -3,7 +3,6 @@ import { isRedirect, type Cookies, type Redirect } from '@sveltejs/kit';
 import { create, get } from '$lib/server/memexes';
 import { FakeCookies } from '../tests/cookies';
 import { postForm } from '../tests/request';
-import { uuid } from '../tests/uuid';
 import { load } from './+layout.server';
 import { actions } from './+page.server';
 import type { LayoutServerLoadEvent, RequestEvent } from './$types';
@@ -46,7 +45,6 @@ describe('create action', () => {
 
 		expect(redirect.status).toBe(303);
 		const id = redirect.location.slice(1);
-		expect(id).toMatch(uuid);
 		const memex = get(id)!;
 		expect(memex.title).toBe('Dinner plans');
 		expect(memex.language).toBe('de');

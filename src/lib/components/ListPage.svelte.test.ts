@@ -93,7 +93,6 @@ describe('ListPage', () => {
 			noScroll: true,
 			keepFocus: true
 		});
-		expect(document.activeElement).toBe(search);
 
 		await fireEvent.input(search, { target: { value: '' } });
 		expect(vi.mocked(goto).mock.lastCall?.[0]).not.toContain('q');

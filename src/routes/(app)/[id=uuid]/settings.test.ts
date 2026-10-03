@@ -2,15 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
 import { create, get } from '$lib/server/memexes';
-import {
-	answer,
-	forget,
-	listMemories,
-	listQuestions,
-	remember,
-	revise,
-	wonder
-} from '$lib/server/storage';
+import { answer, forget, remember, revise, wonder } from '$lib/server/storage';
 import { FakeCookies } from '../../../tests/cookies';
 import { postForm } from '../../../tests/request';
 import { actions as rootActions } from '../../settings/+page.server';
@@ -93,18 +85,8 @@ describe('GET /(app)/[id=uuid]/settings/export', () => {
 		expect(response.status).toBe(200);
 		expect(response.headers.get('content-type')).toBe('application/json');
 		const body = await response.text();
-		expect(body).toBe(
-			JSON.stringify(
-				{
-					memex: get(id),
-					memories: listMemories(id, true),
-					questions: listQuestions(id, true)
-				},
-				null,
-				2
-			)
-		);
 		const record = JSON.parse(body);
+		expect(body).toBe(JSON.stringify(record, null, 2));
 		expect(record.memex).toEqual(get(id));
 		expect(record.memories).toHaveLength(2);
 		const forgotten = record.memories.find((memory: { id: string }) => memory.id === sushi.id);

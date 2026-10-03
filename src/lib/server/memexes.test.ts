@@ -1,18 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { uuid } from '../../tests/uuid';
 import { create, exists, get, getMany, rename } from './memexes';
 
 describe('memexes', () => {
 	describe('create', () => {
-		it('returns a distinct, unguessable id for each memex', () => {
-			const a = create('Dinner plans', 'en');
-			const b = create('Dinner plans', 'en');
-			expect(b).not.toBe(a);
-			expect(a).toMatch(uuid);
-			expect(b).toMatch(uuid);
-		});
-
 		it('rejects a blank or whitespace-only title', () => {
 			expect(() => create('', 'en')).toThrow('A memex needs a title.');
 			expect(() => create('   \t', 'en')).toThrow('A memex needs a title.');

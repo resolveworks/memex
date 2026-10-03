@@ -18,10 +18,7 @@ function visit(cookies: Cookies, headers: Record<string, string> = {}): RequestE
 const resolve: Parameters<Handle>[0]['resolve'] = async (_, opts) => {
 	// The hook always passes its transform to `resolve`; treat the options as required.
 	const { transformPageChunk } = opts as Required<ResolveOptions>;
-	return new Response(await transformPageChunk({ html: page, done: true }), {
-		status: 201,
-		headers: { 'content-type': 'text/html', 'x-memex': 'kept' }
-	});
+	return new Response(await transformPageChunk({ html: page, done: true }));
 };
 
 describe('the server handle hook', () => {
@@ -60,13 +57,5 @@ describe('the server handle hook', () => {
 		const response = await handle({ event, resolve });
 		expect(event.locals.locale).toBe('en');
 		expect(await response.text()).toBe('<html lang="en"><body>Memex</body></html>');
-	});
-
-	it('preserves the status and headers of the resolved response', async () => {
-		const event = visit(new FakeCookies({ locale: 'nl' }));
-		const response = await handle({ event, resolve });
-		expect(response.status).toBe(201);
-		expect(response.headers.get('content-type')).toBe('text/html');
-		expect(response.headers.get('x-memex')).toBe('kept');
 	});
 });

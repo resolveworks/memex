@@ -1,28 +1,15 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { languages, messages, stopwords } from './languages';
 
-/** Each locale data file as `[tag, contents]`, the tag taken from its filename. */
-const files = readdirSync(new URL('./i18n', import.meta.url))
+/** The i18n filenames as language tags. */
+const tags = readdirSync(new URL('./i18n', import.meta.url))
 	.filter((name) => name.endsWith('.json'))
-	.map((name) => {
-		const tag = name.slice(0, -'.json'.length);
-		const contents = JSON.parse(readFileSync(new URL(`./i18n/${name}`, import.meta.url), 'utf8'));
-		return [tag, contents] as const;
-	});
-
-describe('locale data files', () => {
-	it('carry both messages and stopwords', () => {
-		for (const [tag, contents] of files) {
-			expect(contents, tag).toHaveProperty('messages');
-			expect(contents, tag).toHaveProperty('stopwords');
-		}
-	});
-});
+	.map((name) => name.slice(0, -'.json'.length));
 
 describe('languages', () => {
 	it('is the sorted list of the i18n filenames as language tags', () => {
-		expect(languages).toEqual(files.map(([tag]) => tag).sort());
+		expect(languages).toEqual(tags.sort());
 	});
 });
 

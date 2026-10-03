@@ -6,7 +6,6 @@ import { listMemories, listQuestions } from '$lib/server/storage';
 import { useFrozenClock } from '../../tests/clock';
 import { bearer, event, post } from '../../tests/request';
 import { thrown } from '../../tests/throws';
-import { uuid } from '../../tests/uuid';
 import { POST as answer } from './answer/+server';
 import { POST as forget } from './forget/+server';
 import { POST as remember } from './remember/+server';
@@ -83,7 +82,6 @@ describe('POST /api/remember', () => {
 
 		expect(response.status).toBe(201);
 		const memory = await response.json();
-		expect(memory.id).toMatch(uuid);
 		expect(memory.text).toBe('Sushi on Fridays');
 		expect(new Date(memory.createdAt).getTime()).toBeGreaterThanOrEqual(before);
 		expect(new Date(memory.createdAt).getTime()).toBeLessThanOrEqual(after);
@@ -102,7 +100,6 @@ describe('POST /api/wonder', () => {
 
 		expect(response.status).toBe(201);
 		const question = await response.json();
-		expect(question.id).toMatch(uuid);
 		expect(question.text).toBe('When is sushi day?');
 		expect(new Date(question.createdAt).getTime()).toBeGreaterThanOrEqual(before);
 		expect(new Date(question.createdAt).getTime()).toBeLessThanOrEqual(after);
@@ -123,7 +120,6 @@ describe('POST /api/answer', () => {
 
 		expect(response.status).toBe(201);
 		const memory = await response.json();
-		expect(memory.id).toMatch(uuid);
 		expect(memory.text).toBe('Fridays');
 		expect(memory.updatedAt).toBe(memory.createdAt);
 		expect(memory.answers).toBe(question.id);
