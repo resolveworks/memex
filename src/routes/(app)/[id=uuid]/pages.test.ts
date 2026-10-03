@@ -7,6 +7,7 @@ import { create, type Memex } from '$lib/server/memexes';
 import { answer, forget, listMemories, listQuestions, remember, wonder } from '$lib/server/storage';
 import { useFrozenClock } from '../../../tests/clock';
 import { FakeCookies } from '../../../tests/cookies';
+import { thrown } from '../../../tests/throws';
 import { load as loadLayout } from './+layout.server';
 import type { LayoutServerLoadEvent } from './$types';
 import { actions as memoriesActions, load as loadMemories } from './memories/+page.server';
@@ -42,16 +43,6 @@ interface QuestionsPage {
 }
 
 const tick = useFrozenClock();
-
-/** Runs a sync function and returns what it threw, asserting it threw. */
-function thrown(run: () => unknown): unknown {
-	try {
-		run();
-	} catch (err) {
-		return err;
-	}
-	throw new Error('expected the call to throw');
-}
 
 /** The slice of the layout event the handler reads: params and cookies. */
 function layoutEvent(id: string, cookies: Cookies): LayoutServerLoadEvent {

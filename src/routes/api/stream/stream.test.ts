@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { AssistantMessage, AssistantMessageEvent, Context } from '@earendil-works/pi-ai';
 import { create } from '$lib/server/memexes';
 import { fakeLlm } from '../../../tests/llm';
+import { event } from '../../../tests/request';
 import { POST } from './+server';
 
 // The abuse limits are read from $env/dynamic/private at request time, but under Vitest
@@ -13,11 +14,6 @@ vi.mock('$env/dynamic/private', () => ({
 }));
 
 const url = 'http://localhost/api/stream';
-
-/** The handler only reads `request` off the event SvelteKit normally assembles. */
-function event(request: Request): Parameters<typeof POST>[0] {
-	return { request } as Parameters<typeof POST>[0];
-}
 
 async function post(body: BodyInit, token?: string): Promise<Response> {
 	const headers = token ? { authorization: `Bearer ${token}` } : undefined;

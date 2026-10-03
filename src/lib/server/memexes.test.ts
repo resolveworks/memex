@@ -1,9 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
+import { uuid } from '../../tests/uuid';
 import { create, exists, get, getMany, rename } from './memexes';
-
-// A UUIDv4: the version and variant bits are what make the id unguessable.
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
 describe('memexes', () => {
 	describe('create', () => {

@@ -1,29 +1,18 @@
 import type { AgentToolResult } from '@earendil-works/pi-agent-core';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { page } from '../tests/app-state';
+import { failure, ok, useFetchMock } from '../tests/fetch';
 import { answer, forget, list, remember, revise, search, wonder } from './tools';
 
 vi.mock('$app/state', () => ({ page }));
 
 const memex = '9e107669-c4b1-4380-a20b-1f3e6c8b9c2d';
 
-const fetchMock = vi.fn<typeof fetch>();
+const fetchMock = useFetchMock();
 
 beforeEach(() => {
 	page.params.id = memex;
-	vi.stubGlobal('fetch', fetchMock);
 });
-
-afterEach(() => {
-	vi.unstubAllGlobals();
-	fetchMock.mockReset();
-});
-
-/** A successful response carrying `body` as JSON. */
-const ok = (body: unknown) => new Response(JSON.stringify(body));
-
-/** A response carrying nothing but a failure status. */
-const failure = (status: number) => new Response('denied', { status });
 
 /** The single request a tool's `execute` sent, as `[input, init]`. */
 function sentRequest(): [string | Request | URL, RequestInit | undefined] {

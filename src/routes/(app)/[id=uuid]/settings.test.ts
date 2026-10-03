@@ -12,6 +12,7 @@ import {
 	wonder
 } from '$lib/server/storage';
 import { FakeCookies } from '../../../tests/cookies';
+import { postForm } from '../../../tests/request';
 import { actions as rootActions } from '../../settings/+page.server';
 import { actions } from './settings/+page.server';
 import { GET } from './settings/export/+server';
@@ -21,19 +22,14 @@ type SettingsEvent = Parameters<(typeof actions)['rename']>[0];
 type RootSettingsEvent = Parameters<(typeof rootActions)['locale']>[0];
 type ExportEvent = Parameters<typeof GET>[0];
 
-/** A real form-encoded POST, as a submitting <form> sends it. */
-function form(fields: Record<string, string>): Request {
-	return new Request('http://memex.test/settings', {
-		method: 'POST',
-		body: new URLSearchParams(fields)
-	});
-}
-
 describe('settings actions', () => {
 	describe('rename', () => {
 		it('persists the new title', async () => {
 			const id = create('Dinner plans', 'en');
-			const event = { params: { id }, request: form({ title: 'Supper plans' }) } as SettingsEvent;
+			const event = {
+				params: { id },
+				request: postForm({ title: 'Supper plans' })
+			} as SettingsEvent;
 
 			await actions.rename(event);
 
@@ -42,7 +38,7 @@ describe('settings actions', () => {
 
 		it('throws on a blank title', async () => {
 			const id = create('Dinner plans', 'en');
-			const event = { params: { id }, request: form({ title: '   ' }) } as SettingsEvent;
+			const event = { params: { id }, request: postForm({ title: '   ' }) } as SettingsEvent;
 
 			await expect(actions.rename(event)).rejects.toThrow('A memex needs a title.');
 		});
@@ -57,7 +53,7 @@ describe('settings actions', () => {
 				params: { id },
 				cookies,
 				locals,
-				request: form({ locale: 'de' })
+				request: postForm({ locale: 'de' })
 			} as SettingsEvent;
 
 			await actions.locale(event);
@@ -73,7 +69,7 @@ describe('root settings actions', () => {
 		it('sets the cookie and updates locals.locale', async () => {
 			const cookies: Cookies = new FakeCookies();
 			const locals: App.Locals = { locale: 'en' };
-			const event = { cookies, locals, request: form({ locale: 'sv' }) } as RootSettingsEvent;
+			const event = { cookies, locals, request: postForm({ locale: 'sv' }) } as RootSettingsEvent;
 
 			await rootActions.locale(event);
 

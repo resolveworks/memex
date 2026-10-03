@@ -2,12 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { isRedirect, type Cookies, type Redirect } from '@sveltejs/kit';
 import { create, get } from '$lib/server/memexes';
 import { FakeCookies } from '../tests/cookies';
+import { postForm } from '../tests/request';
+import { uuid } from '../tests/uuid';
 import { load } from './+layout.server';
 import { actions } from './+page.server';
 import type { LayoutServerLoadEvent, RequestEvent } from './$types';
-
-// A UUIDv4: the version and variant bits are what make the id unguessable.
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
 /** Runs the action and returns the redirect it threw, asserting it redirected. */
 async function redirectOf(run: () => Promise<unknown>): Promise<Redirect> {
@@ -17,15 +16,6 @@ async function redirectOf(run: () => Promise<unknown>): Promise<Redirect> {
 		if (isRedirect(err)) return err;
 	}
 	throw new Error('expected the action to redirect');
-}
-
-/** A form-encoded POST request carrying the given fields. */
-function postForm(fields: Record<string, string>): Request {
-	return new Request('http://memex.test/', {
-		method: 'POST',
-		headers: { 'content-type': 'application/x-www-form-urlencoded' },
-		body: new URLSearchParams(fields)
-	});
 }
 
 describe('root layout load', () => {

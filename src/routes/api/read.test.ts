@@ -6,33 +6,11 @@ import { create } from '$lib/server/memexes';
 import type { ListItem, TermCount } from '$lib/server/storage';
 import { answer, forget, remember, wonder } from '$lib/server/storage';
 import type { Question } from '$lib/question';
-import { bearer, event } from '../../tests/request';
+import { bearer, event, get, urlEvent } from '../../tests/request';
+import { thrown } from '../../tests/throws';
 import { GET as context } from './context/+server';
 import { GET as list } from './list/+server';
 import { GET as search } from './search/+server';
-
-/** A GET request to an API path; omit `authorization` to send it without credentials. */
-function get(path: string, authorization?: string): Request {
-	const headers: Record<string, string> = {};
-	if (authorization !== undefined) headers.authorization = authorization;
-	return new Request(`http://memex.test${path}`, { headers });
-}
-
-/** The slice of `RequestEvent` the search and list handlers read: `request` plus the parsed `url`. */
-function urlEvent(path: string, authorization?: string): RequestEvent {
-	const request = get(path, authorization);
-	return { request, url: new URL(request.url) } as RequestEvent;
-}
-
-/** Runs a sync function and returns what it threw, asserting it threw. */
-function thrown(run: () => unknown): unknown {
-	try {
-		run();
-	} catch (err) {
-		return err;
-	}
-	throw new Error('expected the call to throw');
-}
 
 describe('API auth', () => {
 	for (const [route, handler] of Object.entries({ search, list, context })) {

@@ -5,24 +5,13 @@ import { create } from '$lib/server/memexes';
 import { listMemories, listQuestions } from '$lib/server/storage';
 import { useFrozenClock } from '../../tests/clock';
 import { bearer, event, post } from '../../tests/request';
+import { thrown } from '../../tests/throws';
+import { uuid } from '../../tests/uuid';
 import { POST as answer } from './answer/+server';
 import { POST as forget } from './forget/+server';
 import { POST as remember } from './remember/+server';
 import { POST as revise } from './revise/+server';
 import { POST as wonder } from './wonder/+server';
-
-// A UUIDv4: the version and variant bits are what make the id unguessable.
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-
-/** Runs a sync function and returns what it threw, asserting it threw. */
-function thrown(run: () => unknown): unknown {
-	try {
-		run();
-	} catch (err) {
-		return err;
-	}
-	throw new Error('expected the call to throw');
-}
 
 describe('memexId', () => {
 	it('returns the id carried by the bearer token', () => {
