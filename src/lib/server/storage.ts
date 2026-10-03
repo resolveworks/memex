@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { and, eq, gt, isNull } from 'drizzle-orm';
+import { and, eq, gt, isNull, sql } from 'drizzle-orm';
 import { stopwords } from '$lib/languages';
 import type { Memory } from '$lib/memory';
 import { PAGE_SIZE, type Page } from '$lib/page';
@@ -35,36 +35,77 @@ function now(): string {
 }
 
 /**
- * Picks the revision that speaks for an entity: the live row with the latest
- * `created_at`. An entity with no live row is gone unless deleted rows count.
+ * A memex's revisions ranked per entity. `made` is the entity's first
+ * timestamp; `rn` counts live rows before deleted ones and newest first, so
+ * `rn = 1` is the revision that speaks for the entity.
  */
-function resolveEntity(rows: Revision[], includeDeleted: boolean): Resolved | undefined {
-	if (rows.length === 0) return undefined;
-	const made = rows.reduce(
-		(min, row) => (row.createdAt < min ? row.createdAt : min),
-		rows[0].createdAt
-	);
-	const live = rows.filter((row) => row.deletedAt === null);
-	const pool = live.length > 0 ? live : includeDeleted ? rows : [];
-	if (pool.length === 0) return undefined;
-	const row = pool.reduce((latest, current) =>
-		current.createdAt > latest.createdAt ? current : latest
-	);
-	return { row, made };
+function ranked(memexId: string) {
+	return sql`
+		select
+			r.id,
+			r.entity_id,
+			r.memex_id,
+			r.kind,
+			r.text,
+			r.answers,
+			r.created_at,
+			r.deleted_at,
+			min(r.created_at) over (partition by r.entity_id) as made,
+			row_number() over (
+				partition by r.entity_id
+				order by (r.deleted_at is null) desc, r.created_at desc
+			) as rn
+		from revisions r
+		where r.memex_id = ${memexId}
+	`;
 }
 
-function resolveAll(rows: Revision[], includeDeleted: boolean): Resolved[] {
-	const groups = new Map<string, Revision[]>();
-	for (const row of rows) {
-		const group = groups.get(row.entityId);
-		if (group) group.push(row);
-		else groups.set(row.entityId, [row]);
-	}
-	const resolved = [...groups.values()].flatMap((group) => {
-		const entity = resolveEntity(group, includeDeleted);
-		return entity ? [entity] : [];
-	});
-	return resolved.sort((a, b) => b.row.createdAt.localeCompare(a.row.createdAt));
+interface Choice {
+	kind?: Kind;
+	includeDeleted?: boolean;
+	openOnly?: boolean;
+	limit?: number;
+	offset?: number;
+}
+
+/**
+ * The revision that speaks for each entity: its latest live one, or its latest
+ * revision overall when forgotten entities count and no live one remains.
+ */
+function resolve(memexId: string, choice: Choice = {}): Resolved[] {
+	const { kind, includeDeleted = false, openOnly = false, limit, offset } = choice;
+	const rows = db.all<Revision & { made: string }>(sql`
+		with ranked as (${ranked(memexId)})
+		select
+			w.id,
+			w.entity_id as entityId,
+			w.memex_id as memexId,
+			w.kind,
+			w.text,
+			w.answers,
+			w.created_at as createdAt,
+			w.deleted_at as deletedAt,
+			w.made
+		from ranked w
+		where w.rn = 1
+			${kind === undefined ? sql`` : sql`and w.kind = ${kind}`}
+			${includeDeleted ? sql`` : sql`and w.deleted_at is null`}
+			${
+				openOnly
+					? sql`and not exists (
+							select 1 from ranked m
+							where m.rn = 1
+								and m.kind = 'memory'
+								and m.deleted_at is null
+								and m.answers = w.entity_id
+						)`
+					: sql``
+			}
+		order by w.created_at desc
+		${limit === undefined ? sql`` : sql`limit ${limit}`}
+		${offset === undefined ? sql`` : sql`offset ${offset}`}
+	`);
+	return rows.map((row) => ({ row, made: row.made }));
 }
 
 function toMemory({ row, made }: Resolved): Memory {
@@ -88,42 +129,55 @@ function toQuestion({ row, made }: Resolved): Question {
 	};
 }
 
-/** Every revision of a memex's entities, live or forgotten. */
-function revisionsOf(memexId: string): Revision[] {
-	return db.select().from(revisions).where(eq(revisions.memexId, memexId)).all();
-}
-
 /** The live revision that speaks for one entity, with the entity's first timestamp. */
 function resolveById(memexId: string, entityId: string): Resolved | undefined {
-	const rows = revisionsOf(memexId).filter((revision) => revision.entityId === entityId);
-	return resolveEntity(rows, false);
+	const row = db.get<(Revision & { made: string }) | undefined>(sql`
+		select
+			r.id,
+			r.entity_id as entityId,
+			r.memex_id as memexId,
+			r.kind,
+			r.text,
+			r.answers,
+			r.created_at as createdAt,
+			r.deleted_at as deletedAt,
+			(
+				select min(previous.created_at)
+				from revisions previous
+				where previous.memex_id = ${memexId} and previous.entity_id = ${entityId}
+			) as made
+		from revisions r
+		where r.memex_id = ${memexId} and r.entity_id = ${entityId} and r.deleted_at is null
+		order by r.created_at desc
+		limit 1
+	`);
+	return row ? { row, made: row.made } : undefined;
 }
 
 /** A memex's memories; forgotten entities are included only when asked for. */
 export function listMemories(memexId: string, includeDeleted = false): Memory[] {
-	return resolveAll(revisionsOf(memexId), includeDeleted)
-		.filter(({ row }) => row.kind === 'memory')
-		.map(toMemory);
+	return resolve(memexId, { kind: 'memory', includeDeleted }).map(toMemory);
 }
 
 /** A memex's questions; forgotten entities are included only when asked for. */
 export function listQuestions(memexId: string, includeDeleted = false): Question[] {
-	return resolveAll(revisionsOf(memexId), includeDeleted)
-		.filter(({ row }) => row.kind === 'question')
-		.map(toQuestion);
+	return resolve(memexId, { kind: 'question', includeDeleted }).map(toQuestion);
 }
 
 /** Total number of live memories in a memex. */
 export function total(memexId: string): number {
-	return listMemories(memexId).length;
+	const row = db.get<{ count: number }>(sql`
+		with ranked as (${ranked(memexId)})
+		select count(*) as count
+		from ranked
+		where rn = 1 and kind = 'memory' and deleted_at is null
+	`);
+	return row.count;
 }
 
 /** Questions no live memory answers. */
 export function openQuestions(memexId: string): Question[] {
-	const answered = new Set(
-		listMemories(memexId).flatMap((memory) => (memory.answers ? [memory.answers] : []))
-	);
-	return listQuestions(memexId).filter((question) => !answered.has(question.id));
+	return resolve(memexId, { kind: 'question', openOnly: true }).map(toQuestion);
 }
 
 /** Stores a new fact. */
@@ -275,34 +329,15 @@ export function search(
 }
 
 export function list(memexId: string, kind: Kind | undefined, offset: number): Page<ListItem> {
-	const items: ListItem[] = [];
-	if (kind !== 'question') {
-		items.push(
-			...listMemories(memexId).map((memory) => ({
-				id: memory.id,
-				kind: 'memory' as const,
-				text: memory.text,
-				createdAt: memory.createdAt,
-				updatedAt: memory.updatedAt
-			}))
-		);
-	}
-	if (kind !== 'memory') {
-		items.push(
-			...openQuestions(memexId).map((question) => ({
-				id: question.id,
-				kind: 'question' as const,
-				text: question.text,
-				createdAt: question.createdAt,
-				updatedAt: question.updatedAt
-			}))
-		);
-	}
-	items.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-	return {
-		items: items.slice(offset, offset + PAGE_SIZE),
-		hasMore: items.length > offset + PAGE_SIZE
-	};
+	const rows = resolve(memexId, { kind, openOnly: true, limit: PAGE_SIZE + 1, offset });
+	const items = rows.slice(0, PAGE_SIZE).map(({ row, made }) => ({
+		id: row.entityId,
+		kind: row.kind,
+		text: row.text,
+		createdAt: made,
+		updatedAt: row.createdAt
+	}));
+	return { items, hasMore: rows.length > PAGE_SIZE };
 }
 
 /** Most common terms across a memex's live memories, by number of memories containing each. */
