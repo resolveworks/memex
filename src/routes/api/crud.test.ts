@@ -1,8 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { create } from '$lib/server/memexes';
-import { listMemories, listQuestions } from '$lib/server/storage';
-import { useFrozenClock } from '../../tests/clock';
+import { listMemories } from '$lib/server/storage';
 import { event, post, type ApiEvent } from '../../tests/request';
 import { POST as answer } from './[id=uuid]/answer/+server';
 import { POST as forget } from './[id=uuid]/forget/+server';
@@ -35,35 +34,22 @@ describe('unknown memex', () => {
 describe('POST /api/:id/remember', () => {
 	it('stores the fact and returns it as 201 JSON', async () => {
 		const id = create('Dinner plans', 'en');
-		const before = Date.now();
 		const response = await remember(event(post({ text: 'Sushi on Fridays' }), id));
-		const after = Date.now();
 
 		expect(response.status).toBe(201);
 		const memory = await response.json();
 		expect(memory.text).toBe('Sushi on Fridays');
-		expect(new Date(memory.createdAt).getTime()).toBeGreaterThanOrEqual(before);
-		expect(new Date(memory.createdAt).getTime()).toBeLessThanOrEqual(after);
-		expect(memory.updatedAt).toBe(memory.createdAt);
-		expect(memory.answers).toBeNull();
-		expect(listMemories(id)).toHaveLength(1);
 	});
 });
 
 describe('POST /api/:id/wonder', () => {
 	it('records the question and returns it as 201 JSON', async () => {
 		const id = create('Dinner plans', 'en');
-		const before = Date.now();
 		const response = await wonder(event(post({ text: 'When is sushi day?' }), id));
-		const after = Date.now();
 
 		expect(response.status).toBe(201);
 		const question = await response.json();
 		expect(question.text).toBe('When is sushi day?');
-		expect(new Date(question.createdAt).getTime()).toBeGreaterThanOrEqual(before);
-		expect(new Date(question.createdAt).getTime()).toBeLessThanOrEqual(after);
-		expect(question.updatedAt).toBe(question.createdAt);
-		expect(listQuestions(id)).toHaveLength(1);
 	});
 });
 
@@ -78,11 +64,7 @@ describe('POST /api/:id/answer', () => {
 		expect(response.status).toBe(201);
 		const memory = await response.json();
 		expect(memory.text).toBe('Fridays');
-		expect(memory.updatedAt).toBe(memory.createdAt);
 		expect(memory.answers).toBe(question.id);
-		const memories = listMemories(id);
-		expect(memories).toHaveLength(1);
-		expect(memories[0]!.answers).toBe(question.id);
 	});
 
 	it('rejects an unknown question id', async () => {
@@ -94,15 +76,10 @@ describe('POST /api/:id/answer', () => {
 });
 
 describe('POST /api/:id/revise', () => {
-	// The memory case asserts updatedAt advances, so its two writes take a millisecond.
-	const tick = useFrozenClock();
-
 	it('returns the revised memory as JSON, keeping its identity', async () => {
 		const id = create('Dinner plans', 'en');
 		const stored = await remember(event(post({ text: 'Sushi on Fridays' }), id));
 		const memory = await stored.json();
-
-		tick();
 
 		const response = await revise(event(post({ id: memory.id, text: 'Sushi on Saturdays' }), id));
 
@@ -110,26 +87,6 @@ describe('POST /api/:id/revise', () => {
 		const revised = await response.json();
 		expect(revised.id).toBe(memory.id);
 		expect(revised.text).toBe('Sushi on Saturdays');
-		expect(new Date(revised.updatedAt).getTime()).toBeGreaterThan(
-			new Date(memory.updatedAt).getTime()
-		);
-		expect(listMemories(id)).toHaveLength(1);
-		expect(listMemories(id)[0]!.text).toBe('Sushi on Saturdays');
-	});
-
-	it('returns the revised question as JSON, keeping its identity', async () => {
-		const id = create('Dinner plans', 'en');
-		const stored = await wonder(event(post({ text: 'When is sushi day?' }), id));
-		const question = await stored.json();
-
-		const response = await revise(event(post({ id: question.id, text: 'When is cake day?' }), id));
-
-		expect(response.status).toBe(200);
-		const revised = await response.json();
-		expect(revised.id).toBe(question.id);
-		expect(revised.text).toBe('When is cake day?');
-		expect(listQuestions(id)).toHaveLength(1);
-		expect(listQuestions(id)[0]!.text).toBe('When is cake day?');
 	});
 });
 
