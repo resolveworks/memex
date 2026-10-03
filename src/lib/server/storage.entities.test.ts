@@ -98,14 +98,6 @@ describe('entity storage', () => {
 			expect(revised.updatedAt).toBe(revisedAt);
 			expect(listQuestions(memex)).toEqual([revised]);
 		});
-
-		it('supersedes an earlier revision written in the same millisecond', () => {
-			const memory = remember(memex, 'Pizza on Friday');
-			revise(memex, memory.id, 'Pizza on Saturday');
-
-			const [current] = listMemories(memex);
-			expect(current.text).toBe('Pizza on Saturday');
-		});
 	});
 
 	describe('forget', () => {

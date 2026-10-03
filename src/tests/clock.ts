@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, vi } from 'vitest';
 
-// Cross-entity list ordering still reads `created_at`, so tests that assert it
-// pin the clock and advance it between writes. Revision resolution itself uses
-// `version` and needs no clock movement.
+// Ordering and revision resolution read `created_at`, so tests that assert them
+// pin the clock and advance it between writes.
 const EPOCH = Date.parse('2025-06-01T12:00:00.000Z');
 
 let clock = EPOCH;
