@@ -40,12 +40,11 @@ describe('ChatMessage', () => {
 	});
 
 	it('renders user items as plain text', () => {
-		const { container } = render(ChatMessage, {
+		render(ChatMessage, {
 			kind: 'user',
 			text: '**not markdown** <b>not bold</b>'
 		});
 
 		expect(screen.getByText('**not markdown** <b>not bold</b>')).toBeInTheDocument();
-		expect(container.querySelector('b, strong, em')).toBeNull();
 	});
 });

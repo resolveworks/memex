@@ -38,11 +38,9 @@ describe('settings actions', () => {
 
 	describe('locale', () => {
 		it('sets the cookie and updates locals.locale', async () => {
-			const id = create('Dinner plans', 'en');
 			const cookies: Cookies = new FakeCookies();
 			const locals: App.Locals = { locale: 'en' };
 			const event = {
-				params: { id },
 				cookies,
 				locals,
 				request: postForm({ locale: 'de' })
