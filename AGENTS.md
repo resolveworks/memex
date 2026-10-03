@@ -8,6 +8,7 @@ design goal — resist scope creep.
 - `pnpm install` — install deps.
 - `pnpm dev` — dev server; requires `.env` with `DEEPSEEK_API_KEY`.
 - `pnpm check` — svelte-check / type check.
+- `pnpm test` — Vitest (in-memory SQLite, rolled back per test).
 - `pnpm build` — production build.
 
 Never commit or log `DEEPSEEK_API_KEY`. `.env` is gitignored; keep it that way.
@@ -19,6 +20,17 @@ Never commit or log `DEEPSEEK_API_KEY`. `.env` is gitignored; keep it that way.
 - No fallbacks, no defensive guards. Invalid state throws with a clear error.
 - Comments carry intent only — nothing the code already shows.
 - Define tool parameters with typebox `Type.Object`.
+
+## Testing
+
+Test behaviour, not implementation: assert observable results through public
+interfaces, not private helpers or call order.
+
+- Vitest, split into a `server` project (node) and a `client` project (jsdom +
+  `@testing-library/svelte`).
+- Server tests run on an in-memory SQLite database with a transaction rolled
+  back after each test; they never touch `data/memex.db`.
+- `pnpm test` runs once; `pnpm test:unit` watches.
 
 ## Reference
 
