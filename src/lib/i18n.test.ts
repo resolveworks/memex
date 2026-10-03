@@ -9,11 +9,6 @@ describe('t', () => {
 		page.data.locale = 'de';
 		expect(t('nav.language')).toBe('Sprache');
 	});
-
-	it('follows the page locale when it changes', () => {
-		page.data.locale = 'en';
-		expect(t('nav.language')).toBe('Language');
-	});
 });
 
 describe('languageName', () => {

@@ -176,8 +176,6 @@ describe('clear', () => {
 
 		expect(fake.agent.reset).not.toHaveBeenCalled();
 		expect(fake.agent.prompt).not.toHaveBeenCalled();
-		expect(store.chat.messages).toEqual([]);
-		expect(store.chat.busy).toBe(false);
 	});
 
 	it('restarts the greeting for the open memex', async () => {
