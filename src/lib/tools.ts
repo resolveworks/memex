@@ -13,7 +13,6 @@ function headers(json = false): HeadersInit {
 	};
 }
 
-/** A diary line: date, kind, id, text. */
 function line(kind: Kind, item: { id: string; updatedAt: string; text: string }): string {
 	return `- ${item.updatedAt.slice(0, 10)} [${kind}] ${item.id}: ${item.text}`;
 }
@@ -185,7 +184,7 @@ const listParameters = Type.Object({
 export const list: AgentTool<typeof listParameters> = {
 	name: "list",
 	label: "List",
-	description: "List the diary, memories and questions interleaved, newest first.",
+	description: "List memories and questions interleaved, newest first.",
 	parameters: listParameters,
 	execute: async (_toolCallId, { kind, offset }) => {
 		const from = offset ?? 0;

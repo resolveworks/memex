@@ -13,7 +13,6 @@ type QuestionRow = typeof questions.$inferSelect;
 
 export type Kind = "memory" | "question";
 
-/** One entry in the mixed diary listing returned by the `list` tool. */
 export interface ListItem {
 	id: string;
 	kind: Kind;
@@ -303,7 +302,6 @@ export function search(
 	};
 }
 
-/** One page of the diary, memories and questions interleaved newest first. */
 export function list(memexId: string, kind: Kind | undefined, offset: number): Page<ListItem> {
 	const items: ListItem[] = [];
 	if (kind !== "question") {
