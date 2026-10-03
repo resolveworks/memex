@@ -44,7 +44,8 @@
 		"@earendil-works/pi-agent-core": "^0.85.1",
 		"@earendil-works/pi-ai": "^0.85.1",
 		"drizzle-orm": "1.0.0-rc.4",
-		"marked": "^18.0.13",
+		"micromark": "^4.0.3",
+		"micromark-extension-gfm": "^3.0.0",
 		"typebox": "^1.3.34"
 	}
 }

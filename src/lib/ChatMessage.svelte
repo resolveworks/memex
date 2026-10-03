@@ -10,7 +10,11 @@
 </script>
 
 <script lang="ts">
-	import Markdown from '$lib/components/Markdown.svelte';
+	import { micromark } from 'micromark';
+	import { gfm, gfmHtml } from 'micromark-extension-gfm';
+
+	const extensions = [gfm()];
+	const htmlExtensions = [gfmHtml()];
 
 	let {
 		kind,
@@ -41,7 +45,11 @@
 {:else if kind === 'error'}
 	<div class="error" role="alert">{text}</div>
 {:else if kind === 'assistant'}
-	<div class="assistant" class:streaming><Markdown {text} /></div>
+	<div class="assistant" class:streaming>
+		<!-- Safe: micromark escapes embedded HTML and drops dangerous URL protocols by default. -->
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+		{@html micromark(text, { extensions, htmlExtensions })}
+	</div>
 {:else}
 	<div class="bubble user">{text}</div>
 {/if}
