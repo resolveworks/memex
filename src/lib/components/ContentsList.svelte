@@ -327,6 +327,10 @@
 		font-size: 0.75rem;
 	}
 
+	.meta a {
+		font-weight: 600;
+	}
+
 	.history {
 		grid-column: 1 / -1;
 	}
@@ -336,7 +340,7 @@
 		align-items: center;
 		gap: var(--space-1);
 		color: var(--accent);
-		font-size: 0.875rem;
+		font-size: 0.75rem;
 		font-weight: 600;
 		cursor: pointer;
 		list-style: none;
