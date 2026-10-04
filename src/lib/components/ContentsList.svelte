@@ -109,25 +109,6 @@
 				{#each visible as item (item.id)}
 					<li class="item" class:deleted={item.deletedAt !== null} id={`entry-${item.id}`}>
 						<div class="body">
-							<div class="tags">
-								<span class="badge {item.kind}">
-									<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-										{#if item.kind === 'question'}
-											<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-											<line x1="12" y1="17" x2="12.01" y2="17" />
-										{:else}
-											<ellipse cx="12" cy="5" rx="9" ry="3" />
-											<path d="M3 5v14a9 3 0 0 0 18 0V5" />
-											<path d="M3 12a9 3 0 0 0 18 0" />
-										{/if}
-									</svg>
-									{item.kind === 'question' ? t('question.label') : t('memory.label')}
-								</span>
-								{#if item.deletedAt !== null}
-									<span class="badge deleted">{t('list.deleted')}</span>
-								{/if}
-							</div>
-
 							<p class="text">{item.text}</p>
 
 							<p class="meta">
@@ -303,38 +284,6 @@
 		flex-direction: column;
 		gap: var(--space-2);
 		min-inline-size: 0;
-	}
-
-	.tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-2);
-	}
-
-	.badge {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--space-1);
-		padding: 0.1rem var(--space-2);
-		border-radius: var(--radius-full);
-		font-size: 0.75rem;
-		font-weight: 600;
-		line-height: 1.5;
-	}
-
-	.badge.memory {
-		background: var(--fill);
-		color: var(--ink-soft);
-	}
-
-	.badge.question {
-		background: color-mix(in srgb, var(--accent) 12%, var(--surface));
-		color: var(--accent);
-	}
-
-	.badge.deleted {
-		background: color-mix(in srgb, var(--danger) 12%, var(--surface));
-		color: var(--danger);
 	}
 
 	.text {

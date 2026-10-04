@@ -43,14 +43,14 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('ContentsList', () => {
-	it('labels each entry with its type instead of a bare icon', () => {
+	it('shows each entry’s text with a single delete action', () => {
 		renderList([
 			item({ id: '1', kind: 'memory', text: 'Sushi on Fridays' }),
 			item({ id: '2', kind: 'question', text: 'When is sushi day?' })
 		]);
 
-		expect(screen.getByText('Memory')).toBeInTheDocument();
-		expect(screen.getByText('Question')).toBeInTheDocument();
+		expect(screen.getByText('Sushi on Fridays')).toBeInTheDocument();
+		expect(screen.getByText('When is sushi day?')).toBeInTheDocument();
 		// The only per-entry control is the delete button.
 		expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(2);
 	});
@@ -104,7 +104,6 @@ describe('ContentsList', () => {
 		await tick();
 
 		expect(screen.getByText('Sushi on Fridays')).toBeInTheDocument();
-		expect(screen.getByText('Deleted')).toBeInTheDocument();
 		expect(screen.getAllByRole('button', { name: 'Restore' })).toHaveLength(1);
 		expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(1);
 	});
