@@ -78,6 +78,10 @@ interface Choice {
 	includeDeleted?: boolean;
 	limit?: number;
 	offset?: number;
+	/** Rank this entity id ahead of the rest. */
+	prefer?: string;
+	/** Order arbitrarily rather than newest first; pair with `limit` to pick one. */
+	random?: boolean;
 }
 
 /**
@@ -86,7 +90,7 @@ interface Choice {
  * Answered questions never resolve, whether their answer is live or forgotten.
  */
 function resolve(memexId: string, choice: Choice = {}): Resolved[] {
-	const { kind, includeDeleted = false, limit, offset } = choice;
+	const { kind, includeDeleted = false, limit, offset, prefer, random } = choice;
 	const rows = db.all<Revision & { made: string }>(sql`
 		with ranked as (${ranked(memexId)})
 		select
@@ -107,7 +111,9 @@ function resolve(memexId: string, choice: Choice = {}): Resolved[] {
 				select 1 from revisions a
 				where a.kind = 'memory' and a.answers = w.entity_id
 			)
-		order by w.seq desc
+		order by
+			${prefer === undefined ? sql`` : sql`(w.entity_id = ${prefer}) desc,`}
+			${random ? sql`random()` : sql`w.seq desc`}
 		${limit === undefined ? sql`` : sql`limit ${limit}`}
 		${offset === undefined ? sql`` : sql`offset ${offset}`}
 	`);
@@ -179,6 +185,32 @@ export function listMemories(memexId: string, includeDeleted = false): Memory[] 
 /** A memex's open questions; answered ones are never listed, forgotten ones only when asked for. */
 export function listQuestions(memexId: string, includeDeleted = false): Question[] {
 	return resolve(memexId, { kind: 'question', includeDeleted }).map(toQuestion);
+}
+
+/** Total number of open questions in a memex. */
+export function openQuestions(memexId: string): number {
+	const row = db.get<{ count: number }>(sql`
+		with ranked as (${ranked(memexId)})
+		select count(*) as count
+		from ranked
+		where rn = 1 and kind = 'question' and deleted_at is null
+			and not exists (
+				select 1 from revisions a
+				where a.kind = 'memory' and a.answers = ranked.entity_id
+			)
+	`);
+	return row.count;
+}
+
+/** One open question: the preferred one when it is still open, otherwise a random one. */
+export function pickQuestion(memexId: string, preferred: string | undefined): Question | undefined {
+	const [resolved] = resolve(memexId, {
+		kind: 'question',
+		prefer: preferred,
+		random: true,
+		limit: 1
+	});
+	return resolved ? toQuestion(resolved) : undefined;
 }
 
 /**

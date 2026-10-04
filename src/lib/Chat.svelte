@@ -7,12 +7,13 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import { t } from '$lib/i18n';
 
-	let { id, language }: { id: string; language: string } = $props();
+	let { id, language, question }: { id: string; language: string; question: string | undefined } =
+		$props();
 
 	let input = $state('');
 
 	$effect(() => {
-		void open(id, language);
+		void open(id, language, question);
 	});
 
 	// Committed history is immutable while a reply streams; only the streaming

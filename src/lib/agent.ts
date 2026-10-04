@@ -25,14 +25,16 @@ declare module '@earendil-works/pi-agent-core' {
  * stays static and the whole prefix stays cached. The greeting uses the app
  * language because it is sent before the user writes.
  */
-export async function greetingMessage(userLanguage: string): Promise<AgentMessage> {
-	const { title, memories, questions, terms } = await promptContext();
-	const [first] = questions;
-	const describe = first
-		? `, what it appears to hold from the topic terms above, and what it has left unanswered. End by asking the open question ${first.id}: "${first.text}", set in bold.`
+export async function greetingMessage(
+	userLanguage: string,
+	questionId?: string
+): Promise<AgentMessage> {
+	const { title, memories, openQuestions, question, terms } = await promptContext(questionId);
+	const describe = question
+		? `, what it appears to hold from the topic terms above, and what it has left unanswered. End by asking the open question ${question.id}: "${question.text}", set in bold.`
 		: ' and, from the topic terms above, what it appears to hold.';
 	const sections = [
-		`This memex is titled "${title}". Today is ${new Date().toISOString().slice(0, 10)}. It holds ${memories} memories and ${questions.length} open questions.`,
+		`This memex is titled "${title}". Today is ${new Date().toISOString().slice(0, 10)}. It holds ${memories} memories and ${openQuestions} open questions.`,
 		termsSection(terms)
 	];
 	const context = sections.filter((section) => section !== '').join('\n\n');
@@ -114,7 +116,8 @@ export function getAgent(): Agent {
 interface PromptContext {
 	title: string;
 	memories: number;
-	questions: Question[];
+	openQuestions: number;
+	question: Question | undefined;
 	terms: TermCount[];
 }
 
@@ -123,8 +126,9 @@ interface TermCount {
 	count: number;
 }
 
-async function promptContext(): Promise<PromptContext> {
-	const response = await fetch(api('context'));
+async function promptContext(questionId: string | undefined): Promise<PromptContext> {
+	const query = questionId === undefined ? '' : `?question=${encodeURIComponent(questionId)}`;
+	const response = await fetch(api(`context${query}`));
 	if (!response.ok) throw new Error(`Failed to load context (${response.status}).`);
 	return (await response.json()) as PromptContext;
 }

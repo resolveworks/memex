@@ -152,9 +152,16 @@ describe('open', () => {
 		expect(fake.agent.reset).toHaveBeenCalledTimes(1);
 		expect(fake.useSystemPrompt).toHaveBeenCalledTimes(1);
 		expect(fake.useSystemPrompt).toHaveBeenCalledWith('de');
-		expect(fake.greetingMessage).toHaveBeenCalledWith('sv');
+		expect(fake.greetingMessage).toHaveBeenCalledWith('sv', undefined);
 		expect(fake.agent.prompt).toHaveBeenCalledTimes(1);
 		expect(fake.agent.prompt).toHaveBeenCalledWith(fake.greeting);
+	});
+
+	it('greets with the question the caller names', async () => {
+		await store.open('9e107669-c4b1-4380-a20b-1f3e6c8b9c2d', 'de', 'q1');
+		flushSync();
+
+		expect(fake.greetingMessage).toHaveBeenCalledWith('sv', 'q1');
 	});
 
 	it('does not greet again when the same memex stays open', async () => {

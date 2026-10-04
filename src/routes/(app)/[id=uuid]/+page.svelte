@@ -4,4 +4,4 @@
 	let { data } = $props();
 </script>
 
-<Chat id={data.memex.id} language={data.memex.language} />
+<Chat id={data.memex.id} language={data.memex.language} question={data.question} />

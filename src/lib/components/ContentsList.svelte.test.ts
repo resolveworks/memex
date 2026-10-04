@@ -6,8 +6,14 @@ import type { ContentsItem } from '$lib/contents';
 import ContentsList from './ContentsList.svelte';
 
 vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
+const memex = vi.hoisted(() => '9e107669-c4b1-4380-a20b-1f3e6c8b9c2d');
+
 vi.mock('$app/state', () => ({
-	page: { url: new URL('http://localhost/contents'), data: { locale: 'en' } }
+	page: {
+		url: new URL('http://localhost/contents'),
+		params: { id: memex },
+		data: { locale: 'en' }
+	}
 }));
 vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
@@ -53,6 +59,19 @@ describe('ContentsList', () => {
 		expect(screen.getByText('When is sushi day?')).toBeInTheDocument();
 		// The only per-entry control is the delete button.
 		expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(2);
+	});
+
+	it('links a question to the chat that will ask it, but leaves a memory plain', () => {
+		renderList([
+			item({ id: '1', kind: 'memory', text: 'Sushi on Fridays' }),
+			item({ id: 'q1', kind: 'question', text: 'When is sushi day?' })
+		]);
+
+		expect(screen.getByRole('link', { name: 'When is sushi day?' })).toHaveAttribute(
+			'href',
+			`/${memex}?question=q1`
+		);
+		expect(screen.queryByRole('link', { name: 'Sushi on Fridays' })).toBeNull();
 	});
 
 	it('shows earlier versions in the history and a restore action for each', () => {

@@ -10,6 +10,7 @@ export const chat = $state<{
 }>({ messages: [], streaming: undefined, busy: false });
 
 let currentId: string | undefined;
+let currentQuestion: string | undefined;
 let currentMemexLanguage: string | undefined;
 let openToken = 0;
 
@@ -48,7 +49,7 @@ function active(): Agent {
 }
 
 /** Starts a fresh conversation: aborts any stream in flight, then greets. */
-async function restart(memexLanguage: string): Promise<void> {
+async function restart(memexLanguage: string, question: string | undefined): Promise<void> {
 	const instance = active();
 	const token = ++openToken;
 	if (instance.state.isStreaming) {
@@ -58,7 +59,7 @@ async function restart(memexLanguage: string): Promise<void> {
 	if (token !== openToken) return;
 	instance.reset();
 	useSystemPrompt(memexLanguage);
-	const greeting = await greetingMessage(page.data.locale);
+	const greeting = await greetingMessage(page.data.locale, question);
 	if (token !== openToken) return;
 	chat.messages = [];
 	chat.streaming = undefined;
@@ -66,12 +67,17 @@ async function restart(memexLanguage: string): Promise<void> {
 	void instance.prompt(greeting);
 }
 
-/** Switches to a memex, discarding the previous conversation and any stream in flight. */
-export async function open(id: string, memexLanguage: string): Promise<void> {
-	if (id === currentId) return;
+/**
+ * Switches to a memex, discarding the previous conversation and any stream in
+ * flight. `question` names an open question for the greeting to ask; without
+ * one the greeting falls back to a random open question.
+ */
+export async function open(id: string, memexLanguage: string, question?: string): Promise<void> {
+	if (id === currentId && question === currentQuestion) return;
 	currentId = id;
+	currentQuestion = question;
 	currentMemexLanguage = memexLanguage;
-	await restart(memexLanguage);
+	await restart(memexLanguage, question);
 }
 
 /**
@@ -80,7 +86,7 @@ export async function open(id: string, memexLanguage: string): Promise<void> {
  */
 export async function clear(): Promise<void> {
 	if (!currentMemexLanguage) return;
-	await restart(currentMemexLanguage);
+	await restart(currentMemexLanguage, undefined);
 }
 
 export async function send(text: string): Promise<void> {

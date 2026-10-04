@@ -22,15 +22,15 @@ function question(id: string, text: string): Question {
 }
 
 /** The greeting message, confirmed by its role. */
-async function greeting(): Promise<Extract<AgentMessage, { role: 'greeting' }>> {
-	const message = await greetingMessage('sv');
+async function greeting(question?: string): Promise<Extract<AgentMessage, { role: 'greeting' }>> {
+	const message = await greetingMessage('sv', question);
 	if (message.role !== 'greeting') throw new Error('Expected a greeting message.');
 	return message;
 }
 
 /** The greeting's text, the only content it carries. */
-async function greetingText(): Promise<string> {
-	const [content] = (await greeting()).content;
+async function greetingText(question?: string): Promise<string> {
+	const [content] = (await greeting(question)).content;
 	if (content.type !== 'text') throw new Error('Expected text content.');
 	return content.text;
 }
@@ -47,7 +47,7 @@ describe('greetingMessage', () => {
 
 	it('loads the context from the memex api', async () => {
 		fetchMock.mockResolvedValueOnce(
-			ok({ title: 'Tea Log', memories: 0, questions: [], terms: [] })
+			ok({ title: 'Tea Log', memories: 0, openQuestions: 0, terms: [] })
 		);
 
 		await greetingText();
@@ -68,11 +68,8 @@ describe('greetingMessage', () => {
 			ok({
 				title: 'Tea Log',
 				memories: 12,
-				questions: [
-					question('q1', 'Tea or coffee?'),
-					question('q2', 'Loose leaf or bags?'),
-					question('q3', 'With milk?')
-				],
+				openQuestions: 3,
+				question: question('q1', 'Tea or coffee?'),
 				terms: [
 					{ term: 'tea', count: 3 },
 					{ term: 'sleep', count: 1 }
@@ -80,7 +77,7 @@ describe('greetingMessage', () => {
 			})
 		);
 
-		const { content } = await greeting();
+		const { content } = await greeting('q1');
 
 		expect(content).toEqual([
 			{
@@ -98,7 +95,7 @@ describe('greetingMessage', () => {
 
 	it('says the store is empty when it holds no terms', async () => {
 		fetchMock.mockResolvedValueOnce(
-			ok({ title: 'Blank Slate', memories: 0, questions: [], terms: [] })
+			ok({ title: 'Blank Slate', memories: 0, openQuestions: 0, terms: [] })
 		);
 
 		const text = await greetingText();
@@ -112,7 +109,7 @@ describe('greetingMessage', () => {
 			ok({
 				title: 'Notes',
 				memories: 5,
-				questions: [],
+				openQuestions: 0,
 				terms: [{ term: 'tea', count: 5 }]
 			})
 		);
@@ -123,24 +120,20 @@ describe('greetingMessage', () => {
 		expect(text).not.toContain('left unanswered');
 	});
 
-	it('shows only the first question', async () => {
+	it('asks the api for the named question', async () => {
 		fetchMock.mockResolvedValueOnce(
 			ok({
 				title: 'Tea Log',
 				memories: 12,
-				questions: [
-					question('q1', 'Tea or coffee?'),
-					question('q2', 'Loose leaf or bags?'),
-					question('q3', 'With milk?')
-				],
+				openQuestions: 1,
+				question: question('q2', 'Loose leaf or bags?'),
 				terms: []
 			})
 		);
 
-		const text = await greetingText();
+		await greetingText('q2');
 
-		expect(text).toContain('q1: "Tea or coffee?"');
-		expect(text).not.toContain('q2');
+		expect(fetchMock.mock.calls[0][0]).toBe(`/api/${memex}/context?question=q2`);
 	});
 });
 

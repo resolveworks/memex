@@ -5,7 +5,7 @@ import { create } from '$lib/server/memexes';
 import type { ListItem, TermCount } from '$lib/server/storage';
 import { answer, forget, remember, wonder } from '$lib/server/storage';
 import type { Question } from '$lib/question';
-import { event, get, urlEvent, type ApiEvent } from '../../tests/request';
+import { urlEvent, type ApiEvent } from '../../tests/request';
 import { thrown } from '../../tests/throws';
 import { GET as context } from './[id=uuid]/context/+server';
 import { GET as list } from './[id=uuid]/list/+server';
@@ -107,7 +107,7 @@ describe('GET /api/:id/list', () => {
 });
 
 describe('GET /api/:id/context', () => {
-	it('returns the title, live-memory total, open questions, and terms', async () => {
+	it('returns the title, live-memory total, open question count, chosen question, and terms', async () => {
 		const id = create('Dinner plans', 'en');
 		remember(id, 'Sushi on Fridays');
 		remember(id, 'Cake on Saturdays');
@@ -117,15 +117,14 @@ describe('GET /api/:id/context', () => {
 		const forgotten = remember(id, 'Pasta on Sundays');
 		forget(id, forgotten.id);
 
-		const response = await context(event(get('/api/context'), id));
+		const response = await context(urlEvent('/api/context', id));
 
 		expect(response.status).toBe(200);
 		const state = await response.json();
 		expect(state.title).toBe('Dinner plans');
 		expect(state.memories).toBe(3);
-		expect(state.questions).toEqual([
-			expect.objectContaining({ id: open.id, text: 'Which wine with cake?' })
-		]);
+		expect(state.openQuestions).toBe(1);
+		expect(state.question).toMatchObject({ id: open.id, text: 'Which wine with cake?' });
 		expect(state.terms).toEqual([
 			{ term: 'fridays', count: 2 },
 			{ term: 'cake', count: 1 },
@@ -134,11 +133,47 @@ describe('GET /api/:id/context', () => {
 		]);
 	});
 
+	it('asks the question named by the question parameter', async () => {
+		const id = create('Dinner plans', 'en');
+		wonder(id, 'Which wine with cake?');
+		const wanted = wonder(id, 'When is sushi day?');
+
+		const response = await context(urlEvent(`/api/context?question=${wanted.id}`, id));
+
+		const state = await response.json();
+		expect(state.openQuestions).toBe(2);
+		expect(state.question).toMatchObject({ id: wanted.id, text: 'When is sushi day?' });
+	});
+
+	it('falls back to an open question when the named one is no longer open', async () => {
+		const id = create('Dinner plans', 'en');
+		const settled = wonder(id, 'When is sushi day?');
+		answer(id, settled.id, 'Fridays');
+		const open = wonder(id, 'Which wine with cake?');
+
+		const response = await context(urlEvent(`/api/context?question=${settled.id}`, id));
+
+		const state = await response.json();
+		expect(state.openQuestions).toBe(1);
+		expect(state.question).toMatchObject({ id: open.id, text: 'Which wine with cake?' });
+	});
+
+	it('reports no question when none is open', async () => {
+		const id = create('Dinner plans', 'en');
+		remember(id, 'Sushi on Fridays');
+
+		const response = await context(urlEvent('/api/context', id));
+
+		const state = await response.json();
+		expect(state.openQuestions).toBe(0);
+		expect(state.question).toBeUndefined();
+	});
+
 	it('filters terms with the memex language stopwords', async () => {
 		const id = create('Essenspläne', 'de');
 		remember(id, 'Der the Hund');
 
-		const response = await context(event(get('/api/context'), id));
+		const response = await context(urlEvent('/api/context', id));
 
 		const state = await response.json();
 		expect(state.terms).toEqual([
@@ -153,7 +188,7 @@ describe('GET /api/:id/context', () => {
 		remember(id, words.join(' '));
 		remember(id, 'w03');
 
-		const response = await context(event(get('/api/context'), id));
+		const response = await context(urlEvent('/api/context', id));
 
 		const state = await response.json();
 		expect(state.terms).toHaveLength(50);

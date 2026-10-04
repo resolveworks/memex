@@ -67,6 +67,12 @@
 		return resolve(`${currentPage.url.pathname}?${search}`);
 	}
 
+	// A link to the chat that asks the question on open.
+	function askHref(item: ContentsItem): ResolvedPathname {
+		const search = new SvelteURLSearchParams({ question: item.id });
+		return resolve(`/${currentPage.params.id}?${search}`);
+	}
+
 	// Post to a named action without dropping the current search and page.
 	function action(name: string): string {
 		const search = queryString();
@@ -109,7 +115,13 @@
 				{#each visible as item (item.id)}
 					<li class="item" class:deleted={item.deletedAt !== null} id={`entry-${item.id}`}>
 						<div class="body">
-							<p class="text">{item.text}</p>
+							{#if item.kind === 'question' && item.deletedAt === null}
+								<p class="text">
+									<a class="ask" href={askHref(item)}>{item.text}</a>
+								</p>
+							{:else}
+								<p class="text">{item.text}</p>
+							{/if}
 
 							<p class="meta">
 								<span>
@@ -308,6 +320,15 @@
 
 	.item.deleted .text {
 		color: var(--muted);
+	}
+
+	.ask {
+		color: var(--accent);
+		text-decoration: none;
+	}
+
+	.ask:hover {
+		text-decoration: underline;
 	}
 
 	.meta {
