@@ -76,7 +76,6 @@ function ranked(memexId: string) {
 interface Choice {
 	kind?: Kind;
 	includeDeleted?: boolean;
-	openOnly?: boolean;
 	limit?: number;
 	offset?: number;
 }
@@ -84,9 +83,10 @@ interface Choice {
 /**
  * The revision that speaks for each entity: its latest live one, or its latest
  * revision overall when forgotten entities count and no live one remains.
+ * Answered questions never resolve, whether their answer is live or forgotten.
  */
 function resolve(memexId: string, choice: Choice = {}): Resolved[] {
-	const { kind, includeDeleted = false, openOnly = false, limit, offset } = choice;
+	const { kind, includeDeleted = false, limit, offset } = choice;
 	const rows = db.all<Revision & { made: string }>(sql`
 		with ranked as (${ranked(memexId)})
 		select
@@ -103,17 +103,10 @@ function resolve(memexId: string, choice: Choice = {}): Resolved[] {
 		where w.rn = 1
 			${kind === undefined ? sql`` : sql`and w.kind = ${kind}`}
 			${includeDeleted ? sql`` : sql`and w.deleted_at is null`}
-			${
-				openOnly
-					? sql`and not exists (
-							select 1 from ranked m
-							where m.rn = 1
-								and m.kind = 'memory'
-								and m.deleted_at is null
-								and m.answers = w.entity_id
-						)`
-					: sql``
-			}
+			and not exists (
+				select 1 from revisions a
+				where a.kind = 'memory' and a.answers = w.entity_id
+			)
 		order by w.seq desc
 		${limit === undefined ? sql`` : sql`limit ${limit}`}
 		${offset === undefined ? sql`` : sql`offset ${offset}`}
@@ -183,17 +176,17 @@ export function listMemories(memexId: string, includeDeleted = false): Memory[] 
 	return resolve(memexId, { kind: 'memory', includeDeleted }).map(toMemory);
 }
 
-/** A memex's questions; forgotten entities are included only when asked for. */
+/** A memex's open questions; answered ones are never listed, forgotten ones only when asked for. */
 export function listQuestions(memexId: string, includeDeleted = false): Question[] {
 	return resolve(memexId, { kind: 'question', includeDeleted }).map(toQuestion);
 }
 
 /**
  * A memex's contents, interleaved newest first. Forgotten entities are included
- * only when asked for; `openOnly` drops questions a live memory already answers.
+ * only when asked for; answered questions never appear.
  */
-export function listAll(memexId: string, includeDeleted = false, openOnly = false): Entry[] {
-	return resolve(memexId, { includeDeleted, openOnly }).map(toEntry);
+export function listAll(memexId: string, includeDeleted = false): Entry[] {
+	return resolve(memexId, { includeDeleted }).map(toEntry);
 }
 
 /** Total number of live memories in a memex. */
@@ -205,11 +198,6 @@ export function total(memexId: string): number {
 		where rn = 1 and kind = 'memory' and deleted_at is null
 	`);
 	return row.count;
-}
-
-/** Questions no live memory answers. */
-export function openQuestions(memexId: string): Question[] {
-	return resolve(memexId, { kind: 'question', openOnly: true }).map(toQuestion);
 }
 
 /** Stores a new fact. */
@@ -343,10 +331,7 @@ function matches<T extends { text: string }>(items: T[], terms: string[]): T[] {
 	});
 }
 
-/**
- * Searches live memories and open questions together. The UI asks for forgotten
- * entities too, in which case every recorded question comes back.
- */
+/** Searches a memex's live memories and open questions; forgotten ones only when asked for. */
 export function search(
 	memexId: string,
 	queries: string[],
@@ -355,21 +340,13 @@ export function search(
 	const terms = queries.flatMap(tokenize);
 	return {
 		memories: matches(listMemories(memexId, includeDeleted), terms),
-		questions: matches(
-			includeDeleted ? listQuestions(memexId, true) : openQuestions(memexId),
-			terms
-		)
+		questions: matches(listQuestions(memexId, includeDeleted), terms)
 	};
 }
 
-/** Searches a memex's contents, keeping recency order; `openOnly` drops closed questions. */
-export function searchAll(
-	memexId: string,
-	queries: string[],
-	includeDeleted = false,
-	openOnly = false
-): Entry[] {
-	return matches(listAll(memexId, includeDeleted, openOnly), queries.flatMap(tokenize));
+/** Searches a memex's contents, keeping recency order. */
+export function searchAll(memexId: string, queries: string[], includeDeleted = false): Entry[] {
+	return matches(listAll(memexId, includeDeleted), queries.flatMap(tokenize));
 }
 
 /** Every revision of a memex, in insertion order, for a complete backup. */
@@ -402,7 +379,7 @@ export function revisionsOf(
 }
 
 export function list(memexId: string, kind: Kind | undefined, offset: number): Page<ListItem> {
-	const rows = resolve(memexId, { kind, openOnly: true, limit: PAGE_SIZE + 1, offset });
+	const rows = resolve(memexId, { kind, limit: PAGE_SIZE + 1, offset });
 	const items = rows.slice(0, PAGE_SIZE).map(({ row, made }) => ({
 		id: row.entityId,
 		kind: row.kind,

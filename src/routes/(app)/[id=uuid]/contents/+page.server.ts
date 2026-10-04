@@ -22,9 +22,7 @@ function groupRevisions(rows: (Revision & { entityId: string })[]): Map<string, 
 
 export const load: PageServerLoad = ({ params, url }) => {
 	const query = url.searchParams.get('q') ?? '';
-	const entries = query
-		? searchAll(params.id, [query], true, true)
-		: listAll(params.id, true, true);
+	const entries = query ? searchAll(params.id, [query], true) : listAll(params.id, true);
 
 	const pages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
 	const page = pageNumber(url.searchParams.get('page'), pages);

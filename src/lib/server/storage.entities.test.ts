@@ -7,7 +7,6 @@ import {
 	forget,
 	listMemories,
 	listQuestions,
-	openQuestions,
 	remember,
 	restore,
 	revert,
@@ -46,13 +45,12 @@ describe('entity storage', () => {
 	});
 
 	describe('wonder', () => {
-		it('records a question that starts out open', () => {
+		it('records an open question', () => {
 			const question = wonder(memex, 'When is pizza?');
 
 			expect(question.text).toBe('When is pizza?');
 			expect(question.deletedAt).toBe(null);
 			expect(listQuestions(memex)).toEqual([question]);
-			expect(openQuestions(memex)).toEqual([question]);
 		});
 	});
 
@@ -64,8 +62,7 @@ describe('entity storage', () => {
 
 			expect(memory.answers).toBe(question.id);
 			expect(listMemories(memex)).toEqual([memory]);
-			expect(openQuestions(memex)).toEqual([]);
-			expect(listQuestions(memex)).toEqual([question]);
+			expect(listQuestions(memex)).toEqual([]);
 		});
 
 		it('throws for an unknown question id', () => {
@@ -138,14 +135,13 @@ describe('entity storage', () => {
 			expect(gone.deletedAt).toBe(deletedAt);
 		});
 
-		it('reopens a question when its answering memory is forgotten', () => {
+		it('keeps a question answered after its answering memory is forgotten', () => {
 			const question = wonder(memex, 'When is pizza?');
 			const memory = answer(memex, question.id, 'Pizza on Friday');
-			expect(openQuestions(memex)).toEqual([]);
 
 			forget(memex, memory.id);
 
-			expect(openQuestions(memex).map((open) => open.id)).toEqual([question.id]);
+			expect(listQuestions(memex)).toEqual([]);
 		});
 	});
 

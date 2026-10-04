@@ -129,8 +129,7 @@ const forgetParameters = Type.Object({
 export const forget: AgentTool<typeof forgetParameters> = {
 	name: 'forget',
 	label: 'Forget',
-	description:
-		'Remove a memory, or dismiss a question, by id. Forgetting an answer reopens its question.',
+	description: 'Remove a memory or dismiss a question by id.',
 	parameters: forgetParameters,
 	execute: async (_toolCallId, { id }) => {
 		const response = await fetch(api('forget'), {

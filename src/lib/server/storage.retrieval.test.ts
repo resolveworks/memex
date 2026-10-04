@@ -38,7 +38,7 @@ describe('search', () => {
 		expect(hits.questions).toEqual([]);
 	});
 
-	it('returns every recorded question, answered or not, when forgotten entities count', () => {
+	it('never returns answered questions, even when forgotten entities count', () => {
 		const memex = create('Food', 'en');
 		const answered = wonder(memex, 'Which pizza place?');
 		answer(memex, answered.id, 'The place on the corner');
@@ -47,10 +47,7 @@ describe('search', () => {
 		forget(memex, forgotten.id);
 
 		const hits = search(memex, ['pizza'], true);
-		expect(hits.questions.map((question) => question.text)).toEqual([
-			'Best pizza downtown?',
-			'Which pizza place?'
-		]);
+		expect(hits.questions.map((question) => question.text)).toEqual(['Best pizza downtown?']);
 	});
 });
 

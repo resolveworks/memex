@@ -139,7 +139,7 @@ describe('the contents page load', () => {
 		expect(entry.updatedAt).toBe(entry.revisions[0].createdAt);
 	});
 
-	it('reopens a question when its only answer is forgotten', () => {
+	it('keeps a question hidden after its only answer is forgotten', () => {
 		const id = create('Dinner plans', 'en');
 		const question = wonder(id, 'When is sushi day?');
 		tick();
@@ -148,7 +148,7 @@ describe('the contents page load', () => {
 
 		const data = loadContentsPage(id, new URL('http://memex.test/contents'));
 
-		expect(data.items.map((item) => item.id)).toContain(question.id);
+		expect(data.items.map((item) => item.id)).not.toContain(question.id);
 	});
 
 	it('searches matching memories and questions, deleted ones included', () => {
