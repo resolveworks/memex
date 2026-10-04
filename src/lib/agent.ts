@@ -41,7 +41,7 @@ export async function greetingMessage(userLanguage: string): Promise<AgentMessag
 		content: [
 			{
 				type: 'text',
-				text: `${context}\n\nThe user has opened this memex and is waiting for you to greet them. In one or two short sentences in ${languageName(userLanguage)}, say what this memex holds, drawn from the contents above.${ask} Call no tools.`
+				text: `${context}\n\nThe user has opened this memex and is waiting for you to greet them. In one or two short sentences in ${languageName(userLanguage)}, say what this memex is and, from the topic terms above, what it appears to hold.${ask} Call no tools.`
 			}
 		],
 		timestamp: Date.now()
@@ -135,7 +135,7 @@ function termsSection(terms: TermCount[]): string {
 	const items = terms.map(({ term, count }) => `- ${term}: ${count}`).join('\n');
 	return `# Topics
 
-Most frequent terms in the store, each with its memory count.
+The most common terms in the store, each with its memory count. Use them to judge what it covers.
 
 ${items}`;
 }

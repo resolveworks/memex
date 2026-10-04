@@ -87,9 +87,9 @@ describe('greetingMessage', () => {
 				type: 'text',
 				text:
 					'This memex is titled "Tea Log". Today is 2026-03-04. It holds 12 memories and 3 open questions.\n\n' +
-					'# Topics\n\nMost frequent terms in the store, each with its memory count.\n\n- tea: 3\n- sleep: 1\n\n' +
+					'# Topics\n\nThe most common terms in the store, each with its memory count. Use them to judge what it covers.\n\n- tea: 3\n- sleep: 1\n\n' +
 					'The user has opened this memex and is waiting for you to greet them. ' +
-					'In one or two short sentences in svenska, say what this memex holds, drawn from the contents above. ' +
+					'In one or two short sentences in svenska, say what this memex is and, from the topic terms above, what it appears to hold. ' +
 					'End by asking the open question q1: "Tea or coffee?", set in bold. ' +
 					'Call no tools.'
 			}
@@ -104,7 +104,7 @@ describe('greetingMessage', () => {
 		const text = await greetingText();
 
 		expect(text).toContain('The store is empty.');
-		expect(text).not.toContain('Most frequent terms');
+		expect(text).not.toContain('The most common terms');
 	});
 
 	it('asks nothing when no question is open', async () => {
