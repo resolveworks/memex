@@ -53,6 +53,8 @@
 
 <style>
 	.app {
+		--gutter: var(--space-4);
+
 		display: grid;
 		grid-template-rows: auto minmax(0, 1fr);
 		block-size: 100dvh;
@@ -83,5 +85,6 @@
 		min-inline-size: 0;
 		min-block-size: 0;
 		overflow-y: auto;
+		padding-inline: var(--gutter);
 	}
 </style>

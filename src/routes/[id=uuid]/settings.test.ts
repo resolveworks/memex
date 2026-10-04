@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
 import { create, get } from '$lib/server/memexes';
 import { answer, forget, remember, revise, wonder } from '$lib/server/storage';
-import { FakeCookies } from '../../../tests/cookies';
-import { postForm } from '../../../tests/request';
-import { actions as rootActions } from '../../settings/+page.server';
+import { FakeCookies } from '../../tests/cookies';
+import { postForm } from '../../tests/request';
+import { actions as rootActions } from '../settings/+page.server';
 import { actions } from './settings/+page.server';
 import { GET } from './settings/export/+server';
 
@@ -69,7 +69,7 @@ describe('root settings actions', () => {
 	});
 });
 
-describe('GET /(app)/[id=uuid]/settings/export', () => {
+describe('GET /[id=uuid]/settings/export', () => {
 	it('returns the memex and its full history, as pretty-printed JSON', async () => {
 		const id = create('Dinner plans', 'en');
 		const sushi = remember(id, 'Sushi on Fridays');

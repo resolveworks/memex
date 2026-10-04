@@ -12,6 +12,6 @@
 		flex-wrap: nowrap;
 		flex-shrink: 0;
 		min-block-size: var(--space-14);
-		padding: var(--space-2) var(--space-3);
+		padding-block: var(--space-2);
 	}
 </style>

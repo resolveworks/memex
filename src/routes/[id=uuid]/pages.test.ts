@@ -12,9 +12,9 @@ import {
 	revise,
 	wonder
 } from '$lib/server/storage';
-import { useFrozenClock } from '../../../tests/clock';
-import { FakeCookies } from '../../../tests/cookies';
-import { thrown } from '../../../tests/throws';
+import { useFrozenClock } from '../../tests/clock';
+import { FakeCookies } from '../../tests/cookies';
+import { thrown } from '../../tests/throws';
 import { load as loadLayout } from './+layout.server';
 import type { LayoutServerLoadEvent } from './$types';
 import { actions as contentsActions, load as loadContents } from './contents/+page.server';

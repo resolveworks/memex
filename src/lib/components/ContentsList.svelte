@@ -294,7 +294,7 @@
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) auto;
 		gap: var(--space-3);
-		padding: var(--space-4) var(--space-2);
+		padding-block: var(--space-4);
 		border-block-end: 1px solid var(--line);
 	}
 

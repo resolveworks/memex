@@ -15,6 +15,6 @@
 		align-content: center;
 		justify-content: center;
 		min-block-size: 100%;
-		padding: var(--space-6);
+		padding-block: var(--space-6);
 	}
 </style>

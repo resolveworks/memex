@@ -162,7 +162,7 @@
 		flex: 1;
 		min-block-size: 0;
 		overflow-y: auto;
-		padding: var(--space-4);
+		padding-block: var(--space-4);
 	}
 
 	.thread {
