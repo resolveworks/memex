@@ -28,9 +28,9 @@ declare module '@earendil-works/pi-agent-core' {
 export async function greetingMessage(userLanguage: string): Promise<AgentMessage> {
 	const { title, memories, questions, terms } = await promptContext();
 	const [first] = questions;
-	const ask = first
-		? ` End by asking the open question ${first.id}: "${first.text}", set in bold.`
-		: '';
+	const describe = first
+		? `, what it appears to hold from the topic terms above, and what it has left unanswered. End by asking the open question ${first.id}: "${first.text}", set in bold.`
+		: ' and, from the topic terms above, what it appears to hold.';
 	const sections = [
 		`This memex is titled "${title}". Today is ${new Date().toISOString().slice(0, 10)}. It holds ${memories} memories and ${questions.length} open questions.`,
 		termsSection(terms)
@@ -41,7 +41,7 @@ export async function greetingMessage(userLanguage: string): Promise<AgentMessag
 		content: [
 			{
 				type: 'text',
-				text: `${context}\n\nThe user has opened this memex and is waiting for you to greet them. In one or two short sentences in ${languageName(userLanguage)}, say what this memex is and, from the topic terms above, what it appears to hold.${ask} Call no tools.`
+				text: `${context}\n\nThe user has opened this memex and is waiting for you to greet them. In one or two short sentences in ${languageName(userLanguage)}, say what this memex is${describe} Call no tools.`
 			}
 		],
 		timestamp: Date.now()
