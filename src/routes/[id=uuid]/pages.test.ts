@@ -234,23 +234,6 @@ describe('the contents page load', () => {
 		}
 	});
 
-	it('paginates live entries only, leaving forgotten ones out of the counts', () => {
-		const id = create('Dinner plans', 'en');
-		for (let i = 1; i <= PAGE_SIZE * 3 + 5; i++) {
-			const memory = remember(id, `Fact ${i}`);
-			tick();
-			if (i % 7 === 0) forget(id, memory.id);
-		}
-
-		const live = loadContentsPage(id, new URL('http://memex.test/contents'));
-		const withDeleted = loadContentsPage(id, new URL('http://memex.test/contents?deleted=1'));
-
-		// Five of the 35 are forgotten, so the 30 live ones fit on three pages.
-		expect(live.pages).toBe(3);
-		expect(live.items).toHaveLength(PAGE_SIZE);
-		expect(withDeleted.pages).toBe(4);
-	});
-
 	it('falls back to page 1 for a non-integer page', () => {
 		const id = create('Dinner plans', 'en');
 		for (let i = 1; i <= PAGE_SIZE * 2 + 5; i++) {

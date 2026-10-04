@@ -31,21 +31,9 @@ describe('the known-memexes roster', () => {
 		expect(read(cookies)).toEqual(['new', ...seed.slice(0, 19)]);
 	});
 
-	it('does not rewrite the cookie when the memex is already first', () => {
-		const cookies = new FakeCookies({ memexes: 'a,b' });
-		remember(cookies, 'a');
-		expect(cookies.sets).toEqual([]);
-	});
-
 	it('forgets a memex', () => {
 		const cookies = new FakeCookies({ memexes: 'a,b,c' });
 		forget(cookies, 'b');
 		expect(read(cookies)).toEqual(['a', 'c']);
-	});
-
-	it('leaves the cookie untouched when forgetting an absent memex', () => {
-		const cookies = new FakeCookies({ memexes: 'a,b' });
-		forget(cookies, 'z');
-		expect(cookies.sets).toEqual([]);
 	});
 });

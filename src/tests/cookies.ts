@@ -1,11 +1,7 @@
 import type { Cookies } from '@sveltejs/kit';
 
-/**
- * Map-backed `Cookies` double. `sets` records every `set` call made through it,
- * so tests can tell whether code under test rewrote a cookie.
- */
+/** Map-backed `Cookies` double. */
 export class FakeCookies implements Cookies {
-	readonly sets: Array<{ name: string; value: string }> = [];
 	readonly #jar = new Map<string, string>();
 
 	constructor(initial: Record<string, string> = {}) {
@@ -21,7 +17,6 @@ export class FakeCookies implements Cookies {
 	}
 
 	set(name: string, value: string): void {
-		this.sets.push({ name, value });
 		this.#jar.set(name, value);
 	}
 

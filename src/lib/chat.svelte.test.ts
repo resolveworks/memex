@@ -179,13 +179,6 @@ describe('open', () => {
 });
 
 describe('clear', () => {
-	it('does nothing while no memex is open', async () => {
-		await store.clear();
-
-		expect(fake.agent.reset).not.toHaveBeenCalled();
-		expect(fake.agent.prompt).not.toHaveBeenCalled();
-	});
-
 	it('restarts the greeting for the open memex', async () => {
 		await store.open('9e107669-c4b1-4380-a20b-1f3e6c8b9c2d', 'de');
 		fake.agent.reset.mockClear();

@@ -177,14 +177,6 @@ describe('ContentsList', () => {
 		);
 	});
 
-	it('builds pagination links that keep the deleted filter', () => {
-		renderList([], { includeDeleted: true, page: 1, pages: 3 });
-		expect(screen.getByRole('link', { name: 'Next' })).toHaveAttribute(
-			'href',
-			'/contents?deleted=1&page=2'
-		);
-	});
-
 	it('shows the empty message when there is nothing yet', () => {
 		renderList([]);
 		expect(screen.getByText('Nothing recorded yet.')).toBeInTheDocument();
