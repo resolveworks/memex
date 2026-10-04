@@ -164,12 +164,12 @@
 									{#each item.revisions.slice(1) as revision (revision.seq)}
 										<li class="version">
 											<div class="body">
+												<p class="version-text">{revision.text}</p>
 												<div class="version-head">
 													<time datetime={revision.createdAt}>
 														{formatDate(revision.createdAt)}
 													</time>
 												</div>
-												<p class="version-text">{revision.text}</p>
 											</div>
 											{#if item.deletedAt === null}
 												<form method="POST" action={action('revert')} use:enhance>
