@@ -372,6 +372,16 @@ export function searchAll(
 	return matches(listAll(memexId, includeDeleted, openOnly), queries.flatMap(tokenize));
 }
 
+/** Every revision of a memex, in insertion order, for a complete backup. */
+export function allRevisions(memexId: string): Revision[] {
+	return db
+		.select()
+		.from(revisions)
+		.where(eq(revisions.memexId, memexId))
+		.orderBy(revisions.seq)
+		.all();
+}
+
 /** Every revision of the given entities, newest first. */
 export function revisionsOf(
 	memexId: string,

@@ -70,7 +70,7 @@ describe('root settings actions', () => {
 });
 
 describe('GET /(app)/[id=uuid]/settings/export', () => {
-	it('returns the complete record, forgotten entities included, as pretty-printed JSON', async () => {
+	it('returns the memex and its full history, as pretty-printed JSON', async () => {
 		const id = create('Dinner plans', 'en');
 		const sushi = remember(id, 'Sushi on Fridays');
 		const question = wonder(id, 'When is sushi day?');
@@ -86,19 +86,35 @@ describe('GET /(app)/[id=uuid]/settings/export', () => {
 		const record = JSON.parse(body);
 		expect(body).toBe(JSON.stringify(record, null, 2));
 		expect(record.memex).toEqual(get(id));
-		expect(record.memories).toHaveLength(2);
-		const forgotten = record.memories.find((memory: { id: string }) => memory.id === sushi.id);
-		expect(forgotten).toMatchObject({ text: 'Sushi on Saturdays', deletedAt: expect.any(String) });
-		const settled = record.memories.find(
-			(memory: { answers: string | null }) => memory.answers === question.id
+		expect(record.revisions).toHaveLength(4);
+		const seqs = record.revisions.map((revision: { seq: number }) => revision.seq);
+		expect(seqs).toEqual([...seqs].sort((a: number, b: number) => a - b));
+		expect(record.revisions).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					entityId: sushi.id,
+					text: 'Sushi on Fridays',
+					deletedAt: expect.any(String)
+				}),
+				expect.objectContaining({
+					entityId: sushi.id,
+					text: 'Sushi on Saturdays',
+					deletedAt: expect.any(String)
+				}),
+				expect.objectContaining({
+					entityId: question.id,
+					kind: 'question',
+					text: 'When is sushi day?',
+					answers: null
+				}),
+				expect.objectContaining({
+					entityId: expect.any(String),
+					kind: 'memory',
+					text: 'Fridays',
+					answers: question.id
+				})
+			])
 		);
-		expect(settled).toMatchObject({ text: 'Fridays', deletedAt: null });
-		expect(record.questions).toHaveLength(1);
-		expect(record.questions[0]).toMatchObject({
-			id: question.id,
-			text: 'When is sushi day?',
-			deletedAt: null
-		});
 	});
 
 	it('names the download after the title, stripped and dash-joined', async () => {

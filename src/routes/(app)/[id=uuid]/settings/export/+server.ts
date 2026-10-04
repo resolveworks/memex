@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { get } from '$lib/server/memexes';
-import { listMemories, listQuestions } from '$lib/server/storage';
+import { allRevisions } from '$lib/server/storage';
 import type { RequestHandler } from './$types';
 
 /** The title with anything a filename can't hold removed; "memex" when nothing is left. */
@@ -16,16 +16,8 @@ export const GET: RequestHandler = ({ params }) => {
 	const memex = get(params.id);
 	if (!memex) error(404, 'No such memex.');
 
-	// An export is a complete copy: forgotten entities included, flagged by deletedAt.
-	const body = JSON.stringify(
-		{
-			memex,
-			memories: listMemories(memex.id, true),
-			questions: listQuestions(memex.id, true)
-		},
-		null,
-		2
-	);
+	// A dumb backup: the memex row and every revision, exactly as stored.
+	const body = JSON.stringify({ memex, revisions: allRevisions(memex.id) }, null, 2);
 
 	return new Response(body, {
 		headers: {
