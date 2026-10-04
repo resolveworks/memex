@@ -46,7 +46,8 @@ const wonderParameters = Type.Object({
 export const wonder: AgentTool<typeof wonderParameters> = {
 	name: 'wonder',
 	label: 'Wonder',
-	description: 'Record an open question: something you want to know but do not.',
+	description:
+		'Record an open question: a gap in the memories. Call it whenever the user asks about something the memories do not cover.',
 	parameters: wonderParameters,
 	execute: async (_toolCallId, { text }) => {
 		const response = await fetch(api('wonder'), {
