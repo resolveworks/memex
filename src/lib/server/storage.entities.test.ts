@@ -5,13 +5,12 @@ import { useFrozenClock } from '../../tests/clock';
 import {
 	answer,
 	forget,
-	listMemories,
-	listQuestions,
 	remember,
 	restore,
 	revert,
 	revise,
 	revisionsOf,
+	search,
 	wonder
 } from './storage';
 
@@ -32,7 +31,7 @@ describe('entity storage', () => {
 			expect(memory.answers).toBe(null);
 			expect(memory.deletedAt).toBe(null);
 			expect(memory.createdAt).toBe(memory.updatedAt);
-			expect(listMemories(memex)).toEqual([memory]);
+			expect(search(memex, []).memories).toEqual([memory]);
 		});
 
 		it('yields two distinct entities for the same text, newest first, in the same millisecond', () => {
@@ -40,7 +39,7 @@ describe('entity storage', () => {
 			const second = remember(memex, 'Pizza on Friday');
 
 			expect(second.id).not.toBe(first.id);
-			expect(listMemories(memex).map((memory) => memory.id)).toEqual([second.id, first.id]);
+			expect(search(memex, []).memories.map((memory) => memory.id)).toEqual([second.id, first.id]);
 		});
 	});
 
@@ -50,7 +49,7 @@ describe('entity storage', () => {
 
 			expect(question.text).toBe('When is pizza?');
 			expect(question.deletedAt).toBe(null);
-			expect(listQuestions(memex)).toEqual([question]);
+			expect(search(memex, []).questions).toEqual([question]);
 		});
 	});
 
@@ -61,8 +60,8 @@ describe('entity storage', () => {
 			const memory = answer(memex, question.id, 'Pizza on Friday');
 
 			expect(memory.answers).toBe(question.id);
-			expect(listMemories(memex)).toEqual([memory]);
-			expect(listQuestions(memex)).toEqual([]);
+			expect(search(memex, []).memories).toEqual([memory]);
+			expect(search(memex, []).questions).toEqual([]);
 		});
 
 		it('throws for an unknown question id', () => {
@@ -82,7 +81,7 @@ describe('entity storage', () => {
 			expect(revised.text).toBe('Pizza on Saturday');
 			expect(revised.createdAt).toBe(memory.createdAt);
 			expect(revised.updatedAt).toBe(revisedAt);
-			expect(listMemories(memex)).toEqual([revised]);
+			expect(search(memex, []).memories).toEqual([revised]);
 		});
 
 		it('replaces the text of a question the same way', () => {
@@ -95,7 +94,7 @@ describe('entity storage', () => {
 			expect(revised.text).toBe('When is supper?');
 			expect(revised.createdAt).toBe(question.createdAt);
 			expect(revised.updatedAt).toBe(revisedAt);
-			expect(listQuestions(memex)).toEqual([revised]);
+			expect(search(memex, []).questions).toEqual([revised]);
 		});
 
 		it('keeps the latest revision when two arrive in the same millisecond', () => {
@@ -103,7 +102,7 @@ describe('entity storage', () => {
 			revise(memex, memory.id, 'Middle text');
 			revise(memex, memory.id, 'New text');
 
-			expect(listMemories(memex).map((listed) => listed.text)).toEqual(['New text']);
+			expect(search(memex, []).memories.map((listed) => listed.text)).toEqual(['New text']);
 		});
 	});
 
@@ -114,9 +113,9 @@ describe('entity storage', () => {
 
 			forget(memex, memory.id);
 
-			expect(listMemories(memex)).toEqual([]);
+			expect(search(memex, []).memories).toEqual([]);
 
-			const [gone] = listMemories(memex, true);
+			const [gone] = search(memex, [], true).memories;
 			expect(gone.id).toBe(memory.id);
 			expect(gone.text).toBe('Pizza on Friday');
 			expect(gone.deletedAt).toBe(deletedAt);
@@ -128,9 +127,9 @@ describe('entity storage', () => {
 
 			forget(memex, question.id);
 
-			expect(listQuestions(memex)).toEqual([]);
+			expect(search(memex, []).questions).toEqual([]);
 
-			const [gone] = listQuestions(memex, true);
+			const [gone] = search(memex, [], true).questions;
 			expect(gone.id).toBe(question.id);
 			expect(gone.deletedAt).toBe(deletedAt);
 		});
@@ -141,7 +140,7 @@ describe('entity storage', () => {
 
 			forget(memex, memory.id);
 
-			expect(listQuestions(memex)).toEqual([]);
+			expect(search(memex, []).questions).toEqual([]);
 		});
 	});
 
@@ -150,11 +149,13 @@ describe('entity storage', () => {
 			const memory = remember(memex, 'Pizza on Friday');
 			revise(memex, memory.id, 'Pizza on Saturday');
 			forget(memex, memory.id);
-			expect(listMemories(memex)).toEqual([]);
+			expect(search(memex, []).memories).toEqual([]);
 
 			restore(memex, memory.id);
 
-			expect(listMemories(memex).map((listed) => listed.text)).toEqual(['Pizza on Saturday']);
+			expect(search(memex, []).memories.map((listed) => listed.text)).toEqual([
+				'Pizza on Saturday'
+			]);
 		});
 
 		it('throws for an entity that is not forgotten', () => {
@@ -174,7 +175,7 @@ describe('entity storage', () => {
 
 			revert(memex, memory.id, oldest.seq);
 
-			expect(listMemories(memex).map((listed) => listed.text)).toEqual(['Pizza on Friday']);
+			expect(search(memex, []).memories.map((listed) => listed.text)).toEqual(['Pizza on Friday']);
 			expect(revisionsOf(memex, [memory.id]).map((revision) => revision.text)).toEqual([
 				'Pizza on Friday',
 				'Pizza on Saturday',
@@ -201,8 +202,8 @@ describe('entity storage', () => {
 		const memory = remember(memex, 'Pizza on Friday');
 		const otherMemory = remember(other, 'Pizza on Friday');
 
-		expect(listMemories(memex).map((m) => m.id)).toEqual([memory.id]);
-		expect(listMemories(other).map((m) => m.id)).toEqual([otherMemory.id]);
+		expect(search(memex, []).memories.map((m) => m.id)).toEqual([memory.id]);
+		expect(search(other, []).memories.map((m) => m.id)).toEqual([otherMemory.id]);
 
 		expect(() => forget(memex, otherMemory.id)).toThrow(
 			`No memory or question with id "${otherMemory.id}".`

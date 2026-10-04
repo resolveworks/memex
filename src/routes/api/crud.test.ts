@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { create } from '$lib/server/memexes';
-import { listMemories } from '$lib/server/storage';
+import { list } from '$lib/server/storage';
 import { event, post, type ApiEvent } from '../../tests/request';
 import { POST as answer } from './[id=uuid]/answer/+server';
 import { POST as forget } from './[id=uuid]/forget/+server';
@@ -100,6 +100,6 @@ describe('POST /api/:id/forget', () => {
 
 		expect(response.status).toBe(204);
 		expect(await response.text()).toBe('');
-		expect(listMemories(id)).toEqual([]);
+		expect(list(id)).toEqual([]);
 	});
 });

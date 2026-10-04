@@ -76,10 +76,11 @@ describe('GET /api/:id/context', () => {
 		expect(state.openQuestions).toBe(1);
 		expect(state.question).toMatchObject({ id: open.id, text: 'Which wine with cake?' });
 		expect(state.terms).toEqual([
+			{ term: 'cake', count: 2 },
 			{ term: 'fridays', count: 2 },
-			{ term: 'cake', count: 1 },
 			{ term: 'saturdays', count: 1 },
-			{ term: 'sushi', count: 1 }
+			{ term: 'sushi', count: 1 },
+			{ term: 'wine', count: 1 }
 		]);
 	});
 

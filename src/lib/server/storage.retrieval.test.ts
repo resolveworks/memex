@@ -112,16 +112,18 @@ describe('list', () => {
 });
 
 describe('terms', () => {
-	it('counts the live memories containing each non-stopword term, ties broken alphabetically', () => {
+	it('counts the live memories and open questions containing each non-stopword term, ties broken alphabetically', () => {
 		const memex = create('Food', 'en');
 		remember(memex, 'Pizza on Friday');
 		remember(memex, 'Pizza pizza');
 		remember(memex, 'Sushi breakfast');
+		wonder(memex, 'Which pizza place?');
 
 		expect(terms(memex, 'en', 10)).toEqual([
-			{ term: 'pizza', count: 2 },
+			{ term: 'pizza', count: 3 },
 			{ term: 'breakfast', count: 1 },
 			{ term: 'friday', count: 1 },
+			{ term: 'place', count: 1 },
 			{ term: 'sushi', count: 1 }
 		]);
 	});
@@ -138,11 +140,13 @@ describe('terms', () => {
 		]);
 	});
 
-	it('counts only live memories', () => {
+	it('counts only live entries', () => {
 		const memex = create('Food', 'en');
-		const forgotten = remember(memex, 'Sushi breakfast');
+		const forgottenMemory = remember(memex, 'Sushi breakfast');
 		remember(memex, 'Sushi dinner');
-		forget(memex, forgotten.id);
+		forget(memex, forgottenMemory.id);
+		const forgottenQuestion = wonder(memex, 'Sushi lunch?');
+		forget(memex, forgottenQuestion.id);
 
 		expect(terms(memex, 'en', 10)).toEqual([
 			{ term: 'dinner', count: 1 },

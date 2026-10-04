@@ -195,16 +195,6 @@ function resolveById(memexId: string, entityId: string): Resolved | undefined {
 	return row ? { row, made: row.made } : undefined;
 }
 
-/** A memex's memories; forgotten entities are included only when asked for. */
-export function listMemories(memexId: string, includeDeleted = false): Memory[] {
-	return resolve(memexId, { kind: 'memory', includeDeleted }).map(toMemory);
-}
-
-/** A memex's open questions; answered ones are never listed, forgotten ones only when asked for. */
-export function listQuestions(memexId: string, includeDeleted = false): Question[] {
-	return resolve(memexId, { kind: 'question', includeDeleted }).map(toQuestion);
-}
-
 /** Total number of open questions in a memex. */
 export function openQuestions(memexId: string): number {
 	const row = db.get<{ count: number }>(sql`
@@ -422,14 +412,14 @@ export function count(memexId: string, choice: Choice = {}): number {
 	return row.count;
 }
 
-/** Most common terms across a memex's live memories, by number of memories containing each. */
+/** Most common terms across a memex's live memories and open questions, by number of entries containing each. */
 export function terms(memexId: string, language: string, limit: number): TermCount[] {
 	const stop = stopwords[language];
 	if (!stop) throw new Error(`No stopwords for language "${language}".`);
 
 	const counts = new Map<string, number>();
-	for (const { text } of listMemories(memexId)) {
-		for (const term of new Set(tokenize(text))) {
+	for (const { row } of resolve(memexId)) {
+		for (const term of new Set(tokenize(row.text))) {
 			if (stop.has(term)) continue;
 			counts.set(term, (counts.get(term) ?? 0) + 1);
 		}
