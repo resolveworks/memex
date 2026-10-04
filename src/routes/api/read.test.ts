@@ -2,17 +2,16 @@ import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import type { Memory } from '$lib/memory';
 import { create } from '$lib/server/memexes';
-import type { ListItem, TermCount } from '$lib/server/storage';
+import type { TermCount } from '$lib/server/storage';
 import { answer, forget, remember, wonder } from '$lib/server/storage';
 import type { Question } from '$lib/question';
 import { urlEvent, type ApiEvent } from '../../tests/request';
 import { thrown } from '../../tests/throws';
 import { GET as context } from './[id=uuid]/context/+server';
-import { GET as list } from './[id=uuid]/list/+server';
 import { GET as search } from './[id=uuid]/search/+server';
 
 describe('unknown memex', () => {
-	const handlers: Record<string, (event: ApiEvent) => unknown> = { search, list, context };
+	const handlers: Record<string, (event: ApiEvent) => unknown> = { search, context };
 	for (const [route, handler] of Object.entries(handlers)) {
 		describe(`GET /api/:id/${route}`, () => {
 			it('rejects an unknown memex id with 404', () => {
@@ -54,55 +53,6 @@ describe('GET /api/:id/search', () => {
 
 		const results = await response.json();
 		expect(results.memories.map((memory: Memory) => memory.text)).toEqual(['Sushi on Fridays']);
-	});
-});
-
-describe('GET /api/:id/list', () => {
-	it('filters by kind=memory', async () => {
-		const id = create('Dinner plans', 'en');
-		remember(id, 'Sushi on Fridays');
-		wonder(id, 'When is sushi day?');
-
-		const response = await list(urlEvent('/api/list?kind=memory', id));
-
-		expect(response.status).toBe(200);
-		const page = await response.json();
-		expect(page.items).toHaveLength(1);
-		expect(page.items[0]).toMatchObject({ kind: 'memory', text: 'Sushi on Fridays' });
-		expect(page.hasMore).toBe(false);
-	});
-
-	it('filters by kind=question', async () => {
-		const id = create('Dinner plans', 'en');
-		remember(id, 'Sushi on Fridays');
-		wonder(id, 'When is sushi day?');
-
-		const response = await list(urlEvent('/api/list?kind=question', id));
-
-		const page = await response.json();
-		expect(page.items).toHaveLength(1);
-		expect(page.items[0]).toMatchObject({ kind: 'question', text: 'When is sushi day?' });
-		expect(page.hasMore).toBe(false);
-	});
-
-	it('returns both kinds for any other kind value', async () => {
-		const id = create('Dinner plans', 'en');
-		remember(id, 'Sushi on Fridays');
-		wonder(id, 'When is sushi day?');
-
-		const response = await list(urlEvent('/api/list?kind=note', id));
-		const page = await response.json();
-		expect(page.items.map((item: ListItem) => item.kind).sort()).toEqual(['memory', 'question']);
-	});
-
-	it('pages through results with offset', async () => {
-		const id = create('Catalogue', 'en');
-		for (const text of ['item 1', 'item 2', 'item 3']) remember(id, text);
-
-		const response = await list(urlEvent('/api/list?offset=1', id));
-
-		const page = await response.json();
-		expect(page.items.map((item: ListItem) => item.text)).toEqual(['item 2', 'item 1']);
 	});
 });
 

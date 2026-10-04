@@ -60,8 +60,8 @@ describe('list', () => {
 		tick();
 		remember(memex, 'Newest memory');
 
-		const page = list(memex);
-		expect(page.items.map((item) => [item.kind, item.text])).toEqual([
+		const entries = list(memex);
+		expect(entries.map((item) => [item.kind, item.text])).toEqual([
 			['memory', 'Newest memory'],
 			['question', 'Middle question'],
 			['memory', 'Oldest memory']
@@ -76,8 +76,8 @@ describe('list', () => {
 		tick();
 		revise(memex, memory.id, 'New text');
 
-		const page = list(memex);
-		expect(page.items.map((item) => item.text)).toEqual(['New text', 'A question in between']);
+		const entries = list(memex);
+		expect(entries.map((item) => item.text)).toEqual(['New text', 'A question in between']);
 	});
 
 	it('omits questions that a live memory answers', () => {
@@ -85,42 +85,29 @@ describe('list', () => {
 		const question = wonder(memex, 'Where to eat?');
 		answer(memex, question.id, 'The pizzeria');
 
-		const page = list(memex);
-		expect(page.items.map((item) => [item.kind, item.text])).toEqual([['memory', 'The pizzeria']]);
+		const entries = list(memex);
+		expect(entries.map((item) => [item.kind, item.text])).toEqual([['memory', 'The pizzeria']]);
 	});
 
-	it('returns only memories for kind "memory" and only open questions for kind "question"', () => {
-		const memex = create('Food', 'en');
-		remember(memex, 'A memory');
-		wonder(memex, 'A question');
-
-		expect(list(memex, { kind: 'memory' }).items.map((item) => item.kind)).toEqual(['memory']);
-		expect(list(memex, { kind: 'question' }).items.map((item) => item.kind)).toEqual(['question']);
-	});
-
-	it('caps pages at PAGE_SIZE and sets hasMore only when more remain', () => {
+	it('caps a page at PAGE_SIZE and pages the rest with offset', () => {
 		const memex = create('Food', 'en');
 		for (let i = 0; i < PAGE_SIZE; i++) {
 			remember(memex, `Memory ${i}`);
 			tick();
 		}
 
-		let page = list(memex);
-		expect(page.items).toHaveLength(PAGE_SIZE);
-		expect(page.hasMore).toBe(false);
+		expect(list(memex)).toHaveLength(PAGE_SIZE);
 
 		remember(memex, 'One more');
-		page = list(memex);
-		expect(page.items).toHaveLength(PAGE_SIZE);
-		expect(page.hasMore).toBe(true);
-		expect(page.items.map((item) => item.text).slice(0, 2)).toEqual([
+		const first = list(memex);
+		expect(first).toHaveLength(PAGE_SIZE);
+		expect(first.map((item) => item.text).slice(0, 2)).toEqual([
 			'One more',
 			`Memory ${PAGE_SIZE - 1}`
 		]);
 
 		const rest = list(memex, { offset: PAGE_SIZE });
-		expect(rest.items.map((item) => item.text)).toEqual(['Memory 0']);
-		expect(rest.hasMore).toBe(false);
+		expect(rest.map((item) => item.text)).toEqual(['Memory 0']);
 	});
 });
 

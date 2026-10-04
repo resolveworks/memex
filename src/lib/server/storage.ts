@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 import { stopwords } from '$lib/languages';
 import type { Memory } from '$lib/memory';
-import { PAGE_SIZE, type Page } from '$lib/page';
+import { PAGE_SIZE } from '$lib/page';
 import type { Question } from '$lib/question';
 import { db } from './db';
 import { revisions } from './db/schema';
@@ -12,16 +12,13 @@ type Revision = typeof revisions.$inferSelect;
 
 export type Kind = Revision['kind'];
 
-export interface ListItem {
+/** One resolved entity as the contents view lists it. */
+export interface Entry {
 	id: string;
 	kind: Kind;
 	text: string;
 	createdAt: string;
 	updatedAt: string;
-}
-
-/** A list item with its deletion state, as the content view needs it. */
-export interface Entry extends ListItem {
 	deletedAt: string | null;
 }
 
@@ -410,10 +407,8 @@ export function revisionsOf(
 }
 
 /** One page of a memex's contents, interleaved newest first. */
-export function list(memexId: string, choice: Choice = {}): Page<Entry> {
-	const rows = resolve(memexId, { ...choice, limit: PAGE_SIZE + 1 });
-	const items = rows.slice(0, PAGE_SIZE).map(toEntry);
-	return { items, hasMore: rows.length > PAGE_SIZE };
+export function list(memexId: string, choice: Choice = {}): Entry[] {
+	return resolve(memexId, { ...choice, limit: PAGE_SIZE }).map(toEntry);
 }
 
 /** How many entities a listing holds, so a viewer can page through it. */

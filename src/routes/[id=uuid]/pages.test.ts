@@ -268,9 +268,9 @@ describe('the contents page delete action', () => {
 
 		await contentsActions.delete(contentsFormEvent(id, { id: gone.id }));
 
-		expect(list(id).items.map((entry) => entry.id)).toEqual([kept.id]);
+		expect(list(id).map((entry) => entry.id)).toEqual([kept.id]);
 		expect(
-			list(id, { includeDeleted: true }).items.find((entry) => entry.id === gone.id)?.deletedAt
+			list(id, { includeDeleted: true }).find((entry) => entry.id === gone.id)?.deletedAt
 		).not.toBeNull();
 	});
 
@@ -282,9 +282,9 @@ describe('the contents page delete action', () => {
 
 		await contentsActions.delete(contentsFormEvent(id, { id: gone.id }));
 
-		expect(list(id).items.map((entry) => entry.id)).toEqual([kept.id]);
+		expect(list(id).map((entry) => entry.id)).toEqual([kept.id]);
 		expect(
-			list(id, { includeDeleted: true }).items.find((entry) => entry.id === gone.id)?.deletedAt
+			list(id, { includeDeleted: true }).find((entry) => entry.id === gone.id)?.deletedAt
 		).not.toBeNull();
 	});
 });
@@ -297,7 +297,7 @@ describe('the contents page restore action', () => {
 
 		await contentsActions.restore(contentsFormEvent(id, { id: memory.id }));
 
-		expect(list(id).items.map((entry) => entry.id)).toEqual([memory.id]);
+		expect(list(id).map((entry) => entry.id)).toEqual([memory.id]);
 	});
 });
 
@@ -311,6 +311,6 @@ describe('the contents page revert action', () => {
 
 		await contentsActions.revert(contentsFormEvent(id, { id: memory.id, seq: String(oldest.seq) }));
 
-		expect(list(id).items.map((entry) => entry.text)).toEqual(['Sushi on Fridays']);
+		expect(list(id).map((entry) => entry.text)).toEqual(['Sushi on Fridays']);
 	});
 });

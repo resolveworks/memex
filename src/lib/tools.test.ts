@@ -2,7 +2,7 @@ import type { AgentToolResult } from '@earendil-works/pi-agent-core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { page } from '../tests/app-state';
 import { failure, ok, useFetchMock } from '../tests/fetch';
-import { answer, forget, list, remember, revise, search, wonder } from './tools';
+import { answer, forget, remember, revise, search, wonder } from './tools';
 
 vi.mock('$app/state', () => ({ page }));
 
@@ -199,110 +199,5 @@ describe('search', () => {
 		await expect(search.execute('call', { queries: ['tea'] })).rejects.toThrow(
 			'Search failed (404).'
 		);
-	});
-});
-
-describe('list', () => {
-	it('asks for the first page of both kinds', async () => {
-		fetchMock.mockResolvedValueOnce(ok({ items: [], hasMore: false }));
-
-		await list.execute('call', {});
-
-		const [url, init] = sentRequest();
-		expect(url).toBe(`/api/${memex}/list?offset=0`);
-		expect(init).toBeUndefined();
-	});
-
-	it('passes the given offset and kind through', async () => {
-		fetchMock.mockResolvedValueOnce(ok({ items: [], hasMore: false }));
-
-		await list.execute('call', { kind: 'question', offset: 50 });
-
-		const [url] = sentRequest();
-		expect(url).toBe(`/api/${memex}/list?offset=50&kind=question`);
-	});
-
-	it('renders the page as dated lines', async () => {
-		fetchMock.mockResolvedValueOnce(
-			ok({
-				items: [
-					{
-						id: 'm2',
-						kind: 'memory',
-						text: 'Prefers loose leaf.',
-						updatedAt: '2026-03-04T10:30:00.000Z'
-					},
-					{
-						id: 'q1',
-						kind: 'question',
-						text: 'Tea or coffee?',
-						updatedAt: '2026-03-02T08:00:00.000Z'
-					}
-				],
-				hasMore: false
-			})
-		);
-
-		expect(await resultText(list.execute('call', {}))).toBe(
-			'- 2026-03-04 [memory] m2: Prefers loose leaf.\n' +
-				'- 2026-03-02 [question] q1: Tea or coffee?'
-		);
-	});
-
-	it('suggests the next offset when more remain', async () => {
-		fetchMock.mockResolvedValueOnce(
-			ok({
-				items: [
-					{
-						id: 'm2',
-						kind: 'memory',
-						text: 'Prefers loose leaf.',
-						updatedAt: '2026-03-04T10:30:00.000Z'
-					},
-					{
-						id: 'q1',
-						kind: 'question',
-						text: 'Tea or coffee?',
-						updatedAt: '2026-03-02T08:00:00.000Z'
-					}
-				],
-				hasMore: true
-			})
-		);
-
-		expect(await resultText(list.execute('call', { offset: 10 }))).toBe(
-			'- 2026-03-04 [memory] m2: Prefers loose leaf.\n' +
-				'- 2026-03-02 [question] q1: Tea or coffee?\n' +
-				'\n' +
-				'More remain. Call list again with offset=12.'
-		);
-	});
-
-	it('keeps the kind in that suggestion when one was given', async () => {
-		fetchMock.mockResolvedValueOnce(
-			ok({
-				items: [
-					{ id: 'm1', kind: 'memory', text: 'Prefers tea.', updatedAt: '2026-03-04T10:30:00.000Z' }
-				],
-				hasMore: true
-			})
-		);
-
-		expect(await resultText(list.execute('call', { kind: 'memory' }))).toBe(
-			'- 2026-03-04 [memory] m1: Prefers tea.\n' +
-				'\n' +
-				'More remain. Call list again with offset=1 and kind="memory".'
-		);
-	});
-
-	it('says so when the page is empty', async () => {
-		fetchMock.mockResolvedValueOnce(ok({ items: [], hasMore: false }));
-
-		expect(await resultText(list.execute('call', {}))).toBe('Nothing recorded.');
-	});
-
-	it('fails when the api errors', async () => {
-		fetchMock.mockResolvedValueOnce(failure(404));
-		await expect(list.execute('call', {})).rejects.toThrow('Failed to list (404).');
 	});
 });

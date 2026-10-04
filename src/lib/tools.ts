@@ -2,9 +2,8 @@ import type { AgentTool } from '@earendil-works/pi-agent-core';
 import { Type } from 'typebox';
 import type { Memory } from './memory';
 import { api } from './memex';
-import type { Page } from './page';
 import type { Question } from './question';
-import type { Kind, ListItem } from './server/storage';
+import type { Kind } from './server/storage';
 
 const jsonHeaders: HeadersInit = { 'content-type': 'application/json' };
 
@@ -66,7 +65,7 @@ export const wonder: AgentTool<typeof wonderParameters> = {
 
 const answerParameters = Type.Object({
 	question: Type.String({
-		description: 'Id of the question this answers, from search or list results.'
+		description: 'Id of the question this answers, from search results.'
 	}),
 	text: Type.String({ description: 'One self-contained fact in plain prose.' })
 });
@@ -94,7 +93,7 @@ export const answer: AgentTool<typeof answerParameters> = {
 
 const reviseParameters = Type.Object({
 	id: Type.String({
-		description: 'Id of the memory or question to revise, from search or list results.'
+		description: 'Id of the memory or question to revise, from search results.'
 	}),
 	text: Type.String({
 		description: 'The new text in full — the current fact or question.'
@@ -123,7 +122,7 @@ export const revise: AgentTool<typeof reviseParameters> = {
 
 const forgetParameters = Type.Object({
 	id: Type.String({
-		description: 'Id of the memory or question to remove, from search or list results.'
+		description: 'Id of the memory or question to remove, from search results.'
 	})
 });
 
@@ -175,48 +174,6 @@ export const search: AgentTool<typeof searchParameters> = {
 					text: lines.length === 0 ? 'Nothing matches that search.' : lines.join('\n')
 				}
 			],
-			details: undefined
-		};
-	}
-};
-
-const listParameters = Type.Object({
-	kind: Type.Optional(
-		Type.Union([Type.Literal('memory'), Type.Literal('question')], {
-			description: 'Restrict to memories or questions; omit for both.'
-		})
-	),
-	offset: Type.Optional(
-		Type.Number({
-			description: 'Entries to skip; omit for the first page.'
-		})
-	)
-});
-
-export const list: AgentTool<typeof listParameters> = {
-	name: 'list',
-	label: 'List',
-	description: 'List memories and open questions interleaved, newest first.',
-	parameters: listParameters,
-	execute: async (_toolCallId, { kind, offset }) => {
-		const from = offset ?? 0;
-		const params = new URLSearchParams({ offset: String(from) });
-		if (kind) params.set('kind', kind);
-		const response = await fetch(api(`list?${params}`));
-		if (!response.ok) throw new Error(`Failed to list (${response.status}).`);
-		const page = (await response.json()) as Page<ListItem>;
-		if (page.items.length === 0) {
-			return {
-				content: [{ type: 'text', text: 'Nothing recorded.' }],
-				details: undefined
-			};
-		}
-		const lines = page.items.map((item) => line(item.kind, item)).join('\n');
-		const more = page.hasMore
-			? `\n\nMore remain. Call list again with offset=${from + page.items.length}${kind ? ` and kind="${kind}"` : ''}.`
-			: '';
-		return {
-			content: [{ type: 'text', text: `${lines}${more}` }],
 			details: undefined
 		};
 	}

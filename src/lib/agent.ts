@@ -4,7 +4,7 @@ import { languageName } from './i18n';
 import { api } from './memex';
 import { model } from './model';
 import type { Question } from './question';
-import { answer, forget, list, remember, revise, search, wonder } from './tools';
+import { answer, forget, remember, revise, search, wonder } from './tools';
 
 /** The opening turn: invisible to the user, a user turn to the model. */
 interface GreetingMessage {
@@ -101,7 +101,7 @@ export function getAgent(): Agent {
 		agent = new Agent({
 			initialState: {
 				model,
-				tools: [remember, wonder, answer, revise, forget, search, list]
+				tools: [remember, wonder, answer, revise, forget, search]
 			},
 			convertToLlm,
 			// Empty proxyUrl targets same-origin /api/stream, which is memex-agnostic; the

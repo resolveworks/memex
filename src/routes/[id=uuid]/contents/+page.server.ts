@@ -27,7 +27,7 @@ export const load: PageServerLoad = ({ params, url }) => {
 	const total = count(params.id, { includeDeleted, queries });
 	const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 	const page = pageNumber(url.searchParams.get('page'), pages);
-	const { items } = list(params.id, {
+	const items = list(params.id, {
 		includeDeleted,
 		queries,
 		offset: (page - 1) * PAGE_SIZE
