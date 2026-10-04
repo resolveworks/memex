@@ -56,9 +56,15 @@ function convertToLlm(messages: AgentMessage[]): Message[] {
 		if (message.role === 'greeting') {
 			return [{ role: 'user' as const, content: message.content, timestamp: message.timestamp }];
 		}
-		return message.role === 'user' || message.role === 'assistant' || message.role === 'toolResult'
-			? [message]
-			: [];
+		if (
+			message.role === 'system' ||
+			message.role === 'user' ||
+			message.role === 'assistant' ||
+			message.role === 'toolResult'
+		) {
+			return [message];
+		}
+		return [];
 	});
 }
 
