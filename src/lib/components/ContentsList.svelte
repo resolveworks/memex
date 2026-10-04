@@ -123,39 +123,6 @@
 									</span>
 								{/if}
 							</p>
-
-							{#if item.revisions.length > 1}
-								<details class="history">
-									<summary>
-										<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-											<polyline points="9 18 15 12 9 6" />
-										</svg>
-										{t('list.history')}
-										<span class="count">{item.revisions.length - 1}</span>
-									</summary>
-									<ol class="versions">
-										{#each item.revisions.slice(1) as revision (revision.seq)}
-											<li class="version">
-												<div class="version-head">
-													<time datetime={revision.createdAt}>
-														{formatDate(revision.createdAt)}
-													</time>
-												</div>
-												<p class="version-text">{revision.text}</p>
-												{#if item.deletedAt === null}
-													<form method="POST" action={action('revert')} use:enhance>
-														<input type="hidden" name="id" value={item.id} />
-														<input type="hidden" name="seq" value={revision.seq} />
-														<button class="restore-version" type="submit">
-															{t('list.restore')}
-														</button>
-													</form>
-												{/if}
-											</li>
-										{/each}
-									</ol>
-								</details>
-							{/if}
 						</div>
 
 						{#if item.deletedAt === null}
@@ -175,8 +142,55 @@
 						{:else}
 							<form method="POST" action={action('restore')} use:enhance>
 								<input type="hidden" name="id" value={item.id} />
-								<button class="restore" type="submit">{t('list.restore')}</button>
+								<button class="restore center" type="submit" aria-label={t('list.restore')}>
+									<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+										<polyline points="1 4 1 10 7 10" />
+										<path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+									</svg>
+								</button>
 							</form>
+						{/if}
+
+						{#if item.revisions.length > 1}
+							<details class="history">
+								<summary>
+									<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+										<polyline points="9 18 15 12 9 6" />
+									</svg>
+									{t('list.history')}
+									<span class="count">{item.revisions.length - 1}</span>
+								</summary>
+								<ol class="versions">
+									{#each item.revisions.slice(1) as revision (revision.seq)}
+										<li class="version">
+											<div class="body">
+												<div class="version-head">
+													<time datetime={revision.createdAt}>
+														{formatDate(revision.createdAt)}
+													</time>
+												</div>
+												<p class="version-text">{revision.text}</p>
+											</div>
+											{#if item.deletedAt === null}
+												<form method="POST" action={action('revert')} use:enhance>
+													<input type="hidden" name="id" value={item.id} />
+													<input type="hidden" name="seq" value={revision.seq} />
+													<button
+														class="restore-version center"
+														type="submit"
+														aria-label={t('list.restore')}
+													>
+														<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+															<polyline points="1 4 1 10 7 10" />
+															<path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+														</svg>
+													</button>
+												</form>
+											{/if}
+										</li>
+									{/each}
+								</ol>
+							</details>
 						{/if}
 					</li>
 				{/each}
@@ -305,7 +319,7 @@
 	}
 
 	.history {
-		margin-block-start: var(--space-1);
+		grid-column: 1 / -1;
 	}
 
 	.history summary {
@@ -353,9 +367,9 @@
 	}
 
 	.version {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-1);
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: var(--space-3);
 	}
 
 	.version-head {
@@ -372,18 +386,9 @@
 		overflow-wrap: anywhere;
 	}
 
+	.delete,
+	.restore,
 	.restore-version {
-		align-self: flex-start;
-		color: var(--accent);
-		font-size: 0.75rem;
-		font-weight: 600;
-	}
-
-	.restore-version:hover {
-		text-decoration: underline;
-	}
-
-	.delete {
 		inline-size: 2rem;
 		block-size: 2rem;
 		border-radius: var(--radius);
@@ -395,17 +400,10 @@
 		color: var(--danger);
 	}
 
-	.restore {
-		padding: var(--space-1) var(--space-3);
-		border: 1px solid var(--line-strong);
-		border-radius: var(--radius);
-		color: var(--accent);
-		font-size: 0.75rem;
-		font-weight: 600;
-	}
-
-	.restore:hover {
+	.restore:hover,
+	.restore-version:hover {
 		background: var(--fill);
+		color: var(--accent);
 	}
 
 	.empty {
