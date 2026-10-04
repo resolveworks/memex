@@ -32,12 +32,6 @@
 	}
 
 	a {
-		color: var(--accent);
 		font-weight: 600;
-		text-decoration: none;
-	}
-
-	a:hover {
-		text-decoration: underline;
 	}
 </style>

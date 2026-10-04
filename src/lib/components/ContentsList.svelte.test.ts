@@ -61,16 +61,17 @@ describe('ContentsList', () => {
 		expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(2);
 	});
 
-	it('links a question to the chat that will ask it, but leaves a memory plain', () => {
+	it('links a question to the chat that will answer it, but leaves the text plain', () => {
 		renderList([
 			item({ id: '1', kind: 'memory', text: 'Sushi on Fridays' }),
 			item({ id: 'q1', kind: 'question', text: 'When is sushi day?' })
 		]);
 
-		expect(screen.getByRole('link', { name: 'When is sushi day?' })).toHaveAttribute(
+		expect(screen.getByRole('link', { name: 'Answer question' })).toHaveAttribute(
 			'href',
 			`/${memex}?question=q1`
 		);
+		expect(screen.queryByRole('link', { name: 'When is sushi day?' })).toBeNull();
 		expect(screen.queryByRole('link', { name: 'Sushi on Fridays' })).toBeNull();
 	});
 

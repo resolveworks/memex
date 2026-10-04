@@ -57,6 +57,7 @@
 		"error.notFound": "Ta strona nie istnieje.",
 		"error.newMemex": "Rozpocznij nowy memex",
 		"list.history": "Historia",
+		"list.answerQuestion": "Odpowiedz na pytanie",
 		"list.created": "Utworzono",
 		"list.updated": "Zaktualizowano",
 		"list.restore": "Przywróć",

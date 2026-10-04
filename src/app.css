@@ -100,6 +100,15 @@
 		font-family: var(--font-sans);
 	}
 
+	a {
+		color: var(--accent);
+		text-decoration: none;
+	}
+
+	a:hover {
+		text-decoration: underline;
+	}
+
 	/* Every UI icon is a stroke icon drawn in currentColor */
 	svg {
 		fill: none;

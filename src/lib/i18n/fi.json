@@ -57,6 +57,7 @@
 		"error.notFound": "Tätä sivua ei ole olemassa.",
 		"error.newMemex": "Aloita uusi memex",
 		"list.history": "Historia",
+		"list.answerQuestion": "Vastaa kysymykseen",
 		"list.created": "Luotu",
 		"list.updated": "Päivitetty",
 		"list.restore": "Palauta",

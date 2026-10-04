@@ -115,13 +115,7 @@
 				{#each visible as item (item.id)}
 					<li class="item" class:deleted={item.deletedAt !== null} id={`entry-${item.id}`}>
 						<div class="body">
-							{#if item.kind === 'question' && item.deletedAt === null}
-								<p class="text">
-									<a class="ask" href={askHref(item)}>{item.text}</a>
-								</p>
-							{:else}
-								<p class="text">{item.text}</p>
-							{/if}
+							<p class="text">{item.text}</p>
 
 							<p class="meta">
 								<span>
@@ -133,6 +127,9 @@
 										{t('list.updated')}
 										<time datetime={item.updatedAt}>{formatDate(item.updatedAt)}</time>
 									</span>
+								{/if}
+								{#if item.kind === 'question' && item.deletedAt === null}
+									<a href={askHref(item)}>{t('list.answerQuestion')}</a>
 								{/if}
 							</p>
 						</div>
@@ -322,15 +319,6 @@
 		color: var(--muted);
 	}
 
-	.ask {
-		color: var(--accent);
-		text-decoration: none;
-	}
-
-	.ask:hover {
-		text-decoration: underline;
-	}
-
 	.meta {
 		display: flex;
 		flex-wrap: wrap;
@@ -454,13 +442,12 @@
 	.step {
 		padding: var(--space-2) var(--space-3);
 		border-radius: var(--radius);
-		color: var(--accent);
 		font-weight: 600;
-		text-decoration: none;
 	}
 
 	.step:hover:not(.disabled) {
 		background: var(--fill);
+		text-decoration: none;
 	}
 
 	.step.disabled {

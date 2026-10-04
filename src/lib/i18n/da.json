@@ -57,6 +57,7 @@
 		"error.notFound": "Denne side findes ikke.",
 		"error.newMemex": "Start en ny memex",
 		"list.history": "Historik",
+		"list.answerQuestion": "Svar på spørgsmål",
 		"list.created": "Oprettet",
 		"list.updated": "Opdateret",
 		"list.restore": "Gendan",

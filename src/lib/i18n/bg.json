@@ -57,6 +57,7 @@
 		"error.notFound": "Тази страница не съществува.",
 		"error.newMemex": "Стартирай нов memex",
 		"list.history": "История",
+		"list.answerQuestion": "Отговори на въпрос",
 		"list.created": "Създадено",
 		"list.updated": "Обновено",
 		"list.restore": "Възстанови",

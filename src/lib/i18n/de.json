@@ -57,6 +57,7 @@
 		"error.notFound": "Diese Seite existiert nicht.",
 		"error.newMemex": "Neuen Memex starten",
 		"list.history": "Verlauf",
+		"list.answerQuestion": "Frage beantworten",
 		"list.created": "Erstellt",
 		"list.updated": "Aktualisiert",
 		"list.restore": "Wiederherstellen",

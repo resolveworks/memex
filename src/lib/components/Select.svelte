@@ -222,9 +222,7 @@
 		text-align: left;
 		padding: var(--space-2) var(--space-3);
 		border-radius: var(--radius-sm);
-		color: var(--accent);
 		font-weight: 600;
-		text-decoration: none;
 		cursor: pointer;
 	}
 
@@ -232,6 +230,7 @@
 	.action:focus {
 		background: var(--fill);
 		outline: none;
+		text-decoration: none;
 	}
 
 	.action.disabled {

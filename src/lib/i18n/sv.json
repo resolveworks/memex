@@ -57,6 +57,7 @@
 		"error.notFound": "Den här sidan finns inte.",
 		"error.newMemex": "Starta en ny memex",
 		"list.history": "Historik",
+		"list.answerQuestion": "Svara på frågan",
 		"list.created": "Skapad",
 		"list.updated": "Uppdaterad",
 		"list.restore": "Återställ",

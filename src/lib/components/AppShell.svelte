@@ -61,12 +61,12 @@
 	.title {
 		font-weight: 600;
 		color: var(--ink);
-		text-decoration: none;
 		white-space: nowrap;
 	}
 
 	.title:hover {
 		color: var(--accent);
+		text-decoration: none;
 	}
 
 	.actions {

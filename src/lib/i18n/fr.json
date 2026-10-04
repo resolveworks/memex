@@ -57,6 +57,7 @@
 		"error.notFound": "Cette page n'existe pas.",
 		"error.newMemex": "Démarrer un nouveau memex",
 		"list.history": "Historique",
+		"list.answerQuestion": "Répondre à la question",
 		"list.created": "Créé",
 		"list.updated": "Modifié",
 		"list.restore": "Restaurer",

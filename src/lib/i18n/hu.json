@@ -57,6 +57,7 @@
 		"error.notFound": "Ez az oldal nem létezik.",
 		"error.newMemex": "Új memex indítása",
 		"list.history": "Előzmények",
+		"list.answerQuestion": "Válasz a kérdésre",
 		"list.created": "Létrehozva",
 		"list.updated": "Frissítve",
 		"list.restore": "Visszaállítás",
