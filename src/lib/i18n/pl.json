@@ -55,7 +55,19 @@
 		"chat.thinking": "Myślę",
 		"chat.clear": "Wyczyść czat",
 		"error.notFound": "Ta strona nie istnieje.",
-		"error.newMemex": "Rozpocznij nowy memex"
+		"error.newMemex": "Rozpocznij nowy memex",
+		"memory.label": "Wspomnienie",
+		"question.label": "Pytanie",
+		"list.history": "Historia",
+		"list.current": "Bieżąca",
+		"list.deleted": "Usunięte",
+		"list.created": "Utworzono",
+		"list.updated": "Zaktualizowano",
+		"list.restore": "Przywróć",
+		"contents.heading": "Zawartość",
+		"contents.search": "Szukaj we wspomnieniach i pytaniach…",
+		"contents.empty": "Jeszcze nic nie zapisano.",
+		"contents.noResults": "Nic nie pasuje do wyszukiwania."
 	},
 	"stopwords": [
 		"a",

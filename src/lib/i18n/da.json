@@ -55,7 +55,19 @@
 		"chat.thinking": "Tænker",
 		"chat.clear": "Ryd chat",
 		"error.notFound": "Denne side findes ikke.",
-		"error.newMemex": "Start en ny memex"
+		"error.newMemex": "Start en ny memex",
+		"memory.label": "Erindring",
+		"question.label": "Spørgsmål",
+		"list.history": "Historik",
+		"list.current": "Aktuel",
+		"list.deleted": "Slettet",
+		"list.created": "Oprettet",
+		"list.updated": "Opdateret",
+		"list.restore": "Gendan",
+		"contents.heading": "Indhold",
+		"contents.search": "Søg i erindringer og spørgsmål…",
+		"contents.empty": "Intet registreret endnu.",
+		"contents.noResults": "Intet matcher din søgning."
 	},
 	"stopwords": [
 		"af",

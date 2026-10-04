@@ -55,7 +55,19 @@
 		"chat.thinking": "Tänker",
 		"chat.clear": "Rensa chatten",
 		"error.notFound": "Den här sidan finns inte.",
-		"error.newMemex": "Starta en ny memex"
+		"error.newMemex": "Starta en ny memex",
+		"memory.label": "Minne",
+		"question.label": "Fråga",
+		"list.history": "Historik",
+		"list.current": "Nuvarande",
+		"list.deleted": "Borttagen",
+		"list.created": "Skapad",
+		"list.updated": "Uppdaterad",
+		"list.restore": "Återställ",
+		"contents.heading": "Innehåll",
+		"contents.search": "Sök i minnen och frågor…",
+		"contents.empty": "Inget sparat ännu.",
+		"contents.noResults": "Inget matchar din sökning."
 	},
 	"stopwords": [
 		"aderton",

@@ -55,7 +55,19 @@
 		"chat.thinking": "Přemýšlím",
 		"chat.clear": "Vymazat konverzaci",
 		"error.notFound": "Tato stránka neexistuje.",
-		"error.newMemex": "Spustit nový memex"
+		"error.newMemex": "Spustit nový memex",
+		"memory.label": "Vzpomínka",
+		"question.label": "Otázka",
+		"list.history": "Historie",
+		"list.current": "Aktuální",
+		"list.deleted": "Smazané",
+		"list.created": "Vytvořeno",
+		"list.updated": "Upraveno",
+		"list.restore": "Obnovit",
+		"contents.heading": "Obsah",
+		"contents.search": "Hledat ve vzpomínkách a otázkách…",
+		"contents.empty": "Zatím nic není uloženo.",
+		"contents.noResults": "Hledání nic neodpovídá."
 	},
 	"stopwords": [
 		"a",

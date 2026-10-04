@@ -55,7 +55,19 @@
 		"chat.thinking": "Se gândește",
 		"chat.clear": "Golește conversația",
 		"error.notFound": "Această pagină nu există.",
-		"error.newMemex": "Începe un memex nou"
+		"error.newMemex": "Începe un memex nou",
+		"memory.label": "Amintire",
+		"question.label": "Întrebare",
+		"list.history": "Istoric",
+		"list.current": "Actuală",
+		"list.deleted": "Șters",
+		"list.created": "Creat",
+		"list.updated": "Actualizat",
+		"list.restore": "Restabilește",
+		"contents.heading": "Conținut",
+		"contents.search": "Caută în amintiri și întrebări…",
+		"contents.empty": "Nimic înregistrat încă.",
+		"contents.noResults": "Nimic nu corespunde căutării."
 	},
 	"stopwords": [
 		"a",

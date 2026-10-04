@@ -16,3 +16,8 @@ export function t(key: MessageKey): string {
 export function languageName(code: string): string {
 	return new Intl.DisplayNames([code], { type: 'language' }).of(code) ?? code;
 }
+
+/** An ISO timestamp in the current locale, e.g. "3 Nov 2025". */
+export function formatDate(iso: string): string {
+	return new Intl.DateTimeFormat(page.data.locale, { dateStyle: 'medium' }).format(new Date(iso));
+}

@@ -55,7 +55,19 @@
 		"chat.thinking": "Gondolkodom",
 		"chat.clear": "Beszélgetés törlése",
 		"error.notFound": "Ez az oldal nem létezik.",
-		"error.newMemex": "Új memex indítása"
+		"error.newMemex": "Új memex indítása",
+		"memory.label": "Emlék",
+		"question.label": "Kérdés",
+		"list.history": "Előzmények",
+		"list.current": "Jelenlegi",
+		"list.deleted": "Törölt",
+		"list.created": "Létrehozva",
+		"list.updated": "Frissítve",
+		"list.restore": "Visszaállítás",
+		"contents.heading": "Tartalom",
+		"contents.search": "Keresés emlékekben és kérdésekben…",
+		"contents.empty": "Még nincs semmi rögzítve.",
+		"contents.noResults": "Semmi sem felel meg a keresésnek."
 	},
 	"stopwords": [
 		"a",

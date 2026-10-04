@@ -55,7 +55,19 @@
 		"chat.thinking": "Denkt nach",
 		"chat.clear": "Chat leeren",
 		"error.notFound": "Diese Seite existiert nicht.",
-		"error.newMemex": "Neuen Memex starten"
+		"error.newMemex": "Neuen Memex starten",
+		"memory.label": "Erinnerung",
+		"question.label": "Frage",
+		"list.history": "Verlauf",
+		"list.current": "Aktuell",
+		"list.deleted": "Gelöscht",
+		"list.created": "Erstellt",
+		"list.updated": "Aktualisiert",
+		"list.restore": "Wiederherstellen",
+		"contents.heading": "Inhalt",
+		"contents.search": "Erinnerungen und Fragen durchsuchen…",
+		"contents.empty": "Noch nichts gespeichert.",
+		"contents.noResults": "Nichts passt zur Suche."
 	},
 	"stopwords": [
 		"a",

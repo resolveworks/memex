@@ -55,7 +55,19 @@
 		"chat.thinking": "Pensando",
 		"chat.clear": "Borrar chat",
 		"error.notFound": "Esta página no existe.",
-		"error.newMemex": "Iniciar un nuevo memex"
+		"error.newMemex": "Iniciar un nuevo memex",
+		"memory.label": "Recuerdo",
+		"question.label": "Pregunta",
+		"list.history": "Historial",
+		"list.current": "Actual",
+		"list.deleted": "Eliminado",
+		"list.created": "Creado",
+		"list.updated": "Actualizado",
+		"list.restore": "Restaurar",
+		"contents.heading": "Contenido",
+		"contents.search": "Buscar en recuerdos y preguntas…",
+		"contents.empty": "Aún no hay nada registrado.",
+		"contents.noResults": "Nada coincide con tu búsqueda."
 	},
 	"stopwords": [
 		"a",

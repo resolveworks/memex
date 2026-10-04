@@ -55,7 +55,19 @@
 		"chat.thinking": "Мисля",
 		"chat.clear": "Изчисти чата",
 		"error.notFound": "Тази страница не съществува.",
-		"error.newMemex": "Стартирай нов memex"
+		"error.newMemex": "Стартирай нов memex",
+		"memory.label": "Спомен",
+		"question.label": "Въпрос",
+		"list.history": "История",
+		"list.current": "Текуща",
+		"list.deleted": "Изтрито",
+		"list.created": "Създадено",
+		"list.updated": "Обновено",
+		"list.restore": "Възстанови",
+		"contents.heading": "Съдържание",
+		"contents.search": "Търсене в спомени и въпроси…",
+		"contents.empty": "Още нищо не е записано.",
+		"contents.noResults": "Нищо не отговаря на търсенето."
 	},
 	"stopwords": [
 		"а",

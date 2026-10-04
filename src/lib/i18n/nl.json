@@ -55,7 +55,19 @@
 		"chat.thinking": "Aan het nadenken",
 		"chat.clear": "Chat wissen",
 		"error.notFound": "Deze pagina bestaat niet.",
-		"error.newMemex": "Een nieuwe memex starten"
+		"error.newMemex": "Een nieuwe memex starten",
+		"memory.label": "Herinnering",
+		"question.label": "Vraag",
+		"list.history": "Geschiedenis",
+		"list.current": "Huidige",
+		"list.deleted": "Verwijderd",
+		"list.created": "Aangemaakt",
+		"list.updated": "Bijgewerkt",
+		"list.restore": "Herstellen",
+		"contents.heading": "Inhoud",
+		"contents.search": "Zoek in herinneringen en vragen…",
+		"contents.empty": "Nog niets vastgelegd.",
+		"contents.noResults": "Niets komt overeen met je zoekopdracht."
 	},
 	"stopwords": [
 		"aan",

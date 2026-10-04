@@ -9,7 +9,10 @@ import {
 	listQuestions,
 	openQuestions,
 	remember,
+	restore,
+	revert,
 	revise,
+	revisionsOf,
 	wonder
 } from './storage';
 
@@ -143,6 +146,49 @@ describe('entity storage', () => {
 			forget(memex, memory.id);
 
 			expect(openQuestions(memex).map((open) => open.id)).toEqual([question.id]);
+		});
+	});
+
+	describe('restore', () => {
+		it('revives a forgotten entity together with its history', () => {
+			const memory = remember(memex, 'Pizza on Friday');
+			revise(memex, memory.id, 'Pizza on Saturday');
+			forget(memex, memory.id);
+			expect(listMemories(memex)).toEqual([]);
+
+			restore(memex, memory.id);
+
+			expect(listMemories(memex).map((listed) => listed.text)).toEqual(['Pizza on Saturday']);
+		});
+
+		it('throws for an entity that is not forgotten', () => {
+			const memory = remember(memex, 'Pizza on Friday');
+			expect(() => restore(memex, memory.id)).toThrow(
+				`No forgotten memory or question with id "${memory.id}".`
+			);
+		});
+	});
+
+	describe('revert', () => {
+		it('brings a past revision back as a new, current one', () => {
+			const memory = remember(memex, 'Pizza on Friday');
+			tick();
+			revise(memex, memory.id, 'Pizza on Saturday');
+			const oldest = revisionsOf(memex, [memory.id]).at(-1)!;
+
+			revert(memex, memory.id, oldest.seq);
+
+			expect(listMemories(memex).map((listed) => listed.text)).toEqual(['Pizza on Friday']);
+			expect(revisionsOf(memex, [memory.id]).map((revision) => revision.text)).toEqual([
+				'Pizza on Friday',
+				'Pizza on Saturday',
+				'Pizza on Friday'
+			]);
+		});
+
+		it('throws for a revision that does not belong to the entity', () => {
+			const memory = remember(memex, 'Pizza on Friday');
+			expect(() => revert(memex, memory.id, 99999)).toThrow(`No revision 99999 of "${memory.id}".`);
 		});
 	});
 

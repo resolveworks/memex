@@ -1,17 +1,7 @@
 <script lang="ts">
-	import ListPage from '$lib/components/ListPage.svelte';
-	import { t } from '$lib/i18n';
+	import ContentsList from '$lib/components/ContentsList.svelte';
 
 	let { data } = $props();
 </script>
 
-<ListPage
-	heading={`${t('memories.heading')} & ${t('questions.heading')}`}
-	searchPlaceholder={t('memories.search')}
-	empty={t('memories.empty')}
-	noResults={t('memories.noResults')}
-	items={data.items}
-	query={data.query}
-	page={data.page}
-	pages={data.pages}
-/>
+<ContentsList items={data.items} query={data.query} page={data.page} pages={data.pages} />

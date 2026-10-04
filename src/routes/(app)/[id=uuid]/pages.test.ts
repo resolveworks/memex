@@ -1,8 +1,17 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
+import type { ContentsItem } from '$lib/contents';
 import { create, type Memex } from '$lib/server/memexes';
-import { answer, forget, listAll, remember, wonder } from '$lib/server/storage';
+import {
+	answer,
+	forget,
+	listAll,
+	remember,
+	revisionsOf,
+	revise,
+	wonder
+} from '$lib/server/storage';
 import { useFrozenClock } from '../../../tests/clock';
 import { FakeCookies } from '../../../tests/cookies';
 import { thrown } from '../../../tests/throws';
@@ -20,15 +29,8 @@ interface LayoutData {
 	memex: Memex;
 }
 
-interface Entry {
-	id: string;
-	kind: 'memory' | 'question';
-	text: string;
-	deletedAt: string | null;
-}
-
 interface ContentsPage {
-	items: Entry[];
+	items: ContentsItem[];
 	query: string;
 	page: number;
 	pages: number;
@@ -50,13 +52,13 @@ function loadContentsPage(id: string, url: URL): ContentsPage {
 	return loadContents(contentsEvent(id, url)) as ContentsPage;
 }
 
-/** A form-encoded POST as the delete form submits it, carrying the entity id. */
-function contentsDeleteEvent(id: string, entityId: string): ContentsActionEvent {
+/** A form-encoded POST as a form on the page submits it. */
+function contentsFormEvent(id: string, fields: Record<string, string>): ContentsActionEvent {
 	const form = new FormData();
-	form.set('id', entityId);
+	for (const [key, value] of Object.entries(fields)) form.set(key, value);
 	return {
 		params: { id },
-		request: new Request('http://memex.test/contents?/delete', { method: 'POST', body: form })
+		request: new Request('http://memex.test/contents?/action', { method: 'POST', body: form })
 	} as ContentsActionEvent;
 }
 
@@ -110,7 +112,7 @@ describe('the contents page load', () => {
 		expect(byId.get(gone.id)?.deletedAt).not.toBeNull();
 	});
 
-	it('keeps answered questions alongside the memory that answers them', () => {
+	it('omits questions a live memory answers', () => {
 		const id = create('Dinner plans', 'en');
 		const question = wonder(id, 'When is sushi day?');
 		tick();
@@ -118,9 +120,35 @@ describe('the contents page load', () => {
 
 		const data = loadContentsPage(id, new URL('http://memex.test/contents'));
 
-		const byId = new Map(data.items.map((item) => [item.id, item]));
-		expect(byId.get(question.id)).toMatchObject({ kind: 'question', deletedAt: null });
-		expect(byId.get(settled.id)).toMatchObject({ kind: 'memory', deletedAt: null });
+		expect(data.items.map((item) => item.id)).toEqual([settled.id]);
+	});
+
+	it('carries each entity’s revisions, newest first', () => {
+		const id = create('Dinner plans', 'en');
+		const memory = remember(id, 'Sushi on Fridays');
+		tick();
+		revise(id, memory.id, 'Sushi on Saturdays');
+
+		const data = loadContentsPage(id, new URL('http://memex.test/contents'));
+
+		const entry = data.items.find((item) => item.id === memory.id)!;
+		expect(entry.revisions.map((revision) => revision.text)).toEqual([
+			'Sushi on Saturdays',
+			'Sushi on Fridays'
+		]);
+		expect(entry.updatedAt).toBe(entry.revisions[0].createdAt);
+	});
+
+	it('reopens a question when its only answer is forgotten', () => {
+		const id = create('Dinner plans', 'en');
+		const question = wonder(id, 'When is sushi day?');
+		tick();
+		const settled = answer(id, question.id, 'Sushi is on Fridays');
+		forget(id, settled.id);
+
+		const data = loadContentsPage(id, new URL('http://memex.test/contents'));
+
+		expect(data.items.map((item) => item.id)).toContain(question.id);
 	});
 
 	it('searches matching memories and questions, deleted ones included', () => {
@@ -213,7 +241,7 @@ describe('the contents page delete action', () => {
 		tick();
 		const gone = remember(id, 'Sushi on Saturdays');
 
-		await contentsActions.delete(contentsDeleteEvent(id, gone.id));
+		await contentsActions.delete(contentsFormEvent(id, { id: gone.id }));
 
 		expect(listAll(id).map((entry) => entry.id)).toEqual([kept.id]);
 		expect(listAll(id, true).find((entry) => entry.id === gone.id)?.deletedAt).not.toBeNull();
@@ -225,9 +253,35 @@ describe('the contents page delete action', () => {
 		tick();
 		const gone = wonder(id, 'When is taco day?');
 
-		await contentsActions.delete(contentsDeleteEvent(id, gone.id));
+		await contentsActions.delete(contentsFormEvent(id, { id: gone.id }));
 
 		expect(listAll(id).map((entry) => entry.id)).toEqual([kept.id]);
 		expect(listAll(id, true).find((entry) => entry.id === gone.id)?.deletedAt).not.toBeNull();
+	});
+});
+
+describe('the contents page restore action', () => {
+	it('revives the forgotten entity whose id the form posts', async () => {
+		const id = create('Dinner plans', 'en');
+		const memory = remember(id, 'Sushi on Fridays');
+		forget(id, memory.id);
+
+		await contentsActions.restore(contentsFormEvent(id, { id: memory.id }));
+
+		expect(listAll(id).map((entry) => entry.id)).toEqual([memory.id]);
+	});
+});
+
+describe('the contents page revert action', () => {
+	it('makes the posted revision current again', async () => {
+		const id = create('Dinner plans', 'en');
+		const memory = remember(id, 'Sushi on Fridays');
+		tick();
+		revise(id, memory.id, 'Sushi on Saturdays');
+		const oldest = revisionsOf(id, [memory.id]).at(-1)!;
+
+		await contentsActions.revert(contentsFormEvent(id, { id: memory.id, seq: String(oldest.seq) }));
+
+		expect(listAll(id).map((entry) => entry.text)).toEqual(['Sushi on Fridays']);
 	});
 });

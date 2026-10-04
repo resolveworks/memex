@@ -55,7 +55,19 @@
 		"chat.thinking": "Σκέφτομαι",
 		"chat.clear": "Καθαρισμός συνομιλίας",
 		"error.notFound": "Αυτή η σελίδα δεν υπάρχει.",
-		"error.newMemex": "Έναρξη νέου memex"
+		"error.newMemex": "Έναρξη νέου memex",
+		"memory.label": "Ανάμνηση",
+		"question.label": "Ερώτηση",
+		"list.history": "Ιστορικό",
+		"list.current": "Τρέχουσα",
+		"list.deleted": "Διαγραμμένο",
+		"list.created": "Δημιουργήθηκε",
+		"list.updated": "Ενημερώθηκε",
+		"list.restore": "Επαναφορά",
+		"contents.heading": "Περιεχόμενο",
+		"contents.search": "Αναζήτηση σε αναμνήσεις και ερωτήσεις…",
+		"contents.empty": "Δεν έχει καταγραφεί τίποτα ακόμη.",
+		"contents.noResults": "Τίποτα δεν ταιριάζει με την αναζήτηση."
 	},
 	"stopwords": [
 		"αδιάκοπα",

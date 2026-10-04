@@ -55,7 +55,19 @@
 		"chat.thinking": "Ajattelee",
 		"chat.clear": "Tyhjennä keskustelu",
 		"error.notFound": "Tätä sivua ei ole olemassa.",
-		"error.newMemex": "Aloita uusi memex"
+		"error.newMemex": "Aloita uusi memex",
+		"memory.label": "Muisto",
+		"question.label": "Kysymys",
+		"list.history": "Historia",
+		"list.current": "Nykyinen",
+		"list.deleted": "Poistettu",
+		"list.created": "Luotu",
+		"list.updated": "Päivitetty",
+		"list.restore": "Palauta",
+		"contents.heading": "Sisältö",
+		"contents.search": "Hae muistoista ja kysymyksistä…",
+		"contents.empty": "Mitään ei ole vielä tallennettu.",
+		"contents.noResults": "Mikään ei vastaa hakuasi."
 	},
 	"stopwords": [
 		"aiemmin",

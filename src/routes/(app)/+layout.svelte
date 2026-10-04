@@ -44,7 +44,7 @@
 		<a
 			class="icon center"
 			href={resolve(`/${page.params.id}/contents`)}
-			aria-label={`${t('memories.heading')} & ${t('questions.heading')}`}
+			aria-label={t('contents.heading')}
 			onclick={follow}
 		>
 			<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">

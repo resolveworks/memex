@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { and, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 import { stopwords } from '$lib/languages';
 import type { Memory } from '$lib/memory';
 import { PAGE_SIZE, type Page } from '$lib/page';
@@ -22,6 +22,14 @@ export interface ListItem {
 
 /** A list item with its deletion state, as the content view needs it. */
 export interface Entry extends ListItem {
+	deletedAt: string | null;
+}
+
+/** One revision of an entity, for the contents view's history. */
+export interface RevisionView {
+	seq: number;
+	text: string;
+	createdAt: string;
 	deletedAt: string | null;
 }
 
@@ -181,11 +189,11 @@ export function listQuestions(memexId: string, includeDeleted = false): Question
 }
 
 /**
- * A memex's contents: every memory and question, open or closed, interleaved
- * newest first. Forgotten entities are included only when asked for.
+ * A memex's contents, interleaved newest first. Forgotten entities are included
+ * only when asked for; `openOnly` drops questions a live memory already answers.
  */
-export function listAll(memexId: string, includeDeleted = false): Entry[] {
-	return resolve(memexId, { includeDeleted }).map(toEntry);
+export function listAll(memexId: string, includeDeleted = false, openOnly = false): Entry[] {
+	return resolve(memexId, { includeDeleted, openOnly }).map(toEntry);
 }
 
 /** Total number of live memories in a memex. */
@@ -285,6 +293,34 @@ export function revise(memexId: string, id: string, text: string): Memory | Ques
 	return row.kind === 'memory' ? toMemory(resolved) : toQuestion(resolved);
 }
 
+/** Revives a forgotten entity by clearing the deletion on all its revisions. */
+export function restore(memexId: string, id: string): void {
+	const { changes } = db
+		.update(revisions)
+		.set({ deletedAt: null })
+		.where(
+			and(
+				eq(revisions.memexId, memexId),
+				eq(revisions.entityId, id),
+				isNotNull(revisions.deletedAt)
+			)
+		)
+		.run();
+	if (changes === 0) {
+		throw new Error(`No forgotten memory or question with id "${id}".`);
+	}
+}
+
+/** Brings back a past revision's text as a new, current revision. */
+export function revert(memexId: string, id: string, seq: number): Memory | Question {
+	const past = db.get<Revision>(sql`
+		select text from revisions
+		where memex_id = ${memexId} and entity_id = ${id} and seq = ${seq}
+	`);
+	if (!past) throw new Error(`No revision ${seq} of "${id}".`);
+	return revise(memexId, id, past.text);
+}
+
 /** Soft-deletes every live revision of a memory or question, so the entity disappears. */
 export function forget(memexId: string, id: string): void {
 	const { changes } = db
@@ -326,9 +362,33 @@ export function search(
 	};
 }
 
-/** Searches a memex's memories and questions together, keeping recency order. */
-export function searchAll(memexId: string, queries: string[], includeDeleted = false): Entry[] {
-	return matches(listAll(memexId, includeDeleted), queries.flatMap(tokenize));
+/** Searches a memex's contents, keeping recency order; `openOnly` drops closed questions. */
+export function searchAll(
+	memexId: string,
+	queries: string[],
+	includeDeleted = false,
+	openOnly = false
+): Entry[] {
+	return matches(listAll(memexId, includeDeleted, openOnly), queries.flatMap(tokenize));
+}
+
+/** Every revision of the given entities, newest first. */
+export function revisionsOf(
+	memexId: string,
+	ids: string[]
+): (RevisionView & { entityId: string })[] {
+	if (ids.length === 0) return [];
+	return db.all<RevisionView & { entityId: string }>(sql`
+		select
+			seq,
+			entity_id as entityId,
+			text,
+			created_at as createdAt,
+			deleted_at as deletedAt
+		from revisions
+		where memex_id = ${memexId} and ${inArray(revisions.entityId, ids)}
+		order by seq desc
+	`);
 }
 
 export function list(memexId: string, kind: Kind | undefined, offset: number): Page<ListItem> {
