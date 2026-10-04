@@ -133,13 +133,19 @@ async function promptContext(questionId: string | undefined): Promise<PromptCont
 	return (await response.json()) as PromptContext;
 }
 
-/** Renders the store's most common terms for the greeting snapshot. */
+/** Renders the store's most common terms for the greeting snapshot, grouped by count. */
 function termsSection(terms: TermCount[]): string {
 	if (terms.length === 0) return '# Topics\n\nThe store is empty.';
-	const items = terms.map(({ term, count }) => `- ${term}: ${count}`).join('\n');
+	const groups = new Map<number, string[]>();
+	for (const { term, count } of terms) {
+		const group = groups.get(count) ?? [];
+		group.push(term);
+		groups.set(count, group);
+	}
+	const items = [...groups].map(([count, group]) => `${count}: ${group.join(' ')}`).join(' ');
 	return `# Topics
 
-The most common terms in the store, each with its memory count. Use them to judge what it covers.
+The most common terms in the store, each count followed by the terms found in that many entries. Use them to judge what it covers.
 
 ${items}`;
 }

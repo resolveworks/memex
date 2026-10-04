@@ -71,6 +71,7 @@ describe('greetingMessage', () => {
 				openQuestions: 3,
 				question: question('q1', 'Tea or coffee?'),
 				terms: [
+					{ term: 'cup', count: 3 },
 					{ term: 'tea', count: 3 },
 					{ term: 'sleep', count: 1 }
 				]
@@ -84,7 +85,7 @@ describe('greetingMessage', () => {
 				type: 'text',
 				text:
 					'This memex is titled "Tea Log". Today is 2026-03-04. It holds 12 memories and 3 open questions.\n\n' +
-					'# Topics\n\nThe most common terms in the store, each with its memory count. Use them to judge what it covers.\n\n- tea: 3\n- sleep: 1\n\n' +
+					'# Topics\n\nThe most common terms in the store, each count followed by the terms found in that many entries. Use them to judge what it covers.\n\n3: cup tea 1: sleep\n\n' +
 					'The user has opened this memex and is waiting for you to greet them. ' +
 					'In one or two short sentences in svenska, say what this memex is, what it appears to hold from the topic terms above, and what it has left unanswered. ' +
 					'End by asking the open question q1: "Tea or coffee?", set in bold. ' +
