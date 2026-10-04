@@ -150,21 +150,18 @@
 											<polyline points="9 18 15 12 9 6" />
 										</svg>
 										{t('list.history')}
-										<span class="count">{item.revisions.length}</span>
+										<span class="count">{item.revisions.length - 1}</span>
 									</summary>
 									<ol class="versions">
-										{#each item.revisions as revision, index (revision.seq)}
-											<li class="version" class:current={index === 0}>
+										{#each item.revisions.slice(1) as revision (revision.seq)}
+											<li class="version">
 												<div class="version-head">
 													<time datetime={revision.createdAt}>
 														{formatDate(revision.createdAt)}
 													</time>
-													{#if index === 0 && item.deletedAt === null}
-														<span class="current-label">{t('list.current')}</span>
-													{/if}
 												</div>
 												<p class="version-text">{revision.text}</p>
-												{#if index > 0 && item.deletedAt === null}
+												{#if item.deletedAt === null}
 													<form method="POST" action={action('revert')} use:enhance>
 														<input type="hidden" name="id" value={item.id} />
 														<input type="hidden" name="seq" value={revision.seq} />
@@ -420,19 +417,10 @@
 		font-size: 0.75rem;
 	}
 
-	.current-label {
-		color: var(--accent);
-		font-weight: 600;
-	}
-
 	.version-text {
 		color: var(--ink-soft);
 		font-size: 0.875rem;
 		overflow-wrap: anywhere;
-	}
-
-	.version.current .version-text {
-		color: var(--ink);
 	}
 
 	.restore-version {

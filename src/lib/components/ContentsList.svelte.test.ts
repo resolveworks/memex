@@ -55,7 +55,7 @@ describe('ContentsList', () => {
 		expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(2);
 	});
 
-	it('shows a version history and a restore action for each earlier version', () => {
+	it('shows earlier versions in the history and a restore action for each', () => {
 		renderList([
 			item({
 				id: '1',
@@ -80,7 +80,9 @@ describe('ContentsList', () => {
 		]);
 
 		expect(screen.getByText('History')).toBeInTheDocument();
-		expect(screen.getByText('Current')).toBeInTheDocument();
+		// The current revision is shown above, not repeated in the history.
+		expect(screen.queryByText('Current')).toBeNull();
+		expect(screen.getAllByText('Sushi on Saturdays')).toHaveLength(1);
 		expect(screen.getByText('Sushi on Fridays')).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: 'Restore' })).toBeInTheDocument();
 	});
