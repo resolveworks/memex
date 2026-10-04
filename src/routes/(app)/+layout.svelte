@@ -43,8 +43,8 @@
 	{#snippet toolbar()}
 		<a
 			class="icon center"
-			href={resolve(`/${page.params.id}/memories`)}
-			aria-label={t('memories.heading')}
+			href={resolve(`/${page.params.id}/contents`)}
+			aria-label={`${t('memories.heading')} & ${t('questions.heading')}`}
 			onclick={follow}
 		>
 			<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -52,24 +52,6 @@
 				<path d="M3 5v14a9 3 0 0 0 18 0V5" />
 				<path d="M3 12a9 3 0 0 0 18 0" />
 			</svg>
-		</a>
-		<a
-			class="icon center"
-			href={resolve(`/${page.params.id}/questions`)}
-			aria-label={t('questions.heading')}
-			onclick={follow}
-		>
-			<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-				<line x1="8" y1="6" x2="21" y2="6" />
-				<line x1="8" y1="12" x2="21" y2="12" />
-				<line x1="8" y1="18" x2="21" y2="18" />
-				<line x1="3" y1="6" x2="3.01" y2="6" />
-				<line x1="3" y1="12" x2="3.01" y2="12" />
-				<line x1="3" y1="18" x2="3.01" y2="18" />
-			</svg>
-			{#if page.data.questionCount}
-				<span class="badge" aria-hidden="true"></span>
-			{/if}
 		</a>
 		<a
 			class="icon center"
@@ -96,16 +78,6 @@
 		block-size: 2.25rem;
 		border-radius: var(--radius);
 		color: var(--ink);
-	}
-
-	.badge {
-		position: absolute;
-		inset-block-start: 0.25rem;
-		inset-inline-end: 0.25rem;
-		inline-size: 0.5rem;
-		block-size: 0.5rem;
-		border-radius: var(--radius-full);
-		background: var(--danger);
 	}
 
 	.icon:hover:not(:disabled) {

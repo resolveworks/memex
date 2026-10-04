@@ -20,6 +20,11 @@ export interface ListItem {
 	updatedAt: string;
 }
 
+/** A list item with its deletion state, as the content view needs it. */
+export interface Entry extends ListItem {
+	deletedAt: string | null;
+}
+
 export interface TermCount {
 	term: string;
 	count: number;
@@ -129,6 +134,17 @@ function toQuestion({ row, made }: Resolved): Question {
 	};
 }
 
+function toEntry({ row, made }: Resolved): Entry {
+	return {
+		id: row.entityId,
+		kind: row.kind,
+		text: row.text,
+		createdAt: made,
+		updatedAt: row.createdAt,
+		deletedAt: row.deletedAt
+	};
+}
+
 /** The live revision that speaks for one entity, with the entity's first timestamp. */
 function resolveById(memexId: string, entityId: string): Resolved | undefined {
 	const row = db.get<(Revision & { made: string }) | undefined>(sql`
@@ -162,6 +178,14 @@ export function listMemories(memexId: string, includeDeleted = false): Memory[] 
 /** A memex's questions; forgotten entities are included only when asked for. */
 export function listQuestions(memexId: string, includeDeleted = false): Question[] {
 	return resolve(memexId, { kind: 'question', includeDeleted }).map(toQuestion);
+}
+
+/**
+ * A memex's contents: every memory and question, open or closed, interleaved
+ * newest first. Forgotten entities are included only when asked for.
+ */
+export function listAll(memexId: string, includeDeleted = false): Entry[] {
+	return resolve(memexId, { includeDeleted }).map(toEntry);
 }
 
 /** Total number of live memories in a memex. */
@@ -300,6 +324,11 @@ export function search(
 			terms
 		)
 	};
+}
+
+/** Searches a memex's memories and questions together, keeping recency order. */
+export function searchAll(memexId: string, queries: string[], includeDeleted = false): Entry[] {
+	return matches(listAll(memexId, includeDeleted), queries.flatMap(tokenize));
 }
 
 export function list(memexId: string, kind: Kind | undefined, offset: number): Page<ListItem> {

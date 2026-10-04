@@ -1,42 +1,34 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
-import type { Memory } from '$lib/memory';
-import type { Question } from '$lib/question';
 import { create, type Memex } from '$lib/server/memexes';
-import { answer, forget, listMemories, listQuestions, remember, wonder } from '$lib/server/storage';
+import { answer, forget, listAll, remember, wonder } from '$lib/server/storage';
 import { useFrozenClock } from '../../../tests/clock';
 import { FakeCookies } from '../../../tests/cookies';
 import { thrown } from '../../../tests/throws';
 import { load as loadLayout } from './+layout.server';
 import type { LayoutServerLoadEvent } from './$types';
-import { actions as memoriesActions, load as loadMemories } from './memories/+page.server';
+import { actions as contentsActions, load as loadContents } from './contents/+page.server';
 import type {
-	PageServerLoadEvent as MemoriesLoadEvent,
-	RequestEvent as MemoriesActionEvent
-} from './memories/$types';
-import { actions as questionsActions, load as loadQuestions } from './questions/+page.server';
-import type {
-	PageServerLoadEvent as QuestionsLoadEvent,
-	RequestEvent as QuestionsActionEvent
-} from './questions/$types';
+	PageServerLoadEvent as ContentsLoadEvent,
+	RequestEvent as ContentsActionEvent
+} from './contents/$types';
 
 // The handlers are annotated with SvelteKit's generated load types, which
 // erase the concrete return shape, so the tests state what they return.
 interface LayoutData {
 	memex: Memex;
-	questionCount: number;
 }
 
-interface MemoriesPage {
-	memories: Memory[];
-	query: string;
-	page: number;
-	pages: number;
+interface Entry {
+	id: string;
+	kind: 'memory' | 'question';
+	text: string;
+	deletedAt: string | null;
 }
 
-interface QuestionsPage {
-	questions: Question[];
+interface ContentsPage {
+	items: Entry[];
 	query: string;
 	page: number;
 	pages: number;
@@ -49,40 +41,23 @@ function layoutEvent(id: string, cookies: Cookies): LayoutServerLoadEvent {
 	return { params: { id }, cookies } as LayoutServerLoadEvent;
 }
 
-/** The slice of a page load event the handlers read: params and url. */
-function memoriesEvent(id: string, url: URL): MemoriesLoadEvent {
-	return { params: { id }, url } as MemoriesLoadEvent;
+/** The slice of a page load event the handler reads: params and url. */
+function contentsEvent(id: string, url: URL): ContentsLoadEvent {
+	return { params: { id }, url } as ContentsLoadEvent;
 }
 
-function questionsEvent(id: string, url: URL): QuestionsLoadEvent {
-	return { params: { id }, url } as QuestionsLoadEvent;
+function loadContentsPage(id: string, url: URL): ContentsPage {
+	return loadContents(contentsEvent(id, url)) as ContentsPage;
 }
 
-function loadMemoriesPage(id: string, url: URL): MemoriesPage {
-	return loadMemories(memoriesEvent(id, url)) as MemoriesPage;
-}
-
-function loadQuestionsPage(id: string, url: URL): QuestionsPage {
-	return loadQuestions(questionsEvent(id, url)) as QuestionsPage;
-}
-
-/** A form-encoded POST as the delete forms submit it, carrying the entity id. */
-function memoriesDeleteEvent(id: string, entityId: string): MemoriesActionEvent {
+/** A form-encoded POST as the delete form submits it, carrying the entity id. */
+function contentsDeleteEvent(id: string, entityId: string): ContentsActionEvent {
 	const form = new FormData();
 	form.set('id', entityId);
 	return {
 		params: { id },
-		request: new Request('http://memex.test/memories?/delete', { method: 'POST', body: form })
-	} as MemoriesActionEvent;
-}
-
-function questionsDeleteEvent(id: string, entityId: string): QuestionsActionEvent {
-	const form = new FormData();
-	form.set('id', entityId);
-	return {
-		params: { id },
-		request: new Request('http://memex.test/questions?/delete', { method: 'POST', body: form })
-	} as QuestionsActionEvent;
+		request: new Request('http://memex.test/contents?/delete', { method: 'POST', body: form })
+	} as ContentsActionEvent;
 }
 
 describe('the app layout load', () => {
@@ -97,82 +72,93 @@ describe('the app layout load', () => {
 		expect(cookies.get('memexes')).toBe(other);
 	});
 
-	it('records the memex in the cookie and returns its open-question count', () => {
+	it('records the memex in the cookie', () => {
 		const id = create('Dinner plans', 'en');
 		const other = randomUUID();
-		const settled = wonder(id, 'Anything');
-		answer(id, settled.id, 'Anything');
-		wonder(id, 'Anything');
 		const cookies = new FakeCookies({ memexes: other });
 
 		const data = loadLayout(layoutEvent(id, cookies)) as LayoutData;
 
 		expect(cookies.get('memexes')).toBe(`${id},${other}`);
 		expect(data.memex).toMatchObject({ id, title: 'Dinner plans' });
-		expect(data.questionCount).toBe(1);
 	});
 });
 
-describe('the memories page load', () => {
-	it('lists every memory, deleted ones included, when there is no query', () => {
+describe('the contents page load', () => {
+	it('lists every memory and question, deleted ones included, newest first', () => {
 		const id = create('Dinner plans', 'en');
-		const live = remember(id, 'Sushi on Fridays');
+		const memory = remember(id, 'Sushi on Fridays');
+		tick();
+		const question = wonder(id, 'When is taco day?');
 		tick();
 		const gone = remember(id, 'Tacos on Tuesdays');
 		forget(id, gone.id);
 
-		const data = loadMemoriesPage(id, new URL('http://memex.test/memories'));
+		const data = loadContentsPage(id, new URL('http://memex.test/contents'));
 
 		expect(data.query).toBe('');
 		expect(data.page).toBe(1);
 		expect(data.pages).toBe(1);
-		expect(data.memories.map((memory) => memory.text)).toEqual([
+		expect(data.items.map((item) => item.text)).toEqual([
 			'Tacos on Tuesdays',
+			'When is taco day?',
 			'Sushi on Fridays'
 		]);
-		const byId = new Map(data.memories.map((memory) => [memory.id, memory]));
-		expect(byId.get(live.id)?.deletedAt).toBeNull();
+		const byId = new Map(data.items.map((item) => [item.id, item]));
+		expect(byId.get(memory.id)).toMatchObject({ kind: 'memory', deletedAt: null });
+		expect(byId.get(question.id)).toMatchObject({ kind: 'question', deletedAt: null });
 		expect(byId.get(gone.id)?.deletedAt).not.toBeNull();
 	});
 
-	it('searches matching memories, deleted ones included', () => {
+	it('keeps answered questions alongside the memory that answers them', () => {
+		const id = create('Dinner plans', 'en');
+		const question = wonder(id, 'When is sushi day?');
+		tick();
+		const settled = answer(id, question.id, 'Sushi is on Fridays');
+
+		const data = loadContentsPage(id, new URL('http://memex.test/contents'));
+
+		const byId = new Map(data.items.map((item) => [item.id, item]));
+		expect(byId.get(question.id)).toMatchObject({ kind: 'question', deletedAt: null });
+		expect(byId.get(settled.id)).toMatchObject({ kind: 'memory', deletedAt: null });
+	});
+
+	it('searches matching memories and questions, deleted ones included', () => {
 		const id = create('Dinner plans', 'en');
 		remember(id, 'Sushi on Fridays');
 		tick();
-		const gone = remember(id, 'Sushi on Saturdays');
+		const gone = wonder(id, 'Which sushi place?');
 		forget(id, gone.id);
 		tick();
-		remember(id, 'Tacos on Tuesdays');
+		wonder(id, 'Tacos or burritos?');
 
-		const data = loadMemoriesPage(id, new URL('http://memex.test/memories?q=sushi'));
+		const data = loadContentsPage(id, new URL('http://memex.test/contents?q=sushi'));
 
 		expect(data.query).toBe('sushi');
-		expect(data.memories.map((memory) => memory.text)).toEqual([
-			'Sushi on Saturdays',
-			'Sushi on Fridays'
-		]);
+		expect(data.items.map((item) => item.text)).toEqual(['Which sushi place?', 'Sushi on Fridays']);
 	});
 
-	it('serves twenty memories per page and reports ceil(count / 20) pages', () => {
+	it('serves twenty entries per page and reports ceil(count / 20) pages', () => {
 		const id = create('Dinner plans', 'en');
 		for (let i = 1; i <= 45; i++) {
-			remember(id, `Fact ${i}`);
+			if (i % 2 === 0) wonder(id, `Entry ${i}`);
+			else remember(id, `Entry ${i}`);
 			tick();
 		}
-		const newestFirst = Array.from({ length: 45 }, (_, i) => `Fact ${45 - i}`);
+		const newestFirst = Array.from({ length: 45 }, (_, i) => `Entry ${45 - i}`);
 
-		const first = loadMemoriesPage(id, new URL('http://memex.test/memories'));
+		const first = loadContentsPage(id, new URL('http://memex.test/contents'));
 		expect(first.page).toBe(1);
 		expect(first.pages).toBe(3);
-		expect(first.memories.map((memory) => memory.text)).toEqual(newestFirst.slice(0, 20));
+		expect(first.items.map((item) => item.text)).toEqual(newestFirst.slice(0, 20));
 
-		const second = loadMemoriesPage(id, new URL('http://memex.test/memories?page=2'));
+		const second = loadContentsPage(id, new URL('http://memex.test/contents?page=2'));
 		expect(second.page).toBe(2);
-		expect(second.memories.map((memory) => memory.text)).toEqual(newestFirst.slice(20, 40));
+		expect(second.items.map((item) => item.text)).toEqual(newestFirst.slice(20, 40));
 
-		const third = loadMemoriesPage(id, new URL('http://memex.test/memories?page=3'));
+		const third = loadContentsPage(id, new URL('http://memex.test/contents?page=3'));
 		expect(third.page).toBe(3);
-		expect(third.memories.map((memory) => memory.text)).toEqual(newestFirst.slice(40));
+		expect(third.items.map((item) => item.text)).toEqual(newestFirst.slice(40));
 	});
 
 	it('clamps an out-of-range page into [1, pages]', () => {
@@ -182,16 +168,16 @@ describe('the memories page load', () => {
 			tick();
 		}
 
-		const tooHigh = loadMemoriesPage(id, new URL('http://memex.test/memories?page=99'));
+		const tooHigh = loadContentsPage(id, new URL('http://memex.test/contents?page=99'));
 		expect(tooHigh.page).toBe(3);
-		expect(tooHigh.memories.map((memory) => memory.text)).toEqual(
+		expect(tooHigh.items.map((item) => item.text)).toEqual(
 			Array.from({ length: 5 }, (_, i) => `Fact ${5 - i}`)
 		);
 
 		for (const page of ['0', '-2']) {
-			const tooLow = loadMemoriesPage(id, new URL(`http://memex.test/memories?page=${page}`));
+			const tooLow = loadContentsPage(id, new URL(`http://memex.test/contents?page=${page}`));
 			expect(tooLow.page).toBe(1);
-			expect(tooLow.memories).toHaveLength(20);
+			expect(tooLow.items).toHaveLength(20);
 		}
 	});
 
@@ -203,118 +189,45 @@ describe('the memories page load', () => {
 		}
 
 		for (const page of ['abc', '2.5']) {
-			const data = loadMemoriesPage(id, new URL(`http://memex.test/memories?page=${page}`));
+			const data = loadContentsPage(id, new URL(`http://memex.test/contents?page=${page}`));
 			expect(data.page).toBe(1);
-			expect(data.memories).toHaveLength(20);
+			expect(data.items).toHaveLength(20);
 		}
 	});
 
-	it('reports one page at minimum for a memex without memories', () => {
+	it('reports one page at minimum for an empty memex', () => {
 		const id = create('Dinner plans', 'en');
 
-		const data = loadMemoriesPage(id, new URL('http://memex.test/memories'));
+		const data = loadContentsPage(id, new URL('http://memex.test/contents'));
 
 		expect(data.page).toBe(1);
 		expect(data.pages).toBe(1);
-		expect(data.memories).toEqual([]);
+		expect(data.items).toEqual([]);
 	});
 });
 
-describe('the questions page load', () => {
-	it('lists every question, deleted ones included, when there is no query', () => {
-		const id = create('Dinner plans', 'en');
-		const live = wonder(id, 'When is sushi day?');
-		tick();
-		const gone = wonder(id, 'When is taco day?');
-		forget(id, gone.id);
-
-		const data = loadQuestionsPage(id, new URL('http://memex.test/questions'));
-
-		expect(data.query).toBe('');
-		expect(data.page).toBe(1);
-		expect(data.pages).toBe(1);
-		expect(data.questions.map((question) => question.text)).toEqual([
-			'When is taco day?',
-			'When is sushi day?'
-		]);
-		const byId = new Map(data.questions.map((question) => [question.id, question]));
-		expect(byId.get(live.id)?.deletedAt).toBeNull();
-		expect(byId.get(gone.id)?.deletedAt).not.toBeNull();
-	});
-
-	it('searches matching questions, deleted ones included', () => {
-		const id = create('Dinner plans', 'en');
-		const gone = wonder(id, 'Which sushi place?');
-		forget(id, gone.id);
-		wonder(id, 'Tacos or burritos?');
-
-		const data = loadQuestionsPage(id, new URL('http://memex.test/questions?q=sushi'));
-
-		expect(data.query).toBe('sushi');
-		expect(data.questions.map((question) => question.text)).toEqual(['Which sushi place?']);
-	});
-
-	it('clamps the page into [1, pages] and reports ceil(count / 20) pages', () => {
-		const id = create('Dinner plans', 'en');
-		for (let i = 1; i <= 25; i++) {
-			wonder(id, `Question ${i}`);
-			tick();
-		}
-
-		const first = loadQuestionsPage(id, new URL('http://memex.test/questions'));
-		expect(first.page).toBe(1);
-		expect(first.pages).toBe(2);
-		expect(first.questions).toHaveLength(20);
-
-		const tooHigh = loadQuestionsPage(id, new URL('http://memex.test/questions?page=99'));
-		expect(tooHigh.page).toBe(2);
-		expect(tooHigh.questions.map((question) => question.text)).toEqual(
-			Array.from({ length: 5 }, (_, i) => `Question ${5 - i}`)
-		);
-
-		const nonsense = loadQuestionsPage(id, new URL('http://memex.test/questions?page=abc'));
-		expect(nonsense.page).toBe(1);
-	});
-
-	it('reports one page at minimum for a memex without questions', () => {
-		const id = create('Dinner plans', 'en');
-
-		const data = loadQuestionsPage(id, new URL('http://memex.test/questions'));
-
-		expect(data.page).toBe(1);
-		expect(data.pages).toBe(1);
-		expect(data.questions).toEqual([]);
-	});
-});
-
-describe('the memories page delete action', () => {
+describe('the contents page delete action', () => {
 	it('forgets the memory whose id the form posts', async () => {
 		const id = create('Dinner plans', 'en');
 		const kept = remember(id, 'Sushi on Fridays');
 		tick();
-		const gone = remember(id, 'Sushi on Fridays');
+		const gone = remember(id, 'Sushi on Saturdays');
 
-		await memoriesActions.delete(memoriesDeleteEvent(id, gone.id));
+		await contentsActions.delete(contentsDeleteEvent(id, gone.id));
 
-		expect(listMemories(id).map((memory) => memory.id)).toEqual([kept.id]);
-		const every = listMemories(id, true);
-		expect(every.map((memory) => memory.id)).toEqual([gone.id, kept.id]);
-		expect(every.find((memory) => memory.id === gone.id)?.deletedAt).not.toBeNull();
+		expect(listAll(id).map((entry) => entry.id)).toEqual([kept.id]);
+		expect(listAll(id, true).find((entry) => entry.id === gone.id)?.deletedAt).not.toBeNull();
 	});
-});
 
-describe('the questions page delete action', () => {
 	it('forgets the question whose id the form posts', async () => {
 		const id = create('Dinner plans', 'en');
 		const kept = wonder(id, 'When is sushi day?');
 		tick();
-		const gone = wonder(id, 'When is sushi day?');
+		const gone = wonder(id, 'When is taco day?');
 
-		await questionsActions.delete(questionsDeleteEvent(id, gone.id));
+		await contentsActions.delete(contentsDeleteEvent(id, gone.id));
 
-		expect(listQuestions(id).map((question) => question.id)).toEqual([kept.id]);
-		const every = listQuestions(id, true);
-		expect(every.map((question) => question.id)).toEqual([gone.id, kept.id]);
-		expect(every.find((question) => question.id === gone.id)?.deletedAt).not.toBeNull();
+		expect(listAll(id).map((entry) => entry.id)).toEqual([kept.id]);
+		expect(listAll(id, true).find((entry) => entry.id === gone.id)?.deletedAt).not.toBeNull();
 	});
 });

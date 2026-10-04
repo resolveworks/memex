@@ -10,6 +10,7 @@
 
 	interface Item {
 		id: string;
+		kind: 'memory' | 'question';
 		text: string;
 		deletedAt: string | null;
 	}
@@ -121,6 +122,22 @@
 			<ul class="items">
 				{#each visible as item (item.id)}
 					<li class="item" class:deleted={item.deletedAt !== null}>
+						<span
+							class="kind"
+							role="img"
+							aria-label={item.kind === 'question' ? t('questions.heading') : t('memories.heading')}
+						>
+							<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+								{#if item.kind === 'question'}
+									<path d="M7.78 7.65a4.35 4.35 0 0 1 8.45 1.45c0 2.9-4.35 4.35-4.35 4.35" />
+									<line x1="12" y1="19.25" x2="12.01" y2="19.25" />
+								{:else}
+									<ellipse cx="12" cy="5" rx="9" ry="3" />
+									<path d="M3 5v14a9 3 0 0 0 18 0V5" />
+									<path d="M3 12a9 3 0 0 0 18 0" />
+								{/if}
+							</svg>
+						</span>
 						<span class="text">{item.text}</span>
 						{#if item.deletedAt === null}
 							<form method="POST" action={deleteAction()} use:enhance>
@@ -232,6 +249,12 @@
 		gap: var(--space-3);
 		padding: var(--space-3) var(--space-2);
 		border-block-end: 1px solid var(--line);
+	}
+
+	.kind {
+		display: flex;
+		flex: none;
+		color: var(--muted);
 	}
 
 	.item.deleted .text {

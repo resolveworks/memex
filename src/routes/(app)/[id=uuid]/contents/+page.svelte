@@ -6,11 +6,11 @@
 </script>
 
 <ListPage
-	heading={t('memories.heading')}
+	heading={`${t('memories.heading')} & ${t('questions.heading')}`}
 	searchPlaceholder={t('memories.search')}
 	empty={t('memories.empty')}
 	noResults={t('memories.noResults')}
-	items={data.memories}
+	items={data.items}
 	query={data.query}
 	page={data.page}
 	pages={data.pages}

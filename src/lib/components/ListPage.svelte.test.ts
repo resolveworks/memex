@@ -6,20 +6,21 @@ import ListPage from './ListPage.svelte';
 
 vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
 vi.mock('$app/state', () => ({
-	page: { url: new URL('http://localhost/memories'), data: { locale: 'en' } }
+	page: { url: new URL('http://localhost/contents'), data: { locale: 'en' } }
 }));
 vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
 
 interface Item {
 	id: string;
+	kind: 'memory' | 'question';
 	text: string;
 	deletedAt: string | null;
 }
 
 const items: Item[] = [
-	{ id: '1', text: 'First memory', deletedAt: null },
-	{ id: '2', text: 'Deleted memory', deletedAt: '2025-10-03T10:00:00.000Z' },
-	{ id: '3', text: 'Second memory', deletedAt: null }
+	{ id: '1', kind: 'memory', text: 'First memory', deletedAt: null },
+	{ id: '2', kind: 'memory', text: 'Deleted memory', deletedAt: '2025-10-03T10:00:00.000Z' },
+	{ id: '3', kind: 'question', text: 'First question', deletedAt: null }
 ];
 
 function renderList(
@@ -59,7 +60,7 @@ describe('ListPage', () => {
 	it('hides deleted items until "Include deleted" is checked', async () => {
 		renderList();
 		expect(screen.getByText('First memory')).toBeInTheDocument();
-		expect(screen.getByText('Second memory')).toBeInTheDocument();
+		expect(screen.getByText('First question')).toBeInTheDocument();
 		expect(screen.queryByText('Deleted memory')).not.toBeInTheDocument();
 		expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(2);
 
@@ -74,6 +75,12 @@ describe('ListPage', () => {
 		expect(screen.queryByText('Deleted memory')).not.toBeInTheDocument();
 	});
 
+	it('marks each row as a memory or a question', () => {
+		renderList();
+		expect(screen.getAllByRole('img', { name: 'Memories' })).toHaveLength(1);
+		expect(screen.getAllByRole('img', { name: 'Questions' })).toHaveLength(1);
+	});
+
 	it('seeds the search box with the current query', () => {
 		renderList({ query: 'gol' });
 		expect(screen.getByRole('searchbox', { name: 'Search memories…' })).toHaveValue('gol');
@@ -86,7 +93,7 @@ describe('ListPage', () => {
 		await fireEvent.input(search, { target: { value: 'go' } });
 		await fireEvent.input(search, { target: { value: 'gol' } });
 
-		expect(goto).toHaveBeenLastCalledWith('/memories?q=gol', {
+		expect(goto).toHaveBeenLastCalledWith('/contents?q=gol', {
 			replaceState: true,
 			noScroll: true,
 			keepFocus: true
@@ -103,7 +110,7 @@ describe('ListPage', () => {
 		expect(screen.getByText('1 / 3')).toBeInTheDocument();
 		expect(screen.getByRole('link', { name: 'Next' })).toHaveAttribute(
 			'href',
-			'/memories?q=foo&page=2'
+			'/contents?q=foo&page=2'
 		);
 	});
 
@@ -111,13 +118,13 @@ describe('ListPage', () => {
 		renderList({ query: 'foo', page: 2, pages: 3 });
 		expect(screen.getByRole('link', { name: 'Previous' })).toHaveAttribute(
 			'href',
-			'/memories?q=foo'
+			'/contents?q=foo'
 		);
 	});
 
 	it('omits the q param from pagination links when there is no query', () => {
 		renderList({ page: 1, pages: 2 });
-		expect(screen.getByRole('link', { name: 'Next' })).toHaveAttribute('href', '/memories?page=2');
+		expect(screen.getByRole('link', { name: 'Next' })).toHaveAttribute('href', '/contents?page=2');
 	});
 
 	it('shows the empty message when there is nothing yet', () => {
