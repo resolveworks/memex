@@ -4,4 +4,10 @@
 	let { data } = $props();
 </script>
 
-<ContentsList items={data.items} query={data.query} page={data.page} pages={data.pages} />
+<ContentsList
+	items={data.items}
+	query={data.query}
+	includeDeleted={data.includeDeleted}
+	page={data.page}
+	pages={data.pages}
+/>

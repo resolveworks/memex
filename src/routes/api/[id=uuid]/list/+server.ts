@@ -9,5 +9,5 @@ export const GET: RequestHandler = ({ params, url }) => {
 	const kind: Kind | undefined =
 		kindParam === 'memory' || kindParam === 'question' ? kindParam : undefined;
 	const offset = Number(url.searchParams.get('offset') ?? 0);
-	return json(list(id, kind, offset));
+	return json(list(id, { kind, offset }));
 };

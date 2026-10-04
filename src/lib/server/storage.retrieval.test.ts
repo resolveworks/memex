@@ -60,7 +60,7 @@ describe('list', () => {
 		tick();
 		remember(memex, 'Newest memory');
 
-		const page = list(memex, undefined, 0);
+		const page = list(memex);
 		expect(page.items.map((item) => [item.kind, item.text])).toEqual([
 			['memory', 'Newest memory'],
 			['question', 'Middle question'],
@@ -76,7 +76,7 @@ describe('list', () => {
 		tick();
 		revise(memex, memory.id, 'New text');
 
-		const page = list(memex, undefined, 0);
+		const page = list(memex);
 		expect(page.items.map((item) => item.text)).toEqual(['New text', 'A question in between']);
 	});
 
@@ -85,7 +85,7 @@ describe('list', () => {
 		const question = wonder(memex, 'Where to eat?');
 		answer(memex, question.id, 'The pizzeria');
 
-		const page = list(memex, undefined, 0);
+		const page = list(memex);
 		expect(page.items.map((item) => [item.kind, item.text])).toEqual([['memory', 'The pizzeria']]);
 	});
 
@@ -94,8 +94,8 @@ describe('list', () => {
 		remember(memex, 'A memory');
 		wonder(memex, 'A question');
 
-		expect(list(memex, 'memory', 0).items.map((item) => item.kind)).toEqual(['memory']);
-		expect(list(memex, 'question', 0).items.map((item) => item.kind)).toEqual(['question']);
+		expect(list(memex, { kind: 'memory' }).items.map((item) => item.kind)).toEqual(['memory']);
+		expect(list(memex, { kind: 'question' }).items.map((item) => item.kind)).toEqual(['question']);
 	});
 
 	it('caps pages at PAGE_SIZE and sets hasMore only when more remain', () => {
@@ -105,12 +105,12 @@ describe('list', () => {
 			tick();
 		}
 
-		let page = list(memex, undefined, 0);
+		let page = list(memex);
 		expect(page.items).toHaveLength(PAGE_SIZE);
 		expect(page.hasMore).toBe(false);
 
 		remember(memex, 'One more');
-		page = list(memex, undefined, 0);
+		page = list(memex);
 		expect(page.items).toHaveLength(PAGE_SIZE);
 		expect(page.hasMore).toBe(true);
 		expect(page.items.map((item) => item.text).slice(0, 2)).toEqual([
@@ -118,7 +118,7 @@ describe('list', () => {
 			`Memory ${PAGE_SIZE - 1}`
 		]);
 
-		const rest = list(memex, undefined, PAGE_SIZE);
+		const rest = list(memex, { offset: PAGE_SIZE });
 		expect(rest.items.map((item) => item.text)).toEqual(['Memory 0']);
 		expect(rest.hasMore).toBe(false);
 	});

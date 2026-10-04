@@ -1,6 +1,5 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 import { goto } from '$app/navigation';
-import { tick } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ContentsItem } from '$lib/contents';
 import ContentsList from './ContentsList.svelte';
@@ -35,10 +34,10 @@ function item(
 
 function renderList(
 	items: ContentsItem[],
-	overrides: Partial<{ query: string; page: number; pages: number }> = {}
+	overrides: Partial<{ query: string; includeDeleted: boolean; page: number; pages: number }> = {}
 ): void {
 	render(ContentsList, {
-		props: { items, query: '', page: 1, pages: 1, ...overrides }
+		props: { items, query: '', includeDeleted: false, page: 1, pages: 1, ...overrides }
 	});
 }
 
@@ -107,25 +106,34 @@ describe('ContentsList', () => {
 		expect(screen.getByRole('button', { name: 'Restore' })).toBeInTheDocument();
 	});
 
-	it('offers restore instead of delete for a forgotten entry, once deleted ones are shown', async () => {
-		renderList([
-			item({
-				id: '1',
-				kind: 'memory',
-				text: 'Sushi on Fridays',
-				deletedAt: '2025-11-06T10:00:00.000Z'
-			}),
-			item({ id: '2', kind: 'memory', text: 'Tacos on Tuesdays' })
-		]);
-
-		expect(screen.queryByText('Sushi on Fridays')).not.toBeInTheDocument();
-
-		await fireEvent.click(screen.getByRole('checkbox', { name: 'Include deleted' }));
-		await tick();
+	it('offers restore instead of delete for a forgotten entry', () => {
+		renderList(
+			[
+				item({
+					id: '1',
+					kind: 'memory',
+					text: 'Sushi on Fridays',
+					deletedAt: '2025-11-06T10:00:00.000Z'
+				}),
+				item({ id: '2', kind: 'memory', text: 'Tacos on Tuesdays' })
+			],
+			{ includeDeleted: true }
+		);
 
 		expect(screen.getByText('Sushi on Fridays')).toBeInTheDocument();
 		expect(screen.getAllByRole('button', { name: 'Restore' })).toHaveLength(1);
 		expect(screen.getAllByRole('button', { name: 'Delete' })).toHaveLength(1);
+	});
+
+	it('navigates with the deleted param when the toggle is checked', async () => {
+		renderList([], { query: 'sushi' });
+
+		await fireEvent.click(screen.getByRole('checkbox', { name: 'Include deleted' }));
+
+		expect(goto).toHaveBeenLastCalledWith('/contents?q=sushi&deleted=1', {
+			noScroll: true,
+			keepFocus: true
+		});
 	});
 
 	it('seeds the search box with the current query', () => {
@@ -166,6 +174,14 @@ describe('ContentsList', () => {
 		expect(screen.getByRole('link', { name: 'Previous' })).toHaveAttribute(
 			'href',
 			'/contents?q=foo'
+		);
+	});
+
+	it('builds pagination links that keep the deleted filter', () => {
+		renderList([], { includeDeleted: true, page: 1, pages: 3 });
+		expect(screen.getByRole('link', { name: 'Next' })).toHaveAttribute(
+			'href',
+			'/contents?deleted=1&page=2'
 		);
 	});
 

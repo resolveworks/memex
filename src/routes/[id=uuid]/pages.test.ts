@@ -2,16 +2,9 @@ import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
 import type { ContentsItem } from '$lib/contents';
+import { PAGE_SIZE } from '$lib/page';
 import { create, type Memex } from '$lib/server/memexes';
-import {
-	answer,
-	forget,
-	listAll,
-	remember,
-	revisionsOf,
-	revise,
-	wonder
-} from '$lib/server/storage';
+import { answer, forget, list, remember, revisionsOf, revise, wonder } from '$lib/server/storage';
 import { useFrozenClock } from '../../tests/clock';
 import { FakeCookies } from '../../tests/cookies';
 import { thrown } from '../../tests/throws';
@@ -32,6 +25,7 @@ interface LayoutData {
 interface ContentsPage {
 	items: ContentsItem[];
 	query: string;
+	includeDeleted: boolean;
 	page: number;
 	pages: number;
 }
@@ -87,7 +81,7 @@ describe('the app layout load', () => {
 });
 
 describe('the contents page load', () => {
-	it('lists every memory and question, deleted ones included, newest first', () => {
+	it('lists live memories and questions newest first, hiding forgotten ones', () => {
 		const id = create('Dinner plans', 'en');
 		const memory = remember(id, 'Sushi on Fridays');
 		tick();
@@ -99,16 +93,29 @@ describe('the contents page load', () => {
 		const data = loadContentsPage(id, new URL('http://memex.test/contents'));
 
 		expect(data.query).toBe('');
+		expect(data.includeDeleted).toBe(false);
 		expect(data.page).toBe(1);
 		expect(data.pages).toBe(1);
-		expect(data.items.map((item) => item.text)).toEqual([
-			'Tacos on Tuesdays',
-			'When is taco day?',
-			'Sushi on Fridays'
-		]);
+		expect(data.items.map((item) => item.text)).toEqual(['When is taco day?', 'Sushi on Fridays']);
 		const byId = new Map(data.items.map((item) => [item.id, item]));
 		expect(byId.get(memory.id)).toMatchObject({ kind: 'memory', deletedAt: null });
 		expect(byId.get(question.id)).toMatchObject({ kind: 'question', deletedAt: null });
+		expect(byId.has(gone.id)).toBe(false);
+	});
+
+	it('includes forgotten rows when the deleted param is set', () => {
+		const id = create('Dinner plans', 'en');
+		const memory = remember(id, 'Sushi on Fridays');
+		tick();
+		const gone = remember(id, 'Tacos on Tuesdays');
+		forget(id, gone.id);
+
+		const data = loadContentsPage(id, new URL('http://memex.test/contents?deleted=1'));
+
+		expect(data.includeDeleted).toBe(true);
+		expect(data.items.map((item) => item.text)).toEqual(['Tacos on Tuesdays', 'Sushi on Fridays']);
+		const byId = new Map(data.items.map((item) => [item.id, item]));
+		expect(byId.get(memory.id)).toMatchObject({ deletedAt: null });
 		expect(byId.get(gone.id)?.deletedAt).not.toBeNull();
 	});
 
@@ -151,7 +158,7 @@ describe('the contents page load', () => {
 		expect(data.items.map((item) => item.id)).not.toContain(question.id);
 	});
 
-	it('searches matching memories and questions, deleted ones included', () => {
+	it('searches matching memories and questions, hiding forgotten ones', () => {
 		const id = create('Dinner plans', 'en');
 		remember(id, 'Sushi on Fridays');
 		tick();
@@ -163,35 +170,53 @@ describe('the contents page load', () => {
 		const data = loadContentsPage(id, new URL('http://memex.test/contents?q=sushi'));
 
 		expect(data.query).toBe('sushi');
-		expect(data.items.map((item) => item.text)).toEqual(['Which sushi place?', 'Sushi on Fridays']);
+		expect(data.items.map((item) => item.text)).toEqual(['Sushi on Fridays']);
 	});
 
-	it('serves twenty entries per page and reports ceil(count / 20) pages', () => {
+	it('searches forgotten rows when the deleted param is set', () => {
 		const id = create('Dinner plans', 'en');
-		for (let i = 1; i <= 45; i++) {
+		remember(id, 'Sushi on Fridays');
+		tick();
+		const gone = wonder(id, 'Which sushi place?');
+		forget(id, gone.id);
+		tick();
+		wonder(id, 'Tacos or burritos?');
+
+		const data = loadContentsPage(id, new URL('http://memex.test/contents?q=sushi&deleted=1'));
+
+		expect(data.items.map((item) => item.text)).toEqual(['Which sushi place?', 'Sushi on Fridays']);
+		expect(data.items.find((item) => item.id === gone.id)?.deletedAt).not.toBeNull();
+	});
+
+	it('serves PAGE_SIZE entries per page and reports ceil(count / PAGE_SIZE) pages', () => {
+		const id = create('Dinner plans', 'en');
+		const total = PAGE_SIZE * 2 + 5;
+		for (let i = 1; i <= total; i++) {
 			if (i % 2 === 0) wonder(id, `Entry ${i}`);
 			else remember(id, `Entry ${i}`);
 			tick();
 		}
-		const newestFirst = Array.from({ length: 45 }, (_, i) => `Entry ${45 - i}`);
+		const newestFirst = Array.from({ length: total }, (_, i) => `Entry ${total - i}`);
 
 		const first = loadContentsPage(id, new URL('http://memex.test/contents'));
 		expect(first.page).toBe(1);
 		expect(first.pages).toBe(3);
-		expect(first.items.map((item) => item.text)).toEqual(newestFirst.slice(0, 20));
+		expect(first.items.map((item) => item.text)).toEqual(newestFirst.slice(0, PAGE_SIZE));
 
 		const second = loadContentsPage(id, new URL('http://memex.test/contents?page=2'));
 		expect(second.page).toBe(2);
-		expect(second.items.map((item) => item.text)).toEqual(newestFirst.slice(20, 40));
+		expect(second.items.map((item) => item.text)).toEqual(
+			newestFirst.slice(PAGE_SIZE, PAGE_SIZE * 2)
+		);
 
 		const third = loadContentsPage(id, new URL('http://memex.test/contents?page=3'));
 		expect(third.page).toBe(3);
-		expect(third.items.map((item) => item.text)).toEqual(newestFirst.slice(40));
+		expect(third.items.map((item) => item.text)).toEqual(newestFirst.slice(PAGE_SIZE * 2));
 	});
 
 	it('clamps an out-of-range page into [1, pages]', () => {
 		const id = create('Dinner plans', 'en');
-		for (let i = 1; i <= 45; i++) {
+		for (let i = 1; i <= PAGE_SIZE * 2 + 5; i++) {
 			remember(id, `Fact ${i}`);
 			tick();
 		}
@@ -205,13 +230,30 @@ describe('the contents page load', () => {
 		for (const page of ['0', '-2']) {
 			const tooLow = loadContentsPage(id, new URL(`http://memex.test/contents?page=${page}`));
 			expect(tooLow.page).toBe(1);
-			expect(tooLow.items).toHaveLength(20);
+			expect(tooLow.items).toHaveLength(PAGE_SIZE);
 		}
+	});
+
+	it('paginates live entries only, leaving forgotten ones out of the counts', () => {
+		const id = create('Dinner plans', 'en');
+		for (let i = 1; i <= PAGE_SIZE * 3 + 5; i++) {
+			const memory = remember(id, `Fact ${i}`);
+			tick();
+			if (i % 7 === 0) forget(id, memory.id);
+		}
+
+		const live = loadContentsPage(id, new URL('http://memex.test/contents'));
+		const withDeleted = loadContentsPage(id, new URL('http://memex.test/contents?deleted=1'));
+
+		// Five of the 35 are forgotten, so the 30 live ones fit on three pages.
+		expect(live.pages).toBe(3);
+		expect(live.items).toHaveLength(PAGE_SIZE);
+		expect(withDeleted.pages).toBe(4);
 	});
 
 	it('falls back to page 1 for a non-integer page', () => {
 		const id = create('Dinner plans', 'en');
-		for (let i = 1; i <= 45; i++) {
+		for (let i = 1; i <= PAGE_SIZE * 2 + 5; i++) {
 			remember(id, `Fact ${i}`);
 			tick();
 		}
@@ -219,7 +261,7 @@ describe('the contents page load', () => {
 		for (const page of ['abc', '2.5']) {
 			const data = loadContentsPage(id, new URL(`http://memex.test/contents?page=${page}`));
 			expect(data.page).toBe(1);
-			expect(data.items).toHaveLength(20);
+			expect(data.items).toHaveLength(PAGE_SIZE);
 		}
 	});
 
@@ -243,8 +285,10 @@ describe('the contents page delete action', () => {
 
 		await contentsActions.delete(contentsFormEvent(id, { id: gone.id }));
 
-		expect(listAll(id).map((entry) => entry.id)).toEqual([kept.id]);
-		expect(listAll(id, true).find((entry) => entry.id === gone.id)?.deletedAt).not.toBeNull();
+		expect(list(id).items.map((entry) => entry.id)).toEqual([kept.id]);
+		expect(
+			list(id, { includeDeleted: true }).items.find((entry) => entry.id === gone.id)?.deletedAt
+		).not.toBeNull();
 	});
 
 	it('forgets the question whose id the form posts', async () => {
@@ -255,8 +299,10 @@ describe('the contents page delete action', () => {
 
 		await contentsActions.delete(contentsFormEvent(id, { id: gone.id }));
 
-		expect(listAll(id).map((entry) => entry.id)).toEqual([kept.id]);
-		expect(listAll(id, true).find((entry) => entry.id === gone.id)?.deletedAt).not.toBeNull();
+		expect(list(id).items.map((entry) => entry.id)).toEqual([kept.id]);
+		expect(
+			list(id, { includeDeleted: true }).items.find((entry) => entry.id === gone.id)?.deletedAt
+		).not.toBeNull();
 	});
 });
 
@@ -268,7 +314,7 @@ describe('the contents page restore action', () => {
 
 		await contentsActions.restore(contentsFormEvent(id, { id: memory.id }));
 
-		expect(listAll(id).map((entry) => entry.id)).toEqual([memory.id]);
+		expect(list(id).items.map((entry) => entry.id)).toEqual([memory.id]);
 	});
 });
 
@@ -282,6 +328,6 @@ describe('the contents page revert action', () => {
 
 		await contentsActions.revert(contentsFormEvent(id, { id: memory.id, seq: String(oldest.seq) }));
 
-		expect(listAll(id).map((entry) => entry.text)).toEqual(['Sushi on Fridays']);
+		expect(list(id).items.map((entry) => entry.text)).toEqual(['Sushi on Fridays']);
 	});
 });

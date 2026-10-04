@@ -1,5 +1,5 @@
-/** Size of one page returned by the list tools and the paged API routes. */
-export const PAGE_SIZE = 50;
+/** Size of one page returned by the list tools, the paged API routes and the contents view. */
+export const PAGE_SIZE = 10;
 
 export interface Page<T> {
 	items: T[];

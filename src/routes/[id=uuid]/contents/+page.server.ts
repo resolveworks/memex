@@ -1,8 +1,7 @@
 import type { ContentsItem, Revision } from '$lib/contents';
-import { forget, listAll, restore, revert, revisionsOf, searchAll } from '$lib/server/storage';
+import { PAGE_SIZE } from '$lib/page';
+import { count, forget, list, restore, revert, revisionsOf } from '$lib/server/storage';
 import type { Actions, PageServerLoad } from './$types';
-
-const PAGE_SIZE = 20;
 
 function pageNumber(value: string | null, pages: number): number {
 	const parsed = Number(value ?? 1);
@@ -22,11 +21,17 @@ function groupRevisions(rows: (Revision & { entityId: string })[]): Map<string, 
 
 export const load: PageServerLoad = ({ params, url }) => {
 	const query = url.searchParams.get('q') ?? '';
-	const entries = query ? searchAll(params.id, [query], true) : listAll(params.id, true);
+	const includeDeleted = url.searchParams.get('deleted') === '1';
+	const queries = query ? [query] : [];
 
-	const pages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
+	const total = count(params.id, { includeDeleted, queries });
+	const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 	const page = pageNumber(url.searchParams.get('page'), pages);
-	const items = entries.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+	const { items } = list(params.id, {
+		includeDeleted,
+		queries,
+		offset: (page - 1) * PAGE_SIZE
+	});
 
 	const revisions = groupRevisions(
 		revisionsOf(
@@ -37,15 +42,11 @@ export const load: PageServerLoad = ({ params, url }) => {
 
 	return {
 		items: items.map((item): ContentsItem => ({
-			id: item.id,
-			kind: item.kind,
-			text: item.text,
-			createdAt: item.createdAt,
-			updatedAt: item.updatedAt,
-			deletedAt: item.deletedAt,
+			...item,
 			revisions: revisions.get(item.id) ?? []
 		})),
 		query,
+		includeDeleted,
 		page,
 		pages
 	};

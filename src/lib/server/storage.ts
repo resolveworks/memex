@@ -76,6 +76,8 @@ function ranked(memexId: string) {
 interface Choice {
 	kind?: Kind;
 	includeDeleted?: boolean;
+	/** Restrict to entities whose text contains a word of any query. */
+	queries?: string[];
 	limit?: number;
 	offset?: number;
 	/** Rank this entity id ahead of the rest. */
@@ -85,12 +87,37 @@ interface Choice {
 }
 
 /**
+ * The speaking row of every entity matching a choice, shared by resolution and
+ * counting so a page and its total always agree.
+ */
+function conditions({ kind, includeDeleted = false, queries = [] }: Choice) {
+	const terms = queries.flatMap(tokenize);
+	return sql`
+		w.rn = 1
+		${kind === undefined ? sql`` : sql`and w.kind = ${kind}`}
+		${includeDeleted ? sql`` : sql`and w.deleted_at is null`}
+		and not exists (
+			select 1 from revisions a
+			where a.kind = 'memory' and a.answers = w.entity_id
+		)
+		${
+			terms.length === 0
+				? sql``
+				: sql`and (${sql.join(
+						terms.map((term) => sql`instr(lower(w.text), ${term}) > 0`),
+						sql` or `
+					)})`
+		}
+	`;
+}
+
+/**
  * The revision that speaks for each entity: its latest live one, or its latest
  * revision overall when forgotten entities count and no live one remains.
  * Answered questions never resolve, whether their answer is live or forgotten.
  */
 function resolve(memexId: string, choice: Choice = {}): Resolved[] {
-	const { kind, includeDeleted = false, limit, offset, prefer, random } = choice;
+	const { limit, offset, prefer, random } = choice;
 	const rows = db.all<Revision & { made: string }>(sql`
 		with ranked as (${ranked(memexId)})
 		select
@@ -104,13 +131,7 @@ function resolve(memexId: string, choice: Choice = {}): Resolved[] {
 			w.deleted_at as deletedAt,
 			w.made
 		from ranked w
-		where w.rn = 1
-			${kind === undefined ? sql`` : sql`and w.kind = ${kind}`}
-			${includeDeleted ? sql`` : sql`and w.deleted_at is null`}
-			and not exists (
-				select 1 from revisions a
-				where a.kind = 'memory' and a.answers = w.entity_id
-			)
+		where ${conditions(choice)}
 		order by
 			${prefer === undefined ? sql`` : sql`(w.entity_id = ${prefer}) desc,`}
 			${random ? sql`random()` : sql`w.seq desc`}
@@ -211,14 +232,6 @@ export function pickQuestion(memexId: string, preferred: string | undefined): Qu
 		limit: 1
 	});
 	return resolved ? toQuestion(resolved) : undefined;
-}
-
-/**
- * A memex's contents, interleaved newest first. Forgotten entities are included
- * only when asked for; answered questions never appear.
- */
-export function listAll(memexId: string, includeDeleted = false): Entry[] {
-	return resolve(memexId, { includeDeleted }).map(toEntry);
 }
 
 /** Total number of live memories in a memex. */
@@ -355,30 +368,16 @@ export function forget(memexId: string, id: string): void {
 	}
 }
 
-function matches<T extends { text: string }>(items: T[], terms: string[]): T[] {
-	if (terms.length === 0) return items;
-	return items.filter((item) => {
-		const haystack = item.text.toLowerCase();
-		return terms.some((term) => haystack.includes(term));
-	});
-}
-
 /** Searches a memex's live memories and open questions; forgotten ones only when asked for. */
 export function search(
 	memexId: string,
 	queries: string[],
 	includeDeleted = false
 ): { memories: Memory[]; questions: Question[] } {
-	const terms = queries.flatMap(tokenize);
 	return {
-		memories: matches(listMemories(memexId, includeDeleted), terms),
-		questions: matches(listQuestions(memexId, includeDeleted), terms)
+		memories: resolve(memexId, { kind: 'memory', includeDeleted, queries }).map(toMemory),
+		questions: resolve(memexId, { kind: 'question', includeDeleted, queries }).map(toQuestion)
 	};
-}
-
-/** Searches a memex's contents, keeping recency order. */
-export function searchAll(memexId: string, queries: string[], includeDeleted = false): Entry[] {
-	return matches(listAll(memexId, includeDeleted), queries.flatMap(tokenize));
 }
 
 /** Every revision of a memex, in insertion order, for a complete backup. */
@@ -410,16 +409,22 @@ export function revisionsOf(
 	`);
 }
 
-export function list(memexId: string, kind: Kind | undefined, offset: number): Page<ListItem> {
-	const rows = resolve(memexId, { kind, limit: PAGE_SIZE + 1, offset });
-	const items = rows.slice(0, PAGE_SIZE).map(({ row, made }) => ({
-		id: row.entityId,
-		kind: row.kind,
-		text: row.text,
-		createdAt: made,
-		updatedAt: row.createdAt
-	}));
+/** One page of a memex's contents, interleaved newest first. */
+export function list(memexId: string, choice: Choice = {}): Page<Entry> {
+	const rows = resolve(memexId, { ...choice, limit: PAGE_SIZE + 1 });
+	const items = rows.slice(0, PAGE_SIZE).map(toEntry);
 	return { items, hasMore: rows.length > PAGE_SIZE };
+}
+
+/** How many entities a listing holds, so a viewer can page through it. */
+export function count(memexId: string, choice: Choice = {}): number {
+	const row = db.get<{ count: number }>(sql`
+		with ranked as (${ranked(memexId)})
+		select count(*) as count
+		from ranked w
+		where ${conditions(choice)}
+	`);
+	return row.count;
 }
 
 /** Most common terms across a memex's live memories, by number of memories containing each. */

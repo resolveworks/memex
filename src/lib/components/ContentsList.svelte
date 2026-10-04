@@ -12,20 +12,16 @@
 	let {
 		items,
 		query,
+		includeDeleted,
 		page,
 		pages
 	}: {
 		items: ContentsItem[];
 		query: string;
+		includeDeleted: boolean;
 		page: number;
 		pages: number;
 	} = $props();
-
-	// Deleted rows arrive with the rest; this controls whether they are included.
-	let includeDeleted = $state(false);
-	const visible = $derived(
-		includeDeleted ? items : items.filter((item) => item.deletedAt === null)
-	);
 
 	// Snapshot the initial query so later prop updates can't clobber in-flight typing.
 	// svelte-ignore state_referenced_locally
@@ -34,11 +30,18 @@
 	// Search is driven by the URL: navigating re-runs the page's load function.
 	function navigate(value: string): void {
 		term = value;
-		const params = new SvelteURLSearchParams();
-		if (term) params.set('q', term);
-		const search = params.toString();
-		goto(resolve(`${currentPage.url.pathname}?${search}`), {
+		goto(resolve(`${currentPage.url.pathname}?${queryString(1, value)}`), {
 			replaceState: true,
+			noScroll: true,
+			keepFocus: true
+		});
+	}
+
+	// The deleted filter lives in the URL too; unlike typing, toggling it is a
+	// real history entry so Back undoes it.
+	function onToggle(event: Event): void {
+		const deleted = (event.currentTarget as HTMLInputElement).checked;
+		goto(resolve(`${currentPage.url.pathname}?${queryString(1, query, deleted)}`), {
 			noScroll: true,
 			keepFocus: true
 		});
@@ -53,10 +56,11 @@
 		navigate(term);
 	}
 
-	// The current search and page as a query string; page one is left bare.
-	function queryString(target = page): string {
+	// The search, deleted filter and page as a query string; page one is left bare.
+	function queryString(target = page, search = query, deleted = includeDeleted): string {
 		const params = new SvelteURLSearchParams();
-		if (query) params.set('q', query);
+		if (search) params.set('q', search);
+		if (deleted) params.set('deleted', '1');
 		if (target > 1) params.set('page', String(target));
 		return params.toString();
 	}
@@ -86,7 +90,7 @@
 			<div class="title">
 				<h1>{t('contents.heading')}</h1>
 				<label class="toggle">
-					<input type="checkbox" bind:checked={includeDeleted} />
+					<input type="checkbox" checked={includeDeleted} onchange={onToggle} />
 					{t('list.includeDeleted')}
 				</label>
 			</div>
@@ -108,11 +112,11 @@
 			</form>
 		</header>
 
-		{#if visible.length === 0}
+		{#if items.length === 0}
 			<p class="empty">{query ? t('contents.noResults') : t('contents.empty')}</p>
 		{:else}
 			<ul class="items">
-				{#each visible as item (item.id)}
+				{#each items as item (item.id)}
 					<li class="item" class:deleted={item.deletedAt !== null} id={`entry-${item.id}`}>
 						<div class="body">
 							<p class="text">{item.text}</p>
