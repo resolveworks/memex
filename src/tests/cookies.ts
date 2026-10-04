@@ -24,6 +24,10 @@ export class FakeCookies implements Cookies {
 		this.#jar.delete(name);
 	}
 
+	parse(): never {
+		throw new Error('FakeCookies.parse is not implemented');
+	}
+
 	serialize(): string {
 		throw new Error('FakeCookies.serialize is not implemented');
 	}

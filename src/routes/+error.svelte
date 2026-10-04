@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import Card from '$lib/components/Card.svelte';
-	import Page from '$lib/components/Page.svelte';
-	import { t } from '$lib/i18n';
+	import Card from '#lib/components/Card.svelte';
+	import Page from '#lib/components/Page.svelte';
+	import { t } from '#lib/i18n.js';
 </script>
 
 <Page>

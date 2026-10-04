@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Card from '$lib/components/Card.svelte';
-	import LocaleSelect from '$lib/components/LocaleSelect.svelte';
-	import Page from '$lib/components/Page.svelte';
-	import { t } from '$lib/i18n';
+	import Card from '#lib/components/Card.svelte';
+	import LocaleSelect from '#lib/components/LocaleSelect.svelte';
+	import Page from '#lib/components/Page.svelte';
+	import { t } from '#lib/i18n.js';
 </script>
 
 <Page>

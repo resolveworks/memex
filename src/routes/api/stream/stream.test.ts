@@ -4,11 +4,11 @@ import { fakeLlm } from '../../../tests/llm';
 import { event } from '../../../tests/request';
 import { POST } from './+server';
 
-// The abuse limits are read from $env/dynamic/private at request time, but under Vitest
-// that module is a snapshot of the shell environment taken before test code runs. Mocking
-// it pins small limits the requests below are built around.
-vi.mock('$env/dynamic/private', () => ({
-	env: { MAX_USER_MESSAGES: '2', MAX_MESSAGE_WORDS: '5' }
+// The abuse limits are read from the environment at request time. Mocking the
+// module pins small limits the requests below are built around.
+vi.mock('$app/env/private', () => ({
+	MAX_USER_MESSAGES: '2',
+	MAX_MESSAGE_WORDS: '5'
 }));
 
 const url = 'http://localhost/api/stream';
@@ -25,7 +25,7 @@ const assistant: AssistantMessage = {
 	],
 	api: 'openai-completions',
 	provider: 'deepseek',
-	model: 'deepseek-v4-flash',
+	model: 'deepseek-flash',
 	usage: {
 		input: 1,
 		output: 2,

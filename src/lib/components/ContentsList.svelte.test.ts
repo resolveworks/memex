@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/svelte';
 import { goto } from '$app/navigation';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ContentsItem } from '$lib/contents';
+import type { ContentsItem } from '#lib/contents.js';
 import ContentsList from './ContentsList.svelte';
 
 vi.mock('$app/navigation', () => ({ goto: vi.fn() }));
@@ -14,7 +14,10 @@ vi.mock('$app/state', () => ({
 		data: { locale: 'en' }
 	}
 }));
-vi.mock('$app/paths', () => ({ resolve: (path: string) => path }));
+vi.mock('$app/paths', () => ({
+	resolve: (path: string, params?: Record<string, string>) =>
+		params ? path.replace('[id=uuid]', params.id) : path
+}));
 
 const at = '2025-11-03T10:00:00.000Z';
 
@@ -37,7 +40,7 @@ function renderList(
 	overrides: Partial<{ query: string; includeDeleted: boolean; page: number; pages: number }> = {}
 ): void {
 	render(ContentsList, {
-		props: { items, query: '', includeDeleted: false, page: 1, pages: 1, ...overrides }
+		props: { id: memex, items, query: '', includeDeleted: false, page: 1, pages: 1, ...overrides }
 	});
 }
 
@@ -131,8 +134,7 @@ describe('ContentsList', () => {
 		await fireEvent.click(screen.getByRole('checkbox', { name: 'Include deleted' }));
 
 		expect(goto).toHaveBeenLastCalledWith('/contents?q=sushi&deleted=1', {
-			noScroll: true,
-			keepFocus: true
+			reset: false
 		});
 	});
 
@@ -149,9 +151,8 @@ describe('ContentsList', () => {
 		await fireEvent.input(search, { target: { value: 'sus' } });
 
 		expect(goto).toHaveBeenLastCalledWith('/contents?q=sus', {
-			replaceState: true,
-			noScroll: true,
-			keepFocus: true
+			replace: true,
+			reset: false
 		});
 
 		await fireEvent.input(search, { target: { value: '' } });

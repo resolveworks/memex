@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { AgentMessage } from '@earendil-works/pi-agent-core';
 	import { contentText } from '@earendil-works/pi-ai';
-	import { chat, clear, open, send } from '$lib/chat.svelte';
-	import ChatMessage, { type Item } from '$lib/ChatMessage.svelte';
-	import Button from '$lib/components/Button.svelte';
-	import Footer from '$lib/components/Footer.svelte';
-	import { t } from '$lib/i18n';
+	import { chat, clear, open, send } from '#lib/chat.svelte.js';
+	import ChatMessage, { type Item } from '#lib/ChatMessage.svelte';
+	import Button from '#lib/components/Button.svelte';
+	import Footer from '#lib/components/Footer.svelte';
+	import { t } from '#lib/i18n.js';
 
 	let { id, language, question }: { id: string; language: string; question: string | undefined } =
 		$props();

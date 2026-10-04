@@ -5,17 +5,19 @@
 	import { page as currentPage } from '$app/state';
 	import type { ResolvedPathname } from '$app/types';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
-	import type { ContentsItem } from '$lib/contents';
-	import { formatDate, t } from '$lib/i18n';
+	import type { ContentsItem } from '#lib/contents.js';
+	import { formatDate, t } from '#lib/i18n.js';
 	import Page from './Page.svelte';
 
 	let {
+		id,
 		items,
 		query,
 		includeDeleted,
 		page,
 		pages
 	}: {
+		id: string;
 		items: ContentsItem[];
 		query: string;
 		includeDeleted: boolean;
@@ -31,9 +33,8 @@
 	function navigate(value: string): void {
 		term = value;
 		goto(resolve(`${currentPage.url.pathname}?${queryString(1, value)}`), {
-			replaceState: true,
-			noScroll: true,
-			keepFocus: true
+			replace: true,
+			reset: false
 		});
 	}
 
@@ -42,8 +43,7 @@
 	function onToggle(event: Event): void {
 		const deleted = (event.currentTarget as HTMLInputElement).checked;
 		goto(resolve(`${currentPage.url.pathname}?${queryString(1, query, deleted)}`), {
-			noScroll: true,
-			keepFocus: true
+			reset: false
 		});
 	}
 
@@ -74,7 +74,7 @@
 	// A link to the chat that asks the question on open.
 	function askHref(item: ContentsItem): ResolvedPathname {
 		const search = new SvelteURLSearchParams({ question: item.id });
-		return resolve(`/${currentPage.params.id}?${search}`);
+		return resolve(`/[id=uuid]?${search}`, { id });
 	}
 
 	// Post to a named action without dropping the current search and page.

@@ -1,10 +1,11 @@
 <script lang="ts">
-	import ContentsList from '$lib/components/ContentsList.svelte';
+	import ContentsList from '#lib/components/ContentsList.svelte';
 
 	let { data } = $props();
 </script>
 
 <ContentsList
+	id={data.memex.id}
 	items={data.items}
 	query={data.query}
 	includeDeleted={data.includeDeleted}

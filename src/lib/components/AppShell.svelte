@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { ResolvedPathname } from '$app/types';
 	import type { Snippet } from 'svelte';
-	import { t } from '$lib/i18n';
+	import { t } from '#lib/i18n.js';
 	import Header from './Header.svelte';
 	import Select, { type SelectAction, type SelectOption } from './Select.svelte';
 

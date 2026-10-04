@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { error } from '@sveltejs/kit';
 import { eq, inArray } from 'drizzle-orm';
-import { languages } from '$lib/languages';
+import { languages } from '#lib/languages.js';
 import { db } from './db';
 import { memexes } from './db/schema';
 

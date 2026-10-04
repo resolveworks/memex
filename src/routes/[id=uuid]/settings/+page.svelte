@@ -1,11 +1,11 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import Field from '$lib/components/Field.svelte';
-	import Input from '$lib/components/Input.svelte';
-	import LocaleSelect from '$lib/components/LocaleSelect.svelte';
-	import Page from '$lib/components/Page.svelte';
-	import { languageName, t } from '$lib/i18n';
+	import Button from '#lib/components/Button.svelte';
+	import Card from '#lib/components/Card.svelte';
+	import Field from '#lib/components/Field.svelte';
+	import Input from '#lib/components/Input.svelte';
+	import LocaleSelect from '#lib/components/LocaleSelect.svelte';
+	import Page from '#lib/components/Page.svelte';
+	import { languageName, t } from '#lib/i18n.js';
 
 	let { data } = $props();
 </script>

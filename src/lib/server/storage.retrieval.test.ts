@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PAGE_SIZE } from '$lib/page';
+import { PAGE_SIZE } from '#lib/page.js';
 import { useFrozenClock } from '../../tests/clock';
 import { create } from './memexes';
 import { answer, forget, list, remember, revise, search, terms, wonder } from './storage';

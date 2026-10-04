@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import type { Memory } from '$lib/memory';
-import { create } from '$lib/server/memexes';
-import type { TermCount } from '$lib/server/storage';
-import { answer, forget, remember, wonder } from '$lib/server/storage';
-import type { Question } from '$lib/question';
+import type { Memory } from '#lib/memory.js';
+import { create } from '#lib/server/memexes.js';
+import type { TermCount } from '#lib/server/storage.js';
+import { answer, forget, remember, wonder } from '#lib/server/storage.js';
+import type { Question } from '#lib/question.js';
 import { urlEvent, type ApiEvent } from '../../tests/request';
 import { thrown } from '../../tests/throws';
 import { GET as context } from './[id=uuid]/context/+server';

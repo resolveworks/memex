@@ -1,14 +1,13 @@
-import { env } from '$env/dynamic/private';
+import { DEEPSEEK_API_KEY } from '$app/env/private';
 import { createModels, defaultProviderAuthContext } from '@earendil-works/pi-ai';
 import { deepseekProvider } from '@earendil-works/pi-ai/providers/deepseek';
 
-// pi-ai resolves provider credentials through an injected AuthContext. Point its
-// env lookups at SvelteKit's runtime env so `.env` works in dev and `process.env`
-// works in a production node build.
+// pi-ai resolves provider credentials through an injected AuthContext. DeepSeek's
+// only credential is an API key, which SvelteKit exposes as an explicit env variable.
 export const models = createModels({
 	authContext: {
 		...defaultProviderAuthContext(),
-		env: (name) => Promise.resolve(env[name])
+		env: () => Promise.resolve(DEEPSEEK_API_KEY)
 	}
 });
 

@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { page } from '../tests/app-state';
 
 vi.mock('$app/state', () => ({ page }));
-vi.mock('$app/navigation', () => ({ invalidateAll: vi.fn() }));
+vi.mock('$app/navigation', () => ({ refreshAll: vi.fn() }));
 
 /**
  * A controllable stand-in for the agent: tests act on the store, then feed it
@@ -89,7 +89,7 @@ const fake = vi.hoisted(() => {
 	return { agent, emit, greeting, greetingMessage, listeners, state, useSystemPrompt };
 });
 
-vi.mock('$lib/agent', () => ({
+vi.mock('#lib/agent.js', () => ({
 	getAgent: () => fake.agent as unknown as Agent,
 	greetingMessage: fake.greetingMessage,
 	useSystemPrompt: fake.useSystemPrompt
@@ -128,7 +128,7 @@ function textDelta(
 	};
 }
 
-let store: typeof import('$lib/chat.svelte');
+let store: typeof import('#lib/chat.svelte.js');
 
 beforeEach(async () => {
 	vi.clearAllMocks();
@@ -140,7 +140,7 @@ beforeEach(async () => {
 	page.data.locale = 'sv';
 	// The store keeps its open memex in module state; reimport for a fresh one.
 	vi.resetModules();
-	store = await import('$lib/chat.svelte');
+	store = await import('#lib/chat.svelte.js');
 	flushSync();
 });
 

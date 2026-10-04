@@ -1,5 +1,5 @@
 import type { Cookies } from '@sveltejs/kit';
-import { languages } from '$lib/languages';
+import { languages } from '#lib/languages.js';
 
 const COOKIE = 'locale';
 const YEAR = 60 * 60 * 24 * 365;

@@ -52,7 +52,7 @@ export async function greetingMessage(
 
 /** The model's view of the transcript: the opening trigger is an ordinary user turn. */
 function convertToLlm(messages: AgentMessage[]): Message[] {
-	return messages.flatMap((message) => {
+	return messages.flatMap((message): Message[] => {
 		if (message.role === 'greeting') {
 			return [{ role: 'user' as const, content: message.content, timestamp: message.timestamp }];
 		}
@@ -152,5 +152,14 @@ ${items}`;
 
 /** Sets the unchanging system prompt; store state travels in the greeting message. */
 export function useSystemPrompt(memexLanguage: string): void {
-	getAgent().state.systemPrompt = systemPrompt(memexLanguage);
+	const agent = getAgent();
+	agent.state.messages = [
+		...agent.state.messages,
+		{
+			role: 'system',
+			content: '',
+			sections: { memex: systemPrompt(memexLanguage) },
+			timestamp: Date.now()
+		}
+	];
 }

@@ -1,4 +1,4 @@
-import type { Memex } from '$lib/server/memexes';
+import type { Memex } from '#lib/server/memexes.js';
 
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces

@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import { create } from '$lib/server/memexes';
+import { create } from '#lib/server/memexes.js';
 import type { Actions } from './$types';
 
 export const actions = {

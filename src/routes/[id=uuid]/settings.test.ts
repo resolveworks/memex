@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
-import { create, get } from '$lib/server/memexes';
-import { answer, forget, remember, revise, wonder } from '$lib/server/storage';
+import { create, get } from '#lib/server/memexes.js';
+import { answer, forget, remember, revise, wonder } from '#lib/server/storage.js';
 import { FakeCookies } from '../../tests/cookies';
 import { postForm } from '../../tests/request';
 import { actions as rootActions } from '../settings/+page.server';

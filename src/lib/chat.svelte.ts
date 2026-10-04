@@ -1,4 +1,4 @@
-import { invalidateAll } from '$app/navigation';
+import { refreshAll } from '$app/navigation';
 import { page } from '$app/state';
 import type { Agent, AgentMessage } from '@earendil-works/pi-agent-core';
 import { getAgent, greetingMessage, useSystemPrompt } from './agent';
@@ -33,7 +33,7 @@ function active(): Agent {
 				chat.busy = false;
 				chat.streaming = undefined;
 				// Pick up questions the run recorded or closed.
-				void invalidateAll();
+				void refreshAll();
 				break;
 			case 'message_start':
 			case 'message_update':

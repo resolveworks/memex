@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
-	import mascot from '$lib/assets/mascot1.png';
-	import ChatMessage from '$lib/ChatMessage.svelte';
-	import Bubble from '$lib/components/Bubble.svelte';
-	import Button from '$lib/components/Button.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import Field from '$lib/components/Field.svelte';
-	import Input from '$lib/components/Input.svelte';
-	import Select from '$lib/components/Select.svelte';
-	import { languages, languageName, t } from '$lib/i18n';
+	import mascot from '#lib/assets/mascot1.png';
+	import ChatMessage from '#lib/ChatMessage.svelte';
+	import Bubble from '#lib/components/Bubble.svelte';
+	import Button from '#lib/components/Button.svelte';
+	import Card from '#lib/components/Card.svelte';
+	import Field from '#lib/components/Field.svelte';
+	import Input from '#lib/components/Input.svelte';
+	import Select from '#lib/components/Select.svelte';
+	import { languages, languageName, t } from '#lib/i18n.js';
 
 	let language = $state(page.data.locale);
 	const languageOptions = $derived(

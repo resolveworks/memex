@@ -1,10 +1,18 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import type { Cookies } from '@sveltejs/kit';
-import type { ContentsItem } from '$lib/contents';
-import { PAGE_SIZE } from '$lib/page';
-import { create, type Memex } from '$lib/server/memexes';
-import { answer, forget, list, remember, revisionsOf, revise, wonder } from '$lib/server/storage';
+import type { ContentsItem } from '#lib/contents.js';
+import { PAGE_SIZE } from '#lib/page.js';
+import { create, type Memex } from '#lib/server/memexes.js';
+import {
+	answer,
+	forget,
+	list,
+	remember,
+	revisionsOf,
+	revise,
+	wonder
+} from '#lib/server/storage.js';
 import { useFrozenClock } from '../../tests/clock';
 import { FakeCookies } from '../../tests/cookies';
 import { thrown } from '../../tests/throws';

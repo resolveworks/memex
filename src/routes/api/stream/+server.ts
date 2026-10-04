@@ -1,6 +1,5 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { json } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
+import { MAX_USER_MESSAGES, MAX_MESSAGE_WORDS } from '$app/env/private';
 import type { ProxyAssistantMessageEvent } from '@earendil-works/pi-agent-core';
 import type {
 	AssistantMessage,
@@ -9,8 +8,8 @@ import type {
 	SimpleStreamOptions
 } from '@earendil-works/pi-ai';
 import { contentText } from '@earendil-works/pi-ai';
-import { model } from '$lib/model';
-import { models } from '$lib/server/llm';
+import { model } from '#lib/model.js';
+import { models } from '#lib/server/llm.js';
 
 function contentAt(partial: AssistantMessage, index: number) {
 	const content = partial.content[index];
@@ -88,14 +87,20 @@ function wordCount(text: string): number {
 /** Rejects a context that exceeds the server's abuse limits before any spend happens. */
 function exceedsLimits(context: Context): Response | undefined {
 	const userMessages = context.messages.filter((message) => message.role === 'user');
-	const maxMessages = Number(env.MAX_USER_MESSAGES);
-	const maxWords = Number(env.MAX_MESSAGE_WORDS);
+	const maxMessages = Number(MAX_USER_MESSAGES);
+	const maxWords = Number(MAX_MESSAGE_WORDS);
 	if (userMessages.length > maxMessages) {
-		return json({ error: `A chat can hold at most ${maxMessages} messages.` }, { status: 429 });
+		return Response.json(
+			{ error: `A chat can hold at most ${maxMessages} messages.` },
+			{ status: 429 }
+		);
 	}
 	for (const message of userMessages) {
 		if (wordCount(contentText(message.content)) > maxWords) {
-			return json({ error: `A message can hold at most ${maxWords} words.` }, { status: 413 });
+			return Response.json(
+				{ error: `A message can hold at most ${maxWords} words.` },
+				{ status: 413 }
+			);
 		}
 	}
 }
@@ -105,7 +110,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	try {
 		body = (await request.json()) as StreamRequest;
 	} catch {
-		return json({ error: 'Request body must be valid JSON' }, { status: 400 });
+		return Response.json({ error: 'Request body must be valid JSON' }, { status: 400 });
 	}
 
 	const rejected = exceedsLimits(body.context);

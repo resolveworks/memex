@@ -1,5 +1,5 @@
-import { read } from '$lib/server/known';
-import { getMany } from '$lib/server/memexes';
+import { read } from '#lib/server/known.js';
+import { getMany } from '#lib/server/memexes.js';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = ({ cookies, locals }) => {

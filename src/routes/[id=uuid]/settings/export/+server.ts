@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
-import { get } from '$lib/server/memexes';
-import { allRevisions } from '$lib/server/storage';
+import { get } from '#lib/server/memexes.js';
+import { allRevisions } from '#lib/server/storage.js';
 import type { RequestHandler } from './$types';
 
 /** The title with anything a filename can't hold removed; "memex" when nothing is left. */

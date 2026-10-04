@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { isRedirect, type Cookies, type Redirect } from '@sveltejs/kit';
-import { create, get } from '$lib/server/memexes';
+import { create, get } from '#lib/server/memexes.js';
 import { FakeCookies } from '../tests/cookies';
 import { postForm } from '../tests/request';
 import { load } from './+layout.server';

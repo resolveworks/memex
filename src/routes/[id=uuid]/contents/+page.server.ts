@@ -1,6 +1,6 @@
-import type { ContentsItem, Revision } from '$lib/contents';
-import { PAGE_SIZE } from '$lib/page';
-import { count, forget, list, restore, revert, revisionsOf } from '$lib/server/storage';
+import type { ContentsItem, Revision } from '#lib/contents.js';
+import { PAGE_SIZE } from '#lib/page.js';
+import { count, forget, list, restore, revert, revisionsOf } from '#lib/server/storage.js';
 import type { Actions, PageServerLoad } from './$types';
 
 function pageNumber(value: string | null, pages: number): number {

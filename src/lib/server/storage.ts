@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
-import { stopwords } from '$lib/languages';
-import type { Memory } from '$lib/memory';
-import { PAGE_SIZE } from '$lib/page';
-import type { Question } from '$lib/question';
+import { stopwords } from '#lib/languages.js';
+import type { Memory } from '#lib/memory.js';
+import { PAGE_SIZE } from '#lib/page.js';
+import type { Question } from '#lib/question.js';
 import { db } from './db';
 import { revisions } from './db/schema';
 import { tokenize } from './tokenize';

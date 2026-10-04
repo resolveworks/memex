@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { create } from '$lib/server/memexes';
-import { list } from '$lib/server/storage';
+import { create } from '#lib/server/memexes.js';
+import { list } from '#lib/server/storage.js';
 import { event, post, type ApiEvent } from '../../tests/request';
 import { POST as answer } from './[id=uuid]/answer/+server';
 import { POST as forget } from './[id=uuid]/forget/+server';

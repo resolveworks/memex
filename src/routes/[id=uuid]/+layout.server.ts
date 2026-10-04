@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
-import { forget, remember } from '$lib/server/known';
-import { get } from '$lib/server/memexes';
+import { forget, remember } from '#lib/server/known.js';
+import { get } from '#lib/server/memexes.js';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = ({ params, cookies }) => {

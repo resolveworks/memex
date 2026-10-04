@@ -3,10 +3,10 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import favicon from '$lib/assets/favicon.svg';
-	import AppShell from '$lib/components/AppShell.svelte';
-	import { chat } from '$lib/chat.svelte';
-	import { t } from '$lib/i18n';
+	import favicon from '#lib/assets/favicon.svg';
+	import AppShell from '#lib/components/AppShell.svelte';
+	import { chat } from '#lib/chat.svelte.js';
+	import { t } from '#lib/i18n.js';
 
 	let { children } = $props();
 
@@ -28,11 +28,13 @@
 	const memexActions = $derived([{ href: resolve('/'), label: t('nav.new') }]);
 
 	// The title returns to the open memex's chat, or home when none is open.
-	const home = $derived(page.data.memex ? resolve(`/${page.data.memex.id}`) : resolve('/'));
+	const home = $derived(
+		page.data.memex ? resolve('/[id=uuid]', { id: page.data.memex.id }) : resolve('/')
+	);
 
 	function switchMemex(id: string) {
 		if (id === page.params.id) return;
-		goto(resolve(`/${id}`));
+		goto(resolve('/[id=uuid]', { id }));
 	}
 
 	function follow(event: MouseEvent) {
@@ -77,7 +79,7 @@
 		{#if page.data.memex}
 			<a
 				class="icon center"
-				href={resolve(`/${page.data.memex.id}/contents`)}
+				href={resolve('/[id=uuid]/contents', { id: page.data.memex.id })}
 				aria-label={t('contents.heading')}
 				onclick={follow}
 			>
@@ -90,7 +92,9 @@
 		{/if}
 		<a
 			class="icon center"
-			href={resolve(page.data.memex ? `/${page.data.memex.id}/settings` : '/settings')}
+			href={page.data.memex
+				? resolve('/[id=uuid]/settings', { id: page.data.memex.id })
+				: resolve('/settings')}
 			aria-label={t(page.data.memex ? 'settings.memexHeading' : 'settings.appHeading')}
 			onclick={follow}
 		>

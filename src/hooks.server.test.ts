@@ -1,4 +1,5 @@
-import type { Cookies, Handle, RequestEvent, ResolveOptions } from '@sveltejs/kit';
+import type { Cookies, RequestEvent } from '@sveltejs/kit';
+import type { Handle, ResolveOptions } from '@sveltejs/kit/hooks';
 import { describe, expect, it } from 'vitest';
 import { handle } from './hooks.server';
 import { FakeCookies } from './tests/cookies';

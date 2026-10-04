@@ -1,5 +1,5 @@
-import { setLocale } from '$lib/server/locale';
-import { rename } from '$lib/server/memexes';
+import { setLocale } from '#lib/server/locale.js';
+import { rename } from '#lib/server/memexes.js';
 import type { Actions } from './$types';
 
 export const actions = {

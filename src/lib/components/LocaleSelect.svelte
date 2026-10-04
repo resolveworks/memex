@@ -2,8 +2,8 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import { tick } from 'svelte';
-	import { clear } from '$lib/chat.svelte';
-	import { languages, languageName, t } from '$lib/i18n';
+	import { clear } from '#lib/chat.svelte.js';
+	import { languages, languageName, t } from '#lib/i18n.js';
 	import Field from './Field.svelte';
 	import Select from './Select.svelte';
 
