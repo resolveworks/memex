@@ -14,6 +14,7 @@
 		outline: none;
 		color: var(--ink);
 		background: var(--surface);
+		transition: border-color 120ms ease;
 	}
 
 	input:focus {

@@ -21,6 +21,9 @@
 		border-radius: var(--radius);
 		background: var(--accent);
 		color: var(--accent-ink);
+		font-weight: 500;
+		line-height: 1.5;
+		transition: background-color 120ms ease;
 	}
 
 	button:hover:not(:disabled) {

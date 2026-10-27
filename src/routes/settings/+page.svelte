@@ -11,9 +11,3 @@
 		<LocaleSelect />
 	</Card>
 </Page>
-
-<style>
-	h2 {
-		font-size: 1rem;
-	}
-</style>

@@ -61,7 +61,9 @@
 	}
 
 	.title {
+		font-size: 1.0625rem;
 		font-weight: 600;
+		letter-spacing: -0.02em;
 		color: var(--ink);
 		white-space: nowrap;
 	}

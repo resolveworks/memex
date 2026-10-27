@@ -12,7 +12,8 @@
 <style>
 	label {
 		gap: var(--space-1);
-		color: var(--muted);
+		color: var(--ink-soft);
 		font-size: 0.875rem;
+		font-weight: 500;
 	}
 </style>

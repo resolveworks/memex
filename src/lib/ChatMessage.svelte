@@ -59,7 +59,7 @@
 		max-width: 75%;
 		padding: var(--space-2) var(--space-3);
 		border-radius: var(--radius-lg);
-		line-height: 1.4;
+		line-height: 1.5;
 		overflow-wrap: anywhere;
 	}
 
@@ -74,7 +74,7 @@
 	.assistant {
 		align-self: flex-start;
 		padding: var(--space-1) 0;
-		line-height: 1.4;
+		line-height: 1.6;
 		overflow-wrap: anywhere;
 	}
 

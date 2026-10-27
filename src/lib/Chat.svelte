@@ -166,7 +166,7 @@
 	}
 
 	.thread {
-		gap: var(--space-2);
+		gap: var(--space-3);
 		max-inline-size: var(--content-max);
 		margin-inline: auto;
 	}
@@ -182,6 +182,7 @@
 		border: 1px solid var(--line-strong);
 		border-radius: var(--radius-lg);
 		background: var(--surface);
+		transition: border-color 120ms ease;
 	}
 
 	.composer:focus-within {

@@ -55,19 +55,22 @@
 		</div>
 		<Card>
 			<h1>{t('create.heading')}</h1>
-			<form class="stack" method="POST" use:enhance>
+			<form class="create-form stack" method="POST" use:enhance>
 				<Field label={t('create.title')}>
 					<Input name="title" required />
 				</Field>
-				<Field label={t('nav.language')}>
-					<Select
-						name="language"
-						label={t('nav.language')}
-						value={language}
-						options={languageOptions}
-						onchange={(value) => (language = value)}
-					/>
-				</Field>
+				<div class="language stack">
+					<Field label={t('nav.language')}>
+						<Select
+							name="language"
+							label={t('nav.language')}
+							value={language}
+							options={languageOptions}
+							onchange={(value) => (language = value)}
+						/>
+					</Field>
+					<p class="hint">{t('settings.languageLocked')}</p>
+				</div>
 				<Button type="submit">{t('create.submit')}</Button>
 			</form>
 		</Card>
@@ -131,9 +134,30 @@
 		padding-block: var(--space-8);
 	}
 
+	.hero :global(.card) {
+		gap: var(--space-6);
+	}
+
 	.hero h1 {
 		font-size: 1.375rem;
-		letter-spacing: -0.01em;
+	}
+
+	.create-form {
+		gap: var(--space-4);
+	}
+
+	.language {
+		gap: var(--space-2);
+	}
+
+	.hint {
+		color: var(--muted);
+		font-size: 0.8125rem;
+		line-height: 1.5;
+	}
+
+	.create-form > :global(button) {
+		margin-block-start: var(--space-2);
 	}
 
 	.mascot-wrap {
@@ -169,9 +193,8 @@
 	}
 
 	.explain h2 {
-		font-size: 1.5rem;
+		font-size: 1.375rem;
 		letter-spacing: -0.02em;
-		line-height: 1.2;
 	}
 
 	.explain p {
@@ -208,8 +231,10 @@
 		font-weight: 600;
 	}
 
-	.step h3 {
+	.step h3,
+	.example h3 {
 		font-size: 1rem;
+		letter-spacing: normal;
 	}
 
 	.step p {
@@ -225,10 +250,6 @@
 
 	.example {
 		gap: var(--space-4);
-	}
-
-	.example h3 {
-		font-size: 1rem;
 	}
 
 	.example p {

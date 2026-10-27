@@ -265,6 +265,7 @@
 		border: 1px solid var(--line-strong);
 		border-radius: var(--radius);
 		background: var(--surface);
+		transition: border-color 120ms ease;
 	}
 
 	.search:focus-within {
@@ -315,7 +316,7 @@
 
 	.text {
 		color: var(--ink);
-		line-height: 1.45;
+		line-height: 1.55;
 		overflow-wrap: anywhere;
 	}
 

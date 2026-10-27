@@ -54,21 +54,21 @@
 
 @layer tokens {
 	:root {
-		--font-sans: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+		--font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 		--font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 
-		--bg: #e6f4f2;
+		--bg: #f6f7f9;
 		--surface: #ffffff;
-		--ink: #2e2623;
-		--ink-soft: #51443f;
-		--muted: #6f625b;
-		--line: #cfe4e0;
-		--line-strong: #b4d3cd;
-		--fill: #dcefeb;
-		--accent: #b5461a;
-		--accent-hover: #8f3712;
+		--ink: #1d2939;
+		--ink-soft: #344054;
+		--muted: #667085;
+		--line: #e4e7ec;
+		--line-strong: #cbd5e1;
+		--fill: #f0f2f5;
+		--accent: #c44536;
+		--accent-hover: #a9362a;
 		--accent-ink: #ffffff;
-		--danger: #b91c1c;
+		--danger: #b42318;
 
 		/* Every step is a multiple of one fluid unit, so the whole scale
 		   grows with the viewport instead of hand-picked rems. */
@@ -89,7 +89,7 @@
 
 		--content-max: 48rem;
 		--panel-max: 30rem;
-		--chrome-h: 3rem;
+		--chrome-h: 3.5rem;
 	}
 }
 
@@ -98,6 +98,16 @@
 		background: var(--bg);
 		color: var(--ink);
 		font-family: var(--font-sans);
+		font-size: 1rem;
+		line-height: 1.5;
+	}
+
+	h1,
+	h2,
+	h3 {
+		font-weight: 600;
+		line-height: 1.3;
+		letter-spacing: -0.015em;
 	}
 
 	a {
@@ -107,6 +117,15 @@
 
 	a:hover {
 		text-decoration: underline;
+	}
+
+	::placeholder {
+		color: var(--muted);
+		opacity: 1;
+	}
+
+	input[type='checkbox'] {
+		accent-color: var(--accent);
 	}
 
 	/* Every UI icon is a stroke icon drawn in currentColor */

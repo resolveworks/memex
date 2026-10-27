@@ -152,6 +152,7 @@
 		background: var(--surface);
 		color: var(--ink);
 		text-align: left;
+		transition: border-color 120ms ease;
 	}
 
 	.trigger:focus {
@@ -185,6 +186,7 @@
 		border-radius: var(--radius);
 		background: var(--surface);
 		color: inherit;
+		box-shadow: 0 0.5rem 1.5rem rgb(16 24 40 / 8%);
 	}
 
 	.option {
@@ -201,6 +203,11 @@
 
 	.option:focus {
 		outline: none;
+	}
+
+	.option[aria-selected='true'] {
+		background: var(--fill);
+		font-weight: 500;
 	}
 
 	.option:hover,

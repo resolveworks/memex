@@ -17,7 +17,8 @@
 		background: var(--surface);
 	}
 
-	.card :global(h1) {
-		font-size: 1.25rem;
+	.card :global(h1),
+	.card :global(h2) {
+		font-size: 1.125rem;
 	}
 </style>

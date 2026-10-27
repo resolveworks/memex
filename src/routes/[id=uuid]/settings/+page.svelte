@@ -52,10 +52,6 @@
 </Page>
 
 <style>
-	h2 {
-		font-size: 1rem;
-	}
-
 	.language {
 		gap: var(--space-1);
 	}

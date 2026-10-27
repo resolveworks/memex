@@ -48,7 +48,7 @@
 	<link rel="icon" href={favicon} type="image/svg+xml" />
 	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 	<link rel="manifest" href="/site.webmanifest" />
-	<meta name="theme-color" content="#e6f4f2" />
+	<meta name="theme-color" content="#f6f7f9" />
 
 	<meta property="og:type" content="website" />
 	<meta property="og:site_name" content="Memex" />
@@ -116,11 +116,15 @@
 		inline-size: 2.25rem;
 		block-size: 2.25rem;
 		border-radius: var(--radius);
-		color: var(--ink);
+		color: var(--ink-soft);
+		transition:
+			color 120ms ease,
+			background-color 120ms ease;
 	}
 
 	.icon:hover:not(:disabled) {
 		background: var(--fill);
+		color: var(--ink);
 	}
 
 	.icon:disabled {
