@@ -44,6 +44,21 @@
 			question: t('landing.example.project.question')
 		}
 	]);
+
+	const faqs = $derived([
+		{
+			question: t('landing.faq.model.question'),
+			body: t('landing.faq.model.body')
+		},
+		{
+			question: t('landing.faq.free.question'),
+			body: t('landing.faq.free.body')
+		},
+		{
+			question: t('landing.faq.data.question'),
+			body: t('landing.faq.data.body')
+		}
+	]);
 </script>
 
 <div class="landing">
@@ -105,6 +120,19 @@
 						<h3>{example.title}</h3>
 						<p>{example.body}</p>
 						<ChatMessage kind="user" text={example.question} />
+					</li>
+				{/each}
+			</ul>
+		</section>
+
+		<section class="stack">
+			<h2>{t('landing.faq.heading')}</h2>
+			<ul class="faq">
+				{#each faqs as faq (faq.question)}
+					<li class="faq-item stack">
+						<h3>{faq.question}</h3>
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<p>{@html faq.body}</p>
 					</li>
 				{/each}
 			</ul>
@@ -232,7 +260,8 @@
 	}
 
 	.step h3,
-	.example h3 {
+	.example h3,
+	.faq-item h3 {
 		font-size: 1rem;
 		letter-spacing: normal;
 	}
@@ -252,10 +281,20 @@
 		gap: var(--space-4);
 	}
 
-	.example p {
+	.example p,
+	.faq-item p {
 		color: var(--muted);
 		font-size: 0.9375rem;
 		line-height: 1.55;
+	}
+
+	.faq {
+		display: grid;
+		gap: var(--space-8);
+	}
+
+	.faq-item {
+		gap: var(--space-4);
 	}
 
 	@media (min-width: 48rem) {
@@ -269,6 +308,10 @@
 		}
 
 		.examples {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.faq {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 	}
