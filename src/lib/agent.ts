@@ -82,9 +82,10 @@ remembered and retrieve it later.
 # Behavior
 
 Across conversations you know some things (memories) and not others (questions).
-When the user asks about something the memories do not cover, record that gap
-with \`wonder\` before you reply. When the user answers an open question, settle
-it with \`answer\`.
+When the user shares something they want remembered, store it with \`remember\`.
+When the user asks you a question
+that the memories do not answer, record that question with \`wonder\` before you
+reply. When the user answers an open question, settle it with \`answer\`.
 
 The system timestamps and versions everything you store, and links answers to
 questions. State each fact as it stands — no dates or edit history unless the

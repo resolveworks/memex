@@ -21,7 +21,7 @@ export const remember: AgentTool<typeof rememberParameters> = {
 	name: 'remember',
 	label: 'Remember',
 	description:
-		'Store a fact as a new memory. Call it whenever the intent to persist is clear — don\'t wait for the word "remember".',
+		'Store a fact the user wants remembered as a new memory. Call it whenever the intent to persist is clear — don\'t wait for the word "remember".',
 	parameters: rememberParameters,
 	execute: async (_toolCallId, { text }) => {
 		const response = await fetch(api('remember'), {
@@ -45,8 +45,7 @@ const wonderParameters = Type.Object({
 export const wonder: AgentTool<typeof wonderParameters> = {
 	name: 'wonder',
 	label: 'Wonder',
-	description:
-		'Record an open question: a gap in the memories. Call it whenever the user asks about something the memories do not cover.',
+	description: 'Record a question the user asked that the memories cannot answer.',
 	parameters: wonderParameters,
 	execute: async (_toolCallId, { text }) => {
 		const response = await fetch(api('wonder'), {
