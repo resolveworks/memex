@@ -74,11 +74,6 @@
 
 	<div class="explain stack">
 		<section class="stack">
-			<h2>{t('landing.what.heading')}</h2>
-			<p>{t('landing.what.body')}</p>
-		</section>
-
-		<section class="stack">
 			<h2>{t('landing.how.heading')}</h2>
 			<ol class="steps">
 				{#each steps as step, i (step.title)}
@@ -104,7 +99,6 @@
 						</label>
 					{/each}
 				</div>
-				<p>{t(selected.body)}</p>
 				<ExampleChat script={selected.script} />
 			</div>
 		</section>

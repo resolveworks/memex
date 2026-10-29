@@ -6,11 +6,10 @@ export type Turn =
 	| { kind: 'tool'; name: string; args: MessageKey }
 	| { kind: 'assistant'; text: MessageKey };
 
-/** An example use on the landing page: its copy and the chat it plays out. */
+/** An example use on the landing page: its title and the chat it plays out. */
 export interface Example {
 	key: 'world' | 'place' | 'project';
 	title: MessageKey;
-	body: MessageKey;
 	script: Turn[];
 }
 
@@ -18,7 +17,6 @@ export const examples: Example[] = [
 	{
 		key: 'world',
 		title: 'landing.example.world.title',
-		body: 'landing.example.world.body',
 		script: [
 			{ kind: 'user', text: 'landing.example.world.user1' },
 			{ kind: 'tool', name: 'search', args: 'landing.example.world.search1' },
@@ -31,7 +29,6 @@ export const examples: Example[] = [
 	{
 		key: 'place',
 		title: 'landing.example.place.title',
-		body: 'landing.example.place.body',
 		script: [
 			{ kind: 'user', text: 'landing.example.place.user1' },
 			{ kind: 'tool', name: 'remember', args: 'landing.example.place.remember1' },
@@ -44,7 +41,6 @@ export const examples: Example[] = [
 	{
 		key: 'project',
 		title: 'landing.example.project.title',
-		body: 'landing.example.project.body',
 		script: [
 			{ kind: 'user', text: 'landing.example.project.user1' },
 			{ kind: 'tool', name: 'search', args: 'landing.example.project.search1' },
