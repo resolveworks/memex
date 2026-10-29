@@ -50,6 +50,7 @@ const fake = vi.hoisted(() => {
 	/** The greeting the mocked `greetingMessage` hands the store. */
 	const greeting: AgentMessage = {
 		role: 'greeting',
+		context: 'Store context.',
 		content: [{ type: 'text', text: 'The user has opened this memex.' }],
 		timestamp: 0
 	};

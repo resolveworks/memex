@@ -78,14 +78,16 @@ describe('greetingMessage', () => {
 			})
 		);
 
-		const { content } = await greeting('q1');
+		const { context, content } = await greeting('q1');
 
+		expect(context).toBe(
+			'This memex is titled "Tea Log". Today is 2026-03-04. It holds 12 memories and 3 open questions.\n\n' +
+				'# Topics\n\nThe most common terms in the store, each count followed by the terms found in that many entries. Use them to judge what it covers.\n\n3: cup tea 1: sleep'
+		);
 		expect(content).toEqual([
 			{
 				type: 'text',
 				text:
-					'This memex is titled "Tea Log". Today is 2026-03-04. It holds 12 memories and 3 open questions.\n\n' +
-					'# Topics\n\nThe most common terms in the store, each count followed by the terms found in that many entries. Use them to judge what it covers.\n\n3: cup tea 1: sleep\n\n' +
 					'The user has opened this memex and is waiting for you to greet them. ' +
 					'In one or two short sentences in svenska, say what this memex is, what it appears to hold from the topic terms above, and what it has left unanswered. ' +
 					'End by asking the open question q1: "Tea or coffee?", set in bold. ' +
@@ -99,10 +101,10 @@ describe('greetingMessage', () => {
 			ok({ title: 'Blank Slate', memories: 0, openQuestions: 0, terms: [] })
 		);
 
-		const text = await greetingText();
+		const { context } = await greeting();
 
-		expect(text).toContain('The store is empty.');
-		expect(text).not.toContain('The most common terms');
+		expect(context).toContain('The store is empty.');
+		expect(context).not.toContain('The most common terms');
 	});
 
 	it('asks nothing when no question is open', async () => {

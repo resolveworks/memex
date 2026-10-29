@@ -6,9 +6,10 @@ import { model } from './model';
 import type { Question } from './question';
 import { answer, forget, remember, revise, search, wonder } from './tools';
 
-/** The opening turn: invisible to the user, a user turn to the model. */
+/** The opening trigger and its persistent store context, invisible in the chat. */
 interface GreetingMessage {
 	role: 'greeting';
+	context: string;
 	content: [{ type: 'text'; text: string }];
 	timestamp: number;
 }
@@ -21,9 +22,9 @@ declare module '@earendil-works/pi-agent-core' {
 
 /**
  * Elicits the model's opening message, grounded in the store's contents.
- * Everything turn-specific rides in this first user turn so the system prompt
- * stays static and the whole prefix stays cached. The greeting uses the app
- * language because it is sent before the user writes.
+ * The store context extends the system prompt after its static prefix; the
+ * greeting instruction is a one-shot user turn. It uses the app language
+ * because it is sent before the user writes.
  */
 export async function greetingMessage(
 	userLanguage: string,
@@ -40,21 +41,29 @@ export async function greetingMessage(
 	const context = sections.filter((section) => section !== '').join('\n\n');
 	return {
 		role: 'greeting',
+		context,
 		content: [
 			{
 				type: 'text',
-				text: `${context}\n\nThe user has opened this memex and is waiting for you to greet them. In one or two short sentences in ${languageName(userLanguage)}, say what this memex is${describe} Call no tools.`
+				text: `The user has opened this memex and is waiting for you to greet them. In one or two short sentences in ${languageName(userLanguage)}, say what this memex is${describe} Call no tools.`
 			}
 		],
 		timestamp: Date.now()
 	};
 }
 
-/** The model's view of the transcript: the opening trigger is an ordinary user turn. */
+/** Keeps the store snapshot in system context, but replays the greeting trigger only once. */
 function convertToLlm(messages: AgentMessage[]): Message[] {
 	return messages.flatMap((message): Message[] => {
 		if (message.role === 'greeting') {
-			return [{ role: 'user' as const, content: message.content, timestamp: message.timestamp }];
+			const context: Message = {
+				role: 'system',
+				content: '',
+				sections: { context: message.context },
+				timestamp: message.timestamp
+			};
+			if (messages.at(-1) !== message) return [context];
+			return [context, { role: 'user', content: message.content, timestamp: message.timestamp }];
 		}
 		if (
 			message.role === 'system' ||
@@ -165,7 +174,7 @@ export function useSystemPrompt(memexLanguage: string): void {
 		{
 			role: 'system',
 			content: '',
-			sections: { memex: systemPrompt(memexLanguage) },
+			sections: { memex: systemPrompt(memexLanguage), context: '' },
 			timestamp: Date.now()
 		}
 	];
