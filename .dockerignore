@@ -9,10 +9,9 @@ build
 .env*
 data
 
-# VCS and editor config
+# VCS config
 .git
 .github
-.vscode
 
 # Docs and the build recipe itself are not needed to build.
 *.md
