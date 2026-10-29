@@ -2,10 +2,12 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import mascot from '#lib/assets/mascot1.png';
-	import ChatMessage from '#lib/ChatMessage.svelte';
 	import Bubble from '#lib/components/Bubble.svelte';
 	import Button from '#lib/components/Button.svelte';
 	import Card from '#lib/components/Card.svelte';
+	import ExampleChat from '#lib/components/ExampleChat.svelte';
+	import type { Item } from '#lib/ChatMessage.svelte';
+	import { examples, type ExampleKey } from '#lib/examples.js';
 	import Field from '#lib/components/Field.svelte';
 	import Input from '#lib/components/Input.svelte';
 	import Select from '#lib/components/Select.svelte';
@@ -22,28 +24,23 @@
 		{ title: t('landing.how.share.title'), body: t('landing.how.share.body') }
 	]);
 
-	const examples = $derived([
-		{
-			title: t('landing.example.family.title'),
-			body: t('landing.example.family.body'),
-			question: t('landing.example.family.question')
-		},
-		{
-			title: t('landing.example.world.title'),
-			body: t('landing.example.world.body'),
-			question: t('landing.example.world.question')
-		},
-		{
-			title: t('landing.example.place.title'),
-			body: t('landing.example.place.body'),
-			question: t('landing.example.place.question')
-		},
-		{
-			title: t('landing.example.project.title'),
-			body: t('landing.example.project.body'),
-			question: t('landing.example.project.question')
-		}
-	]);
+	let active = $state<ExampleKey>('world');
+	const selected = $derived(examples.find((example) => example.key === active)!);
+
+	/** Resolves the selected example's script into chat items, as Chat renders its transcript. */
+	const items = $derived(
+		selected.script.map((turn, i): Item => {
+			if (turn.kind === 'tool') {
+				return {
+					key: String(i),
+					kind: 'tool',
+					name: turn.name,
+					args: [{ key: 'value', value: t(turn.args) }]
+				};
+			}
+			return { key: String(i), kind: turn.kind, text: t(turn.text) };
+		})
+	);
 
 	const faqs = $derived([
 		{
@@ -114,15 +111,18 @@
 
 		<section class="stack">
 			<h2>{t('landing.examples.heading')}</h2>
-			<ul class="examples">
-				{#each examples as example (example.title)}
-					<li class="example stack">
-						<h3>{example.title}</h3>
-						<p>{example.body}</p>
-						<ChatMessage kind="user" text={example.question} />
-					</li>
-				{/each}
-			</ul>
+			<div class="stack demo">
+				<div class="tabs" role="radiogroup" aria-label={t('landing.examples.heading')}>
+					{#each examples as example (example.key)}
+						<label class="tab" class:active={example.key === active}>
+							<input type="radio" name="example" value={example.key} bind:group={active} />
+							{t(example.title)}
+						</label>
+					{/each}
+				</div>
+				<p>{t(selected.body)}</p>
+				<ExampleChat {items} />
+			</div>
 		</section>
 
 		<section class="stack">
@@ -260,7 +260,6 @@
 	}
 
 	.step h3,
-	.example h3,
 	.faq-item h3 {
 		font-size: 1rem;
 		letter-spacing: normal;
@@ -272,20 +271,47 @@
 		line-height: 1.55;
 	}
 
-	.examples {
-		display: grid;
-		gap: var(--space-8);
+	.demo {
+		gap: var(--space-6);
 	}
 
-	.example {
-		gap: var(--space-4);
+	.tabs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
 	}
 
-	.example p,
 	.faq-item p {
 		color: var(--muted);
 		font-size: 0.9375rem;
 		line-height: 1.55;
+	}
+
+	.tab {
+		display: inline-flex;
+		align-items: center;
+		padding: var(--space-2) var(--space-3);
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius-full);
+		background: var(--surface);
+		color: var(--muted);
+		cursor: pointer;
+	}
+
+	.tab input {
+		position: absolute;
+		opacity: 0;
+	}
+
+	.tab.active {
+		border-color: var(--accent);
+		background: var(--accent);
+		color: var(--accent-ink);
+	}
+
+	.tab:has(input:focus-visible) {
+		outline: 2px solid var(--accent);
+		outline-offset: 2px;
 	}
 
 	.faq {
@@ -305,10 +331,6 @@
 
 		.steps {
 			grid-template-columns: repeat(3, minmax(0, 1fr));
-		}
-
-		.examples {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
 		}
 
 		.faq {
