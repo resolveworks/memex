@@ -150,7 +150,9 @@
 <style>
 	.chat {
 		gap: 0;
-		height: 100%;
+		/* The chat is the one view that owns the viewport: it fills the space
+		   below the header so the composer stays pinned while messages scroll. */
+		block-size: calc(100dvh - var(--chrome-h));
 		color: var(--ink);
 		background: var(--bg);
 	}
