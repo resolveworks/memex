@@ -6,7 +6,6 @@
 	import Button from '#lib/components/Button.svelte';
 	import Card from '#lib/components/Card.svelte';
 	import ExampleChat from '#lib/components/ExampleChat.svelte';
-	import type { Item } from '#lib/ChatMessage.svelte';
 	import { examples, type ExampleKey } from '#lib/examples.js';
 	import Field from '#lib/components/Field.svelte';
 	import Input from '#lib/components/Input.svelte';
@@ -26,21 +25,6 @@
 
 	let active = $state<ExampleKey>('world');
 	const selected = $derived(examples.find((example) => example.key === active)!);
-
-	/** Resolves the selected example's script into chat items, as Chat renders its transcript. */
-	const items = $derived(
-		selected.script.map((turn, i): Item => {
-			if (turn.kind === 'tool') {
-				return {
-					key: String(i),
-					kind: 'tool',
-					name: turn.name,
-					args: [{ key: 'value', value: t(turn.args) }]
-				};
-			}
-			return { key: String(i), kind: turn.kind, text: t(turn.text) };
-		})
-	);
 
 	const faqs = $derived([
 		{
@@ -121,7 +105,7 @@
 					{/each}
 				</div>
 				<p>{t(selected.body)}</p>
-				<ExampleChat {items} />
+				<ExampleChat script={selected.script} />
 			</div>
 		</section>
 

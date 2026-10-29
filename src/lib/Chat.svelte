@@ -5,6 +5,7 @@
 	import ChatMessage, { type Item } from '#lib/ChatMessage.svelte';
 	import Button from '#lib/components/Button.svelte';
 	import Footer from '#lib/components/Footer.svelte';
+	import Thinking from '#lib/components/Thinking.svelte';
 	import { t } from '#lib/i18n.js';
 
 	let { id, language, question }: { id: string; language: string; question: string | undefined } =
@@ -110,11 +111,7 @@
 				<ChatMessage kind="assistant" text={streamText} streaming />
 			{/if}
 			{#if thinking}
-				<div class="thinking" role="status" aria-label={t('chat.thinking')}>
-					<span class="dot"></span>
-					<span class="dot"></span>
-					<span class="dot"></span>
-				</div>
+				<Thinking />
 			{/if}
 			{#if hasConversation}
 				<div class="clear">
@@ -203,41 +200,7 @@
 		overflow-y: auto;
 	}
 
-	.thinking {
-		align-self: flex-start;
-		display: inline-flex;
-		gap: var(--space-1);
-		padding: var(--space-2) 0;
-	}
-
 	.clear {
 		align-self: center;
-	}
-
-	.dot {
-		width: 0.5rem;
-		height: 0.5rem;
-		border-radius: 50%;
-		background: var(--muted);
-		animation: pulse 1.2s ease-in-out infinite;
-	}
-
-	.dot:nth-child(2) {
-		animation-delay: 0.2s;
-	}
-
-	.dot:nth-child(3) {
-		animation-delay: 0.4s;
-	}
-
-	@keyframes pulse {
-		0%,
-		80%,
-		100% {
-			opacity: 0.3;
-		}
-		40% {
-			opacity: 1;
-		}
 	}
 </style>
